@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Package, MapPin, Heart, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useOrders } from '../hooks/useOrders';
+import { useWishlist } from '../hooks/useWishlist';
 
 interface AccountPageProps {
   onClose: () => void;
@@ -10,6 +11,7 @@ interface AccountPageProps {
 export default function AccountPage({ onClose }: AccountPageProps) {
   const { user, logout } = useAuth();
   const { orders } = useOrders();
+  const { wishlist } = useWishlist();
   const [activeTab, setActiveTab] = useState('profile');
 
   const tabs = [
@@ -159,7 +161,10 @@ export default function AccountPage({ onClose }: AccountPageProps) {
                         <p>Date: {new Date(order.createdAt).toLocaleDateString('fr-FR')}</p>
                         <p>{order.items.length} article{order.items.length > 1 ? 's' : ''} • {order.total.toFixed(2)}€</p>
                       </div>
-                      <button className="mt-3 text-rose-300 hover:underline text-sm">
+                      <button 
+                        onClick={() => window.location.href = `/order-details/${order.id}`}
+                        className="mt-3 text-rose-300 hover:underline text-sm"
+                      >
                         Voir les détails
                       </button>
                     </div>
@@ -185,16 +190,28 @@ export default function AccountPage({ onClose }: AccountPageProps) {
             {activeTab === 'wishlist' && (
               <div>
                 <h2 className="text-2xl font-bold mb-6">Mes Favoris</h2>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                  <Heart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-4">Aucun favori pour le moment</p>
-                  <button 
-                    onClick={onClose}
-                    className="bg-black text-white px-6 py-2 rounded hover:bg-gray-900"
-                  >
-                    Découvrir nos produits
-                  </button>
-                </div>
+                {wishlist.length === 0 ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <Heart className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 mb-4">Aucun favori pour le moment</p>
+                    <button 
+                      onClick={onClose}
+                      className="bg-black text-white px-6 py-2 rounded hover:bg-gray-900"
+                    >
+                      Découvrir nos produits
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-gray-600 mb-4">{wishlist.length} produit{wishlist.length > 1 ? 's' : ''} en favoris</p>
+                    <button 
+                      onClick={() => window.location.href = '/wishlist'}
+                      className="bg-black text-white px-6 py-2 rounded hover:bg-gray-900"
+                    >
+                      Voir tous mes favoris
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

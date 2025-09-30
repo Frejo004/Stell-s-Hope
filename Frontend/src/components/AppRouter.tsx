@@ -16,6 +16,11 @@ import AccountPage from './AccountPage';
 import CheckoutPage from './CheckoutPage';
 import OrderConfirmationPage from './OrderConfirmationPage';
 import NotFoundPage from './NotFoundPage';
+import LoginPage from './LoginPage';
+import RegisterPage from './RegisterPage';
+import OrderTrackingPage from './OrderTrackingPage';
+import WishlistPage from './WishlistPage';
+import OrderDetailsPage from './OrderDetailsPage';
 import { useAuth } from '../hooks/useAuth';
 import { useOrders } from '../hooks/useOrders';
 import { Order } from '../types/order';
@@ -206,6 +211,47 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                   order={getOrderById('CMD123') || {} as Order}
                   onClose={() => window.location.href = '/'}
                   onContinueShopping={() => window.location.href = '/'}
+                />
+              } 
+            />
+
+            {/* Nouvelles pages */}
+            <Route 
+              path="/login" 
+              element={<LoginPage onClose={() => window.history.back()} />} 
+            />
+            
+            <Route 
+              path="/register" 
+              element={<RegisterPage onClose={() => window.history.back()} />} 
+            />
+            
+            <Route 
+              path="/order-tracking/:orderId" 
+              element={
+                <OrderTrackingPage
+                  orderId={window.location.pathname.split('/')[2]}
+                  onClose={() => window.history.back()}
+                />
+              } 
+            />
+            
+            <Route 
+              path="/wishlist" 
+              element={
+                <WishlistPage
+                  onClose={() => window.history.back()}
+                  onProductClick={handleProductClick}
+                />
+              } 
+            />
+            
+            <Route 
+              path="/order-details/:orderId" 
+              element={
+                <OrderDetailsPage
+                  orderId={window.location.pathname.split('/')[2]}
+                  onClose={() => window.history.back()}
                 />
               } 
             />

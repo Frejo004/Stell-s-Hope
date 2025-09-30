@@ -1,6 +1,7 @@
 import React from 'react';
 import { Heart, Star } from 'lucide-react';
 import { Product } from '../types';
+import { useWishlist } from '../hooks/useWishlist';
 
 interface ProductCardProps {
   product: Product;
@@ -8,6 +9,17 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onProductClick }: ProductCardProps) {
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const inWishlist = isInWishlist(product.id);
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (inWishlist) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
   return (
     <div className="group cursor-pointer" onClick={() => onProductClick(product)}>
       <div className="relative overflow-hidden bg-gray-200 rounded-lg aspect-[3/4]">
@@ -37,8 +49,11 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
         </div>
 
         {/* Wishlist button */}
-        <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50">
-          <Heart className="w-4 h-4 text-gray-600" />
+        <button 
+          onClick={handleWishlistClick}
+          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50"
+        >
+          <Heart className={`w-4 h-4 ${inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
         </button>
 
         {/* Quick view on hover */}
