@@ -189,20 +189,16 @@ export default function SimpleRouter({ onOrderComplete }: SimpleRouterProps) {
     );
   };
 
-  const showHeaderFooter = !currentPath.startsWith('/product/') && 
-                          !currentPath.startsWith('/order-confirmation/') &&
-                          !currentPath.match(/^\/(contact|about|faq|cgv|privacy|shipping|account|checkout|search)$/);
+  const showHeaderFooter = !currentPath.startsWith('/order-confirmation/');
 
   return (
     <div className="min-h-screen bg-white">
-      {showHeaderFooter && (
-        <Header
-          onCategoryChange={handleCategoryChange}
-          currentCategory={getCurrentCategory()}
-          products={products}
-          onProductClick={handleProductClick}
-        />
-      )}
+      <Header
+        onCategoryChange={handleCategoryChange}
+        currentCategory={getCurrentCategory()}
+        products={products}
+        onProductClick={handleProductClick}
+      />
 
       <main>
         {renderPage()}

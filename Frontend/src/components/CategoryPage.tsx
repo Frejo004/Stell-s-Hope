@@ -27,6 +27,7 @@ export default function CategoryPage({ products, category, onProductClick }: Cat
       case 'femme': return 'Collection Femme';
       case 'accessories': return 'Accessoires';
       case 'sale': return 'Promotions';
+      case 'all': return 'Boutique - Tous nos produits';
       default: return 'Toutes les nouveautés';
     }
   };

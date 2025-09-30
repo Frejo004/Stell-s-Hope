@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Product } from '../types';
 import { products } from '../data/products';
 import Header from './Header';
@@ -24,31 +24,53 @@ interface AppRouterProps {
   onOrderComplete: (order: Order) => void;
 }
 
-export default function AppRouter({ onOrderComplete }: AppRouterProps) {
+function CategoryPageWrapper({ products, onProductClick }: { products: Product[], onProductClick: (product: Product) => void }) {
+  const { category } = useParams<{ category: string }>();
+  return (
+    <CategoryPage
+      products={products}
+      category={category || 'all'}
+      onProductClick={onProductClick}
+    />
+  );
+}
+
+function AppContent({ onOrderComplete }: AppRouterProps) {
   const { isAuthenticated } = useAuth();
   const { getOrderById } = useOrders();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const getCurrentCategory = () => {
+    const path = location.pathname;
+    if (path === '/' || path === '/category/home') return 'home';
+    if (path === '/boutique') return 'all';
+    if (path.startsWith('/category/')) return path.split('/')[2];
+    return 'home';
+  };
 
   const handleProductClick = (product: Product) => {
-    window.location.href = `/product/${product.id}`;
+    navigate(`/product/${product.id}`);
   };
 
   const handleCategoryChange = (category: string) => {
-    if (category === 'all') {
-      window.location.href = '/';
+    if (category === 'home') {
+      navigate('/');
+    } else if (category === 'all') {
+      navigate('/boutique');
     } else {
-      window.location.href = `/category/${category}`;
+      navigate(`/category/${category}`);
     }
   };
 
   return (
-    <Router>
-      <div className="min-h-screen bg-white">
-        <Header
-          onCategoryChange={handleCategoryChange}
-          currentCategory="all"
-          products={products}
-          onProductClick={handleProductClick}
-        />
+    <div className="min-h-screen bg-white">
+      <Header
+        onCategoryChange={handleCategoryChange}
+        currentCategory={getCurrentCategory()}
+        products={products}
+        onProductClick={handleProductClick}
+      />
 
         <main>
           <Routes>
@@ -65,11 +87,32 @@ export default function AppRouter({ onOrderComplete }: AppRouterProps) {
             />
             
             <Route 
-              path="/category/:category" 
+              path="/boutique" 
               element={
                 <CategoryPage
                   products={products}
-                  category="homme"
+                  category="all"
+                  onProductClick={handleProductClick}
+                />
+              } 
+            />
+            
+            <Route 
+              path="/category/home" 
+              element={
+                <HomePage
+                  products={products}
+                  onProductClick={handleProductClick}
+                  onCategoryChange={handleCategoryChange}
+                />
+              } 
+            />
+            
+            <Route 
+              path="/category/:category" 
+              element={
+                <CategoryPageWrapper
+                  products={products}
                   onProductClick={handleProductClick}
                 />
               } 
@@ -182,8 +225,15 @@ export default function AppRouter({ onOrderComplete }: AppRouterProps) {
           </Routes>
         </main>
 
-        <Footer />
-      </div>
+      <Footer />
+    </div>
+  );
+}
+
+export default function AppRouter({ onOrderComplete }: AppRouterProps) {
+  return (
+    <Router>
+      <AppContent onOrderComplete={onOrderComplete} />
     </Router>
   );
 }
