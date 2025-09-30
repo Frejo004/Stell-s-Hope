@@ -163,8 +163,8 @@ export default function AccountPage({ onClose }: AccountPageProps) {
                         Voir les détails
                       </button>
                     </div>
-                    ))
-                )
+                  ))
+                )}
                 </div>
               </div>
             )}
