@@ -16,6 +16,8 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isZooming, setIsZooming] = useState(false);
   
   const { addToCart } = useCart();
   const productReviews = reviews.filter(review => review.productId === product.id);
@@ -29,6 +31,13 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
       return;
     }
     addToCart(product, selectedSize || product.sizes[0], selectedColor, quantity);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setMousePosition({ x, y });
   };
 
   return (
@@ -52,12 +61,25 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images */}
           <div className="space-y-4">
-            <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden group">
-              <img
-                src={product.images[selectedImage]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden group cursor-zoom-in">
+              <div 
+                className="w-full h-full"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => setIsZooming(true)}
+                onMouseLeave={() => setIsZooming(false)}
+              >
+                <img
+                  src={product.images[selectedImage]}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-200"
+                  style={{
+                    transform: isZooming 
+                      ? `scale(1.8)` 
+                      : 'scale(1)',
+                    transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
+                  }}
+                />
+              </div>
               <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Heart className="w-5 h-5 text-gray-600" />
               </button>
@@ -410,7 +432,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   <img
                     src={relatedProduct.images[0]}
                     alt={relatedProduct.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
                 <h3 className="font-medium text-gray-900 mb-2">{relatedProduct.name}</h3>
