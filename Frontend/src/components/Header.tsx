@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
 import SearchPage from './SearchPage';
 import AccountPage from './AccountPage';
+import Logo from './Logo';
 import { Product } from '../types';
 
 interface HeaderProps {
@@ -58,9 +59,7 @@ export default function Header({ onCategoryChange, currentCategory, products, on
 
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-2xl font-bold tracking-tight text-black">
-              ÉLÉGANCE
-            </h1>
+            <Logo />
           </div>
 
           {/* Desktop Navigation */}

@@ -5,6 +5,7 @@ import AboutPage from './AboutPage';
 import FAQPage from './FAQPage';
 import LegalPage from './LegalPage';
 import AccountPage from './AccountPage';
+import Logo from './Logo';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Footer() {
@@ -19,7 +20,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-bold tracking-tight">ÉLÉGANCE</h3>
+            <Logo className="text-white" />
             <p className="text-gray-400">
               Mode contemporaine et intemporelle pour homme et femme. 
               Qualité premium et style authentique depuis 2020.
@@ -122,7 +123,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2024 ÉLÉGANCE. Tous droits réservés.
+            © 2024 Stell's Hope. Tous droits réservés.
           </p>
           <div className="flex space-x-6 text-sm text-gray-400 mt-4 md:mt-0">
             <button 
