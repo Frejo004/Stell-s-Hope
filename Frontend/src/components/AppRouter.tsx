@@ -21,6 +21,8 @@ import RegisterPage from './RegisterPage';
 import OrderTrackingPage from './OrderTrackingPage';
 import WishlistPage from './WishlistPage';
 import OrderDetailsPage from './OrderDetailsPage';
+import CartPage from './CartPage';
+import AdminLayout from './admin/AdminLayout';
 import { useAuth } from '../hooks/useAuth';
 import { useOrders } from '../hooks/useOrders';
 import { Order } from '../types/order';
@@ -38,6 +40,16 @@ function CategoryPageWrapper({ products, onProductClick }: { products: Product[]
       onProductClick={onProductClick}
     />
   );
+}
+
+function OrderTrackingPageWrapper({ onClose }: { onClose: () => void }) {
+  const { orderId } = useParams<{ orderId: string }>();
+  return <OrderTrackingPage orderId={orderId || ''} onClose={onClose} />;
+}
+
+function OrderDetailsPageWrapper({ onClose }: { onClose: () => void }) {
+  const { orderId } = useParams<{ orderId: string }>();
+  return <OrderDetailsPage orderId={orderId || ''} onClose={onClose} />;
 }
 
 function AppContent({ onOrderComplete }: AppRouterProps) {
@@ -229,8 +241,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
             <Route 
               path="/order-tracking/:orderId" 
               element={
-                <OrderTrackingPage
-                  orderId={window.location.pathname.split('/')[2]}
+                <OrderTrackingPageWrapper
                   onClose={() => window.history.back()}
                 />
               } 
@@ -249,11 +260,20 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
             <Route 
               path="/order-details/:orderId" 
               element={
-                <OrderDetailsPage
-                  orderId={window.location.pathname.split('/')[2]}
+                <OrderDetailsPageWrapper
                   onClose={() => window.history.back()}
                 />
               } 
+            />
+            
+            <Route 
+              path="/cart" 
+              element={<CartPage onClose={() => window.history.back()} />} 
+            />
+            
+            <Route 
+              path="/admin" 
+              element={<AdminLayout />} 
             />
 
             {/* Page 404 */}

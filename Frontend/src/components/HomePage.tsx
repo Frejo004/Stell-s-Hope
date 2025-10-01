@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArrowRight, Star, Truck, RotateCcw, Shield, Headphones } from 'lucide-react';
 import { Product } from '../types';
 import ProductCard from './ProductCard';
 
@@ -10,212 +9,299 @@ interface HomePageProps {
 }
 
 export default function HomePage({ products, onProductClick, onCategoryChange }: HomePageProps) {
-  const bestSellers = products.filter(product => product.isBestSeller).slice(0, 4);
+  const bestSellers = products.filter(product => product.isBestSeller).slice(0, 8);
   const newProducts = products.filter(product => product.isNew).slice(0, 4);
 
   return (
-    <div className="space-y-16">
-      {/* Hero Section */}
-      <section className="relative h-[70vh] bg-gray-900 flex items-center justify-center overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(https://images.pexels.com/photos/1462637/pexels-photo-1462637.jpeg)',
-          }}
-        >
-          <div className="absolute inset-0 bg-black bg-opacity-40" />
-        </div>
-        
-        <div className="relative z-10 text-center text-white space-y-6 max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-            Collection Automne/Hiver 2024
-          </h1>
-          <p className="text-xl md:text-2xl font-light max-w-2xl mx-auto">
-            Découvrez nos pièces essentielles pour un style intemporel et moderne
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
+    <div>
+      {/* Hero Grid Section */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 min-h-screen">
+        {/* Women's Fashion - Large Left */}
+        <div className="lg:col-span-6 relative bg-gradient-to-br from-pink-100 to-orange-100 flex items-center min-h-[50vh] lg:min-h-screen">
+          <div className="absolute inset-0">
+            <img
+              src="https://images.pexels.com/photos/1462637/pexels-photo-1462637.jpeg"
+              alt="Women's Fashion"
+              className="w-full h-full object-cover opacity-80"
+            />
+          </div>
+          <div className="relative z-10 p-6 md:p-12 text-left">
+            <h2 className="text-3xl md:text-5xl font-light mb-4 text-gray-800">Women's fashion</h2>
+            <p className="text-gray-600 mb-6 max-w-md text-sm md:text-base">
+              Sitamet, consectetur adipiscing elit, sed do eiusmod tempor incididunt labore edolore magna aliquam erat volutpat.
+            </p>
+            <button 
               onClick={() => onCategoryChange('femme')}
-              className="bg-white text-black px-8 py-3 rounded font-medium hover:bg-gray-100 transition-colors"
+              className="border-b-2 border-gray-800 text-gray-800 pb-1 hover:border-gray-600 transition-colors text-sm md:text-base"
             >
-              Collection Femme
-            </button>
-            <button
-              onClick={() => onCategoryChange('homme')}
-              className="bg-transparent border-2 border-white text-white px-8 py-3 rounded font-medium hover:bg-white hover:text-black transition-colors"
-            >
-              Collection Homme
+              SHOP NOW
             </button>
           </div>
         </div>
-      </section>
 
-      {/* Features */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            {
-              icon: Truck,
-              title: 'Livraison gratuite',
-              description: 'Dès 100€ d\'achat'
-            },
-            {
-              icon: RotateCcw,
-              title: 'Retours gratuits',
-              description: 'Sous 30 jours'
-            },
-            {
-              icon: Shield,
-              title: 'Paiement sécurisé',
-              description: 'SSL & cryptage'
-            },
-            {
-              icon: Headphones,
-              title: 'Service client',
-              description: '7j/7 de 9h à 19h'
-            }
-          ].map((feature, index) => (
-            <div key={index} className="text-center space-y-3">
-              <feature.icon className="w-8 h-8 mx-auto text-rose-300" />
-              <h3 className="font-semibold">{feature.title}</h3>
-              <p className="text-gray-600 text-sm">{feature.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Best Sellers */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Best-Sellers</h2>
-            <p className="text-gray-600 mt-2">Nos pièces les plus populaires</p>
-          </div>
-          <button
-            onClick={() => onCategoryChange('all')}
-            className="flex items-center space-x-2 text-rose-300 hover:underline"
+        {/* Right Grid */}
+        <div className="lg:col-span-6 grid grid-cols-2 grid-rows-2">
+          {/* Men's Fashion */}
+          <div 
+            className="relative bg-gradient-to-br from-teal-100 to-green-100 flex items-center justify-center cursor-pointer group min-h-[25vh] lg:min-h-[50vh]"
+            onClick={() => onCategoryChange('homme')}
           >
-            <span>Voir tout</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {bestSellers.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onProductClick={onProductClick}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Promotional Banner */}
-      <section className="bg-rose-50 py-16">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Inscrivez-vous à notre newsletter
-          </h2>
-          <p className="text-gray-600 mb-8 text-lg">
-            Recevez en avant-première nos nouveautés et nos offres exclusives
-          </p>
-          <div className="flex flex-col sm:flex-row max-w-md mx-auto gap-4">
-            <input
-              type="email"
-              placeholder="Votre adresse email"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-rose-300"
-            />
-            <button className="bg-black text-white px-6 py-3 rounded font-medium hover:bg-gray-900 transition-colors whitespace-nowrap">
-              S'inscrire
-            </button>
-          </div>
-          <p className="text-sm text-gray-500 mt-4">
-            10% de réduction sur votre première commande
-          </p>
-        </div>
-      </section>
-
-      {/* New Arrivals */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight">Nouveautés</h2>
-            <p className="text-gray-600 mt-2">Les dernières tendances mode</p>
-          </div>
-          <button
-            onClick={() => onCategoryChange('all')}
-            className="flex items-center space-x-2 text-rose-300 hover:underline"
-          >
-            <span>Découvrir</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {newProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onProductClick={onProductClick}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Reviews Section */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Ils parlent de nous
-            </h2>
-            <div className="flex items-center justify-center space-x-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-              ))}
-              <span className="ml-2 text-gray-600">4.8/5 basé sur 1,247 avis</span>
+            <div className="absolute inset-0">
+              <img
+                src="https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg"
+                alt="Men's Fashion"
+                className="w-full h-full object-cover opacity-70"
+              />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: 'Sophie L.',
-                comment: 'Qualité exceptionnelle et livraison rapide. Je recommande vivement !',
-                rating: 5,
-                image: 'https://images.pexels.com/photos/1462637/pexels-photo-1462637.jpeg'
-              },
-              {
-                name: 'Marc D.',
-                comment: 'Parfait pour renouveler ma garde-robe avec style. Service client au top.',
-                rating: 5,
-                image: 'https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg'
-              },
-              {
-                name: 'Emma R.',
-                comment: 'Des pièces intemporelles et de grande qualité. Mon nouveau site préféré !',
-                rating: 5,
-                image: 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg'
-              }
-            ].map((review, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
-                <div className="flex items-center space-x-1 mb-4">
-                  {Array.from({ length: review.rating }).map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-700 mb-4 italic">"{review.comment}"</p>
-                <div className="flex items-center space-x-3">
-                  <img
-                    src={review.image}
-                    alt={review.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <span className="font-medium text-gray-900">{review.name}</span>
-                </div>
+            <div className="relative z-10 text-center text-gray-800 p-4">
+              <h3 className="text-lg md:text-2xl font-light mb-2">Men's fashion</h3>
+              <p className="text-xs md:text-sm mb-4">358 Items</p>
+              <div className="border-b border-gray-800 group-hover:border-gray-600 transition-colors text-xs md:text-sm">
+                SHOP NOW
               </div>
+            </div>
+          </div>
+
+          {/* Kid's Fashion */}
+          <div className="relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center min-h-[25vh] lg:min-h-[50vh]">
+            <div className="absolute inset-0">
+              <img
+                src="https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg"
+                alt="Kid's Fashion"
+                className="w-full h-full object-cover opacity-70"
+              />
+            </div>
+            <div className="relative z-10 text-center text-gray-800 p-4">
+              <h3 className="text-lg md:text-2xl font-light mb-2">Kid's fashion</h3>
+              <p className="text-xs md:text-sm mb-4">273 Items</p>
+              <div className="border-b border-gray-800 text-xs md:text-sm">SHOP NOW</div>
+            </div>
+          </div>
+
+          {/* Cosmetics */}
+          <div className="relative bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center min-h-[25vh] lg:min-h-[50vh]">
+            <div className="absolute inset-0">
+              <img
+                src="https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg"
+                alt="Cosmetics"
+                className="w-full h-full object-cover opacity-70"
+              />
+            </div>
+            <div className="relative z-10 text-center text-gray-800 p-4">
+              <h3 className="text-lg md:text-2xl font-light mb-2">Cosmetics</h3>
+              <p className="text-xs md:text-sm mb-4">159 Items</p>
+              <div className="border-b border-gray-800 text-xs md:text-sm">SHOP NOW</div>
+            </div>
+          </div>
+
+          {/* Accessories */}
+          <div 
+            className="relative bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center cursor-pointer group min-h-[25vh] lg:min-h-[50vh]"
+            onClick={() => onCategoryChange('accessoires')}
+          >
+            <div className="absolute inset-0">
+              <img
+                src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg"
+                alt="Accessories"
+                className="w-full h-full object-cover opacity-70"
+              />
+            </div>
+            <div className="relative z-10 text-center text-gray-800 p-4">
+              <h3 className="text-lg md:text-2xl font-light mb-2">Accessories</h3>
+              <p className="text-xs md:text-sm mb-4">792 Items</p>
+              <div className="border-b border-gray-800 group-hover:border-gray-600 transition-colors text-xs md:text-sm">
+                SHOP NOW
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* New Products Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-light text-gray-800 mb-8">NEW PRODUCT</h2>
+            
+            {/* Filter Tabs */}
+            <div className="flex flex-wrap justify-center gap-4 md:space-x-8 mb-12">
+              {['All', 'Women\'s', 'Men\'s', 'Kid\'s', 'Accessories', 'Cosmetics'].map((tab, index) => (
+                <button
+                  key={tab}
+                  className={`text-xs md:text-sm font-medium pb-2 ${
+                    index === 0 
+                      ? 'text-red-500 border-b-2 border-red-500' 
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Products Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {bestSellers.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onProductClick={onProductClick}
+              />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Collection Banner */}
+      <section className="relative min-h-[300px] md:h-96 bg-gradient-to-r from-pink-50 to-blue-50 overflow-hidden">
+        <div className="absolute inset-0 flex flex-col md:flex-row items-center justify-between">
+          <div className="w-full md:w-1/3 h-48 md:h-96">
+            <img
+              src="https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg"
+              alt="Collection"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="flex-1 text-center p-6 md:p-0">
+            <p className="text-red-500 text-xs md:text-sm font-medium mb-2">THE CHLOE COLLECTION</p>
+            <h2 className="text-2xl md:text-4xl font-light text-gray-800 mb-4 md:mb-6">The Project Jacket</h2>
+            <button className="border-b-2 border-gray-800 text-gray-800 pb-1 hover:border-gray-600 transition-colors text-sm md:text-base">
+              SHOP NOW
+            </button>
+          </div>
+          <div className="w-full md:w-1/3 h-48 md:h-96">
+            <img
+              src="https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg"
+              alt="Collection"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Trending Products */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            {/* Hot Trend */}
+            <div>
+              <h3 className="text-xl font-medium text-gray-800 mb-6 border-b-2 border-red-500 pb-2 inline-block">
+                HOT TREND
+              </h3>
+              <div className="space-y-4">
+                {newProducts.slice(0, 3).map((product) => (
+                  <div key={product.id} className="flex items-center space-x-4">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                    <div>
+                      <h4 className="font-medium text-gray-800">{product.name}</h4>
+                      <div className="flex items-center space-x-1 my-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i} className="text-yellow-400 text-xs">★</span>
+                        ))}
+                      </div>
+                      <p className="font-semibold text-gray-800">${product.price}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Best Seller */}
+            <div>
+              <h3 className="text-xl font-medium text-gray-800 mb-6">BEST SELLER</h3>
+              <div className="space-y-4">
+                {bestSellers.slice(0, 3).map((product) => (
+                  <div key={product.id} className="flex items-center space-x-4">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                    <div>
+                      <h4 className="font-medium text-gray-800">{product.name}</h4>
+                      <div className="flex items-center space-x-1 my-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i} className="text-yellow-400 text-xs">★</span>
+                        ))}
+                      </div>
+                      <p className="font-semibold text-gray-800">${product.price}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Feature */}
+            <div>
+              <h3 className="text-xl font-medium text-gray-800 mb-6">FEATURE</h3>
+              <div className="space-y-4">
+                {products.slice(0, 3).map((product) => (
+                  <div key={product.id} className="flex items-center space-x-4">
+                    <img
+                      src={product.images[0]}
+                      alt={product.name}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                    <div>
+                      <h4 className="font-medium text-gray-800">{product.name}</h4>
+                      <div className="flex items-center space-x-1 my-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <span key={i} className="text-yellow-400 text-xs">★</span>
+                        ))}
+                      </div>
+                      <p className="font-semibold text-gray-800">${product.price}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sale Banner */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-8">
+          <div className="w-full md:w-1/2">
+            <img
+              src="https://images.pexels.com/photos/1043474/pexels-photo-1043474.jpeg"
+              alt="Sale"
+              className="w-full h-60 md:h-80 object-cover rounded-lg"
+            />
+          </div>
+          <div className="w-full md:w-1/2 text-center md:text-left">
+            <p className="text-red-500 text-xs md:text-sm font-medium mb-2">DISCOUNT</p>
+            <h2 className="text-3xl md:text-5xl font-light text-red-500 mb-4">Summer 2024</h2>
+            <p className="text-xl md:text-2xl font-light text-gray-800 mb-6">SALE 50%</p>
+            
+            {/* Countdown */}
+            <div className="flex justify-center md:justify-start space-x-4 md:space-x-6 mb-8">
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-gray-800">30</div>
+                <div className="text-xs md:text-sm text-gray-600">Day</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-gray-800">12</div>
+                <div className="text-xs md:text-sm text-gray-600">Hour</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-gray-800">26</div>
+                <div className="text-xs md:text-sm text-gray-600">Min</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-gray-800">20</div>
+                <div className="text-xs md:text-sm text-gray-600">Sec</div>
+              </div>
+            </div>
+            
+            <button className="border-b-2 border-gray-800 text-gray-800 pb-1 hover:border-gray-600 transition-colors text-sm md:text-base">
+              SHOP NOW
+            </button>
           </div>
         </div>
       </section>

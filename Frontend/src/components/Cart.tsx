@@ -123,10 +123,13 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
                   Commander
                 </button>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    window.location.href = '/cart';
+                  }}
                   className="w-full py-3 border border-gray-300 rounded font-medium hover:bg-gray-50 transition-colors"
                 >
-                  Continuer mes achats
+                  Voir le panier
                 </button>
               </div>
               

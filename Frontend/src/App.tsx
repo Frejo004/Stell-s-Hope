@@ -1,5 +1,5 @@
 import React from 'react';
-import SimpleRouter from './components/SimpleRouter';
+import AppRouter from './components/AppRouter';
 import Cart from './components/Cart';
 import ToastContainer from './components/ToastContainer';
 import { useToast } from './hooks/useToast';
@@ -21,7 +21,7 @@ function App() {
 
   return (
     <>
-      <SimpleRouter onOrderComplete={handleOrderComplete} />
+      <AppRouter onOrderComplete={handleOrderComplete} />
       <Cart onOrderComplete={handleOrderComplete} />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>

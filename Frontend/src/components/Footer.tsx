@@ -65,7 +65,14 @@ export default function Footer() {
                   Mon Compte
                 </button>
               </li>
-              <li><a href="#" className="hover:text-white transition-colors">Suivi de Commande</a></li>
+              <li>
+                <button 
+                  onClick={() => window.location.href = '/account'}
+                  className="hover:text-white transition-colors"
+                >
+                  Suivi de Commande
+                </button>
+              </li>
               <li>
                 <button 
                   onClick={() => openPage('shipping')}

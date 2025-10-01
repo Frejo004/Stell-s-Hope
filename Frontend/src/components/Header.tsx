@@ -131,14 +131,30 @@ export default function Header({ onCategoryChange, currentCategory, products, on
                   </div>
                 </div>
               ) : (
-                <button
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  <User className="w-6 h-6" />
-                </button>
+                <div className="relative group">
+                  <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <User className="w-6 h-6" />
+                  </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                    <button
+                      onClick={() => window.location.href = '/login'}
+                      className="w-full px-3 py-2 text-left hover:bg-gray-50"
+                    >
+                      Se connecter
+                    </button>
+                    <button
+                      onClick={() => window.location.href = '/register'}
+                      className="w-full px-3 py-2 text-left hover:bg-gray-50"
+                    >
+                      S'inscrire
+                    </button>
+                  </div>
+                </div>
               )}
-              <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors">
+              <button 
+                onClick={() => window.location.href = '/wishlist'}
+                className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
                 <Heart className="w-6 h-6" />
               </button>
               <button
