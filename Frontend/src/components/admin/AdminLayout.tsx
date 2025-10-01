@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, Package, ShoppingCart, Users, Settings, LogOut, Menu, X, Search, Bell, MessageSquare, Tag, Star, FileText } from 'lucide-react';
+import { BarChart3, Package, ShoppingCart, Users, Settings, LogOut, Menu, X, Search, Bell, MessageSquare, Tag, Star, FileText, HelpCircle, Archive } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 import AdminProducts from './AdminProducts';
 import AdminOrders from './AdminOrders';
@@ -9,6 +9,8 @@ import AdminSettings from './AdminSettings';
 import AdminCategories from './AdminCategories';
 import AdminReviews from './AdminReviews';
 import AdminContent from './AdminContent';
+import AdminSupport from './AdminSupport';
+import AdminInventory from './AdminInventory';
 
 export default function AdminLayout() {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -21,7 +23,9 @@ export default function AdminLayout() {
     { id: 'orders', label: 'Commandes', icon: ShoppingCart },
     { id: 'customers', label: 'Clients', icon: Users },
     { id: 'categories', label: 'Catégories', icon: Tag },
+    { id: 'inventory', label: 'Stocks', icon: Archive },
     { id: 'reviews', label: 'Avis', icon: Star },
+    { id: 'support', label: 'Support', icon: HelpCircle },
     { id: 'content', label: 'Contenu', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'settings', label: 'Paramètres', icon: Settings }
@@ -41,6 +45,10 @@ export default function AdminLayout() {
         return <AdminCategories onNavigate={setCurrentPage} />;
       case 'reviews':
         return <AdminReviews onNavigate={setCurrentPage} />;
+      case 'inventory':
+        return <AdminInventory onNavigate={setCurrentPage} />;
+      case 'support':
+        return <AdminSupport onNavigate={setCurrentPage} />;
       case 'content':
         return <AdminContent onNavigate={setCurrentPage} />;
       case 'analytics':

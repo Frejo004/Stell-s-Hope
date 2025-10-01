@@ -32,6 +32,24 @@ export default function AdminContent({ onNavigate }: AdminContentProps) {
         </button>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-gray-900">{pages.length}</div>
+          <div className="text-sm text-gray-600">Pages Total</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-green-600">
+            {pages.filter(p => p.status === 'published').length}
+          </div>
+          <div className="text-sm text-gray-600">Publiées</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-blue-600">{banners.length}</div>
+          <div className="text-sm text-gray-600">Bannières</div>
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="border-b border-gray-200">
         <nav className="flex space-x-8">
@@ -181,24 +199,6 @@ export default function AdminContent({ onNavigate }: AdminContentProps) {
           </div>
         </div>
       )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{pages.length}</div>
-          <div className="text-sm text-gray-600">Pages Total</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {pages.filter(p => p.status === 'published').length}
-          </div>
-          <div className="text-sm text-gray-600">Publiées</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">{banners.length}</div>
-          <div className="text-sm text-gray-600">Bannières</div>
-        </div>
-      </div>
     </div>
   );
 }

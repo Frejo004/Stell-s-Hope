@@ -28,6 +28,32 @@ export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-gray-900">{customers.length}</div>
+          <div className="text-sm text-gray-600">Total Clients</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-green-600">
+            {customers.filter(c => c.status === 'active').length}
+          </div>
+          <div className="text-sm text-gray-600">Actifs</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-yellow-600">
+            {customers.filter(c => c.status === 'vip').length}
+          </div>
+          <div className="text-sm text-gray-600">VIP</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-blue-600">
+            {customers.reduce((sum, c) => sum + c.orders, 0)}
+          </div>
+          <div className="text-sm text-gray-600">Commandes Total</div>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border p-6">
         <div className="flex flex-col md:flex-row gap-4">
@@ -127,32 +153,6 @@ export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{customers.length}</div>
-          <div className="text-sm text-gray-600">Total Clients</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {customers.filter(c => c.status === 'active').length}
-          </div>
-          <div className="text-sm text-gray-600">Actifs</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-yellow-600">
-            {customers.filter(c => c.status === 'vip').length}
-          </div>
-          <div className="text-sm text-gray-600">VIP</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">
-            {customers.reduce((sum, c) => sum + c.orders, 0)}
-          </div>
-          <div className="text-sm text-gray-600">Commandes Total</div>
         </div>
       </div>
     </div>

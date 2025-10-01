@@ -28,6 +28,24 @@ export default function AdminCategories({ onNavigate }: AdminCategoriesProps) {
         </button>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-gray-900">{categories.length}</div>
+          <div className="text-sm text-gray-600">Catégories</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-blue-600">{attributes.length}</div>
+          <div className="text-sm text-gray-600">Attributs</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-green-600">
+            {categories.reduce((sum, cat) => sum + cat.products, 0)}
+          </div>
+          <div className="text-sm text-gray-600">Produits Total</div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Categories */}
         <div className="bg-white rounded-xl shadow-sm border">
@@ -100,24 +118,6 @@ export default function AdminCategories({ onNavigate }: AdminCategoriesProps) {
               ))}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{categories.length}</div>
-          <div className="text-sm text-gray-600">Catégories</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">{attributes.length}</div>
-          <div className="text-sm text-gray-600">Attributs</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {categories.reduce((sum, cat) => sum + cat.products, 0)}
-          </div>
-          <div className="text-sm text-gray-600">Produits Total</div>
         </div>
       </div>
     </div>

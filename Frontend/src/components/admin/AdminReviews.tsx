@@ -73,6 +73,32 @@ export default function AdminReviews({ onNavigate }: AdminReviewsProps) {
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-gray-900">{reviews.length}</div>
+          <div className="text-sm text-gray-600">Total Avis</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-yellow-600">
+            {reviews.filter(r => r.status === 'pending').length}
+          </div>
+          <div className="text-sm text-gray-600">En Attente</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-green-600">
+            {reviews.filter(r => r.status === 'approved').length}
+          </div>
+          <div className="text-sm text-gray-600">Approuvés</div>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border p-4">
+          <div className="text-2xl font-bold text-blue-600">
+            {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
+          </div>
+          <div className="text-sm text-gray-600">Note Moyenne</div>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border p-6">
         <div className="flex flex-col md:flex-row gap-4">
@@ -168,32 +194,6 @@ export default function AdminReviews({ onNavigate }: AdminReviewsProps) {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{reviews.length}</div>
-          <div className="text-sm text-gray-600">Total Avis</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-yellow-600">
-            {reviews.filter(r => r.status === 'pending').length}
-          </div>
-          <div className="text-sm text-gray-600">En Attente</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {reviews.filter(r => r.status === 'approved').length}
-          </div>
-          <div className="text-sm text-gray-600">Approuvés</div>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">
-            {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
-          </div>
-          <div className="text-sm text-gray-600">Note Moyenne</div>
-        </div>
       </div>
     </div>
   );

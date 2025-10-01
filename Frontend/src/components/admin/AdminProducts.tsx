@@ -141,32 +141,6 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
           </table>
         </div>
       </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-gray-900">{products.length}</div>
-          <div className="text-sm text-gray-600">Total Produits</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {products.filter(p => p.isNew).length}
-          </div>
-          <div className="text-sm text-gray-600">Nouveautés</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-red-600">
-            {products.filter(p => p.isOnSale).length}
-          </div>
-          <div className="text-sm text-gray-600">En Promo</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-yellow-600">
-            {products.filter(p => p.isBestSeller).length}
-          </div>
-          <div className="text-sm text-gray-600">Best-Sellers</div>
-        </div>
-      </div>
     </div>
   );
 }

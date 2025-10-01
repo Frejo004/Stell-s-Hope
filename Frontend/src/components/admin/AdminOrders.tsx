@@ -58,6 +58,38 @@ export default function AdminOrders({ onNavigate }: AdminOrdersProps) {
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-2xl font-bold text-gray-900">{orders.length}</div>
+          <div className="text-sm text-gray-600">Total</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-2xl font-bold text-yellow-600">
+            {orders.filter(o => o.status === 'pending').length}
+          </div>
+          <div className="text-sm text-gray-600">En attente</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-2xl font-bold text-blue-600">
+            {orders.filter(o => o.status === 'confirmed').length}
+          </div>
+          <div className="text-sm text-gray-600">Confirmées</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-2xl font-bold text-purple-600">
+            {orders.filter(o => o.status === 'shipped').length}
+          </div>
+          <div className="text-sm text-gray-600">Expédiées</div>
+        </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-2xl font-bold text-green-600">
+            {orders.filter(o => o.status === 'delivered').length}
+          </div>
+          <div className="text-sm text-gray-600">Livrées</div>
+        </div>
+      </div>
+
       {/* Filters */}
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex flex-col md:flex-row gap-4">
@@ -164,38 +196,6 @@ export default function AdminOrders({ onNavigate }: AdminOrdersProps) {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-gray-900">{orders.length}</div>
-          <div className="text-sm text-gray-600">Total</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-yellow-600">
-            {orders.filter(o => o.status === 'pending').length}
-          </div>
-          <div className="text-sm text-gray-600">En attente</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-blue-600">
-            {orders.filter(o => o.status === 'confirmed').length}
-          </div>
-          <div className="text-sm text-gray-600">Confirmées</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-purple-600">
-            {orders.filter(o => o.status === 'shipped').length}
-          </div>
-          <div className="text-sm text-gray-600">Expédiées</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {orders.filter(o => o.status === 'delivered').length}
-          </div>
-          <div className="text-sm text-gray-600">Livrées</div>
         </div>
       </div>
     </div>
