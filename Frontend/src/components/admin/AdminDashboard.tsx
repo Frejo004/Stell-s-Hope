@@ -31,16 +31,16 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <div key={stat.title} className="bg-white rounded-lg shadow p-6">
+          <div key={stat.title} className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center">
-              <div className={`${stat.color} p-3 rounded-lg`}>
+              <div className={`${stat.color} p-3 rounded-xl`}>
                 <stat.icon className="w-6 h-6 text-white" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                <p className="text-sm font-medium text-gray-500">{stat.title}</p>
                 <div className="flex items-center">
-                  <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
-                  <span className="ml-2 text-sm text-green-600">{stat.change}</span>
+                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                  <span className="ml-2 text-sm font-medium text-green-600">{stat.change}</span>
                 </div>
               </div>
             </div>
@@ -50,13 +50,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Orders */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
+        <div className="bg-white rounded-xl shadow-sm border">
+          <div className="p-6 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Commandes Récentes</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Commandes Récentes</h2>
               <button 
                 onClick={() => onNavigate('orders')}
-                className="text-blue-600 hover:text-blue-800 text-sm"
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
               >
                 Voir tout
               </button>
@@ -65,17 +65,17 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <div className="p-6">
             <div className="space-y-4">
               {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between">
+                <div key={order.id} className="flex items-center justify-between py-2">
                   <div>
-                    <p className="font-medium">{order.id}</p>
-                    <p className="text-sm text-gray-600">{order.customer}</p>
+                    <p className="font-semibold text-gray-900">{order.id}</p>
+                    <p className="text-sm text-gray-500">{order.customer}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">{order.amount}</p>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                      order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                      'bg-yellow-100 text-yellow-800'
+                    <p className="font-semibold text-gray-900">{order.amount}</p>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                      order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                      'bg-yellow-100 text-yellow-700'
                     }`}>
                       {order.status === 'delivered' ? 'Livrée' :
                        order.status === 'shipped' ? 'Expédiée' : 'En attente'}
@@ -88,39 +88,39 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b">
-            <h2 className="text-lg font-semibold">Actions Rapides</h2>
+        <div className="bg-white rounded-xl shadow-sm border">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900">Actions Rapides</h2>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => onNavigate('products')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                className="p-6 border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all group"
               >
-                <Package className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm font-medium">Ajouter Produit</p>
+                <Package className="w-8 h-8 mx-auto mb-3 text-gray-400 group-hover:text-blue-600" />
+                <p className="text-sm font-medium text-gray-700 group-hover:text-blue-700">Ajouter Produit</p>
               </button>
               <button 
                 onClick={() => onNavigate('orders')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                className="p-6 border border-gray-200 rounded-xl hover:border-green-300 hover:bg-green-50 transition-all group"
               >
-                <ShoppingCart className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm font-medium">Gérer Commandes</p>
+                <ShoppingCart className="w-8 h-8 mx-auto mb-3 text-gray-400 group-hover:text-green-600" />
+                <p className="text-sm font-medium text-gray-700 group-hover:text-green-700">Gérer Commandes</p>
               </button>
               <button 
                 onClick={() => onNavigate('customers')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                className="p-6 border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all group"
               >
-                <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm font-medium">Voir Clients</p>
+                <Users className="w-8 h-8 mx-auto mb-3 text-gray-400 group-hover:text-purple-600" />
+                <p className="text-sm font-medium text-gray-700 group-hover:text-purple-700">Voir Clients</p>
               </button>
               <button 
                 onClick={() => onNavigate('analytics')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors"
+                className="p-6 border border-gray-200 rounded-xl hover:border-orange-300 hover:bg-orange-50 transition-all group"
               >
-                <BarChart3 className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm font-medium">Analytics</p>
+                <BarChart3 className="w-8 h-8 mx-auto mb-3 text-gray-400 group-hover:text-orange-600" />
+                <p className="text-sm font-medium text-gray-700 group-hover:text-orange-700">Analytics</p>
               </button>
             </div>
           </div>
@@ -128,13 +128,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       </div>
 
       {/* Alerts */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
         <div className="flex">
-          <AlertCircle className="w-5 h-5 text-yellow-400" />
+          <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-yellow-800">Attention</h3>
+            <h3 className="text-sm font-semibold text-yellow-800">Attention</h3>
             <p className="text-sm text-yellow-700 mt-1">
-              3 produits ont un stock faible. <button className="underline">Voir les détails</button>
+              3 produits ont un stock faible. <button className="underline font-medium hover:no-underline">Voir les détails</button>
             </p>
           </div>
         </div>
