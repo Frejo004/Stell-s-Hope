@@ -3,6 +3,9 @@ import { BarChart3, Package, ShoppingCart, Users, Settings, LogOut, Menu, X, Sea
 import AdminDashboard from './AdminDashboard';
 import AdminProducts from './AdminProducts';
 import AdminOrders from './AdminOrders';
+import AdminCustomers from './AdminCustomers';
+import AdminAnalytics from './AdminAnalytics';
+import AdminSettings from './AdminSettings';
 
 export default function AdminLayout() {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -14,6 +17,7 @@ export default function AdminLayout() {
     { id: 'products', label: 'Produits', icon: Package },
     { id: 'orders', label: 'Commandes', icon: ShoppingCart },
     { id: 'customers', label: 'Clients', icon: Users },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'settings', label: 'Paramètres', icon: Settings }
   ];
 
@@ -26,9 +30,11 @@ export default function AdminLayout() {
       case 'orders':
         return <AdminOrders onNavigate={setCurrentPage} />;
       case 'customers':
-        return <div className="p-6"><h1 className="text-3xl font-bold">Gestion Clients</h1><p className="mt-4">Page en développement...</p></div>;
+        return <AdminCustomers onNavigate={setCurrentPage} />;
+      case 'analytics':
+        return <AdminAnalytics onNavigate={setCurrentPage} />;
       case 'settings':
-        return <div className="p-6"><h1 className="text-3xl font-bold">Paramètres</h1><p className="mt-4">Page en développement...</p></div>;
+        return <AdminSettings onNavigate={setCurrentPage} />;
       default:
         return <AdminDashboard onNavigate={setCurrentPage} />;
     }
