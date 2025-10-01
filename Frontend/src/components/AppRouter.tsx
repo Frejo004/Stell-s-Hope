@@ -81,16 +81,26 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <Header
-        onCategoryChange={handleCategoryChange}
-        currentCategory={getCurrentCategory()}
-        products={products}
-        onProductClick={handleProductClick}
+    <Routes>
+      {/* Admin Route - No Header/Footer */}
+      <Route 
+        path="/admin" 
+        element={<AdminLayout />} 
       />
-
-        <main>
-          <Routes>
+      
+      {/* Regular Routes with Header/Footer */}
+      <Route 
+        path="/*" 
+        element={
+          <div className="min-h-screen bg-white">
+            <Header
+              onCategoryChange={handleCategoryChange}
+              currentCategory={getCurrentCategory()}
+              products={products}
+              onProductClick={handleProductClick}
+            />
+            <main>
+              <Routes>
             {/* Pages principales */}
             <Route 
               path="/" 
@@ -271,10 +281,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
               element={<CartPage onClose={() => window.history.back()} />} 
             />
             
-            <Route 
-              path="/admin" 
-              element={<AdminLayout />} 
-            />
+
 
             {/* Page 404 */}
             <Route 
@@ -288,11 +295,13 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                 />
               } 
             />
-          </Routes>
-        </main>
-
-      <Footer />
-    </div>
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        }
+      />
+    </Routes>
   );
 }
 
