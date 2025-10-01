@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, Package, ShoppingCart, Users, Settings, LogOut, Menu, X, Search, Bell, MessageSquare, Tag, Star, FileText, HelpCircle, Archive } from 'lucide-react';
+import { BarChart3, Package, ShoppingCart, Users, Settings, LogOut, Menu, X, Search, Bell, MessageSquare, Tag, Star, FileText, HelpCircle, Archive, Percent, Truck, CreditCard } from 'lucide-react';
 import AdminDashboard from './AdminDashboard';
 import AdminProducts from './AdminProducts';
 import AdminOrders from './AdminOrders';
@@ -11,6 +11,9 @@ import AdminReviews from './AdminReviews';
 import AdminContent from './AdminContent';
 import AdminSupport from './AdminSupport';
 import AdminInventory from './AdminInventory';
+import AdminPromotions from './AdminPromotions';
+import AdminShipping from './AdminShipping';
+import AdminPayments from './AdminPayments';
 
 export default function AdminLayout() {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -28,6 +31,9 @@ export default function AdminLayout() {
     { id: 'support', label: 'Support', icon: HelpCircle },
     { id: 'content', label: 'Contenu', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'promotions', label: 'Promotions', icon: Percent },
+    { id: 'shipping', label: 'Expéditions', icon: Truck },
+    { id: 'payments', label: 'Paiements', icon: CreditCard },
     { id: 'settings', label: 'Paramètres', icon: Settings }
   ];
 
@@ -53,6 +59,12 @@ export default function AdminLayout() {
         return <AdminContent onNavigate={setCurrentPage} />;
       case 'analytics':
         return <AdminAnalytics onNavigate={setCurrentPage} />;
+      case 'promotions':
+        return <AdminPromotions onNavigate={setCurrentPage} />;
+      case 'shipping':
+        return <AdminShipping onNavigate={setCurrentPage} />;
+      case 'payments':
+        return <AdminPayments onNavigate={setCurrentPage} />;
       case 'settings':
         return <AdminSettings onNavigate={setCurrentPage} />;
       default:
