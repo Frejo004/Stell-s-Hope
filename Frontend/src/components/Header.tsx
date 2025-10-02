@@ -30,8 +30,8 @@ export default function Header({ onCategoryChange, currentCategory, products, on
   };
 
   const categories = [
-    { id: 'all', label: 'Accueil', href: '#' },
-    { id: 'boutique', label: 'Boutique', href: '#' },
+    { id: 'home', label: 'Accueil', href: '#' },
+    { id: 'all', label: 'Boutique', href: '#' },
     { id: 'homme', label: 'Homme', href: '#' },
     { id: 'femme', label: 'Femme', href: '#' },
     { id: 'accessories', label: 'Accessoires', href: '#' },

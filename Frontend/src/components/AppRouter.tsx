@@ -63,7 +63,6 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
 
   const getCurrentCategory = () => {
     const path = location.pathname;
-    if (path === '/' || path === '/category/home') return 'home';
     if (path === '/boutique') return 'all';
     if (path.startsWith('/category/')) return path.split('/')[2];
     return 'home';
