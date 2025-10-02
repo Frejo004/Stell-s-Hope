@@ -23,6 +23,7 @@ import WishlistPage from './WishlistPage';
 import OrderDetailsPage from './OrderDetailsPage';
 import CartPage from './CartPage';
 import AdminLayout from './admin/AdminLayout';
+import ApiTest from './ApiTest';
 import { useAuth } from '../hooks/useAuth';
 import { useOrders } from '../hooks/useOrders';
 import { Order } from '../types/order';
@@ -279,6 +280,11 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
             <Route 
               path="/cart" 
               element={<CartPage onClose={() => window.history.back()} />} 
+            />
+            
+            <Route 
+              path="/api-test" 
+              element={<ApiTest />} 
             />
             
 

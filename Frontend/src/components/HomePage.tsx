@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
 import ProductCard from './ProductCard';
+import { productService } from '../services/productService';
 
 interface HomePageProps {
   products: Product[];
@@ -9,8 +10,34 @@ interface HomePageProps {
 }
 
 export default function HomePage({ products, onProductClick, onCategoryChange }: HomePageProps) {
-  const bestSellers = products.filter(product => product.isBestSeller).slice(0, 8);
-  const newProducts = products.filter(product => product.isNew).slice(0, 4);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [bestsellers, setBestsellers] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const [featured, best] = await Promise.all([
+          productService.getFeaturedProducts(),
+          productService.getBestsellers()
+        ]);
+        setFeaturedProducts(featured);
+        setBestsellers(best);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        // Fallback aux données locales
+        setFeaturedProducts(products.filter(p => p.isFeatured || p.isNew).slice(0, 8));
+        setBestsellers(products.filter(p => p.isBestSeller).slice(0, 8));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [products]);
+
+  const bestSellers = bestsellers.length > 0 ? bestsellers : products.filter(product => product.isBestSeller).slice(0, 8);
+  const newProducts = featuredProducts.length > 0 ? featuredProducts : products.filter(product => product.isNew).slice(0, 4);
 
   return (
     <div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User, AuthState } from '../types/auth';
+import { apiService } from '../services/api';
 
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -9,20 +10,26 @@ export const useAuth = () => {
   });
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-        setAuthState({
-          user,
-          isAuthenticated: true,
-          isLoading: false
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      // Vérifier le token avec l'API
+      apiService.getMe()
+        .then((user) => {
+          setAuthState({
+            user,
+            isAuthenticated: true,
+            isLoading: false
+          });
+        })
+        .catch(() => {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user');
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false
+          });
         });
-      } catch (error) {
-        console.error('Erreur parsing user:', error);
-        localStorage.removeItem('user');
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-      }
     } else {
       setAuthState(prev => ({ ...prev, isLoading: false }));
     }
@@ -31,49 +38,57 @@ export const useAuth = () => {
   const login = async (email: string, password: string) => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
-    // Simulation API call
-    const mockUser: User = {
-      id: '1',
-      email,
-      firstName: 'John',
-      lastName: 'Doe',
-      addresses: [],
-      createdAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('user', JSON.stringify(mockUser));
-    setAuthState({
-      user: mockUser,
-      isAuthenticated: true,
-      isLoading: false
-    });
+    try {
+      const response = await apiService.login(email, password);
+      
+      localStorage.setItem('auth_token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      setAuthState({
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false
+      });
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      throw error;
+    }
   };
 
-  const register = async (userData: Omit<User, 'id' | 'createdAt' | 'addresses'>) => {
+  const register = async (userData: any) => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
-    const newUser: User = {
-      ...userData,
-      id: Date.now().toString(),
-      addresses: [],
-      createdAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('user', JSON.stringify(newUser));
-    setAuthState({
-      user: newUser,
-      isAuthenticated: true,
-      isLoading: false
-    });
+    try {
+      const response = await apiService.register(userData);
+      
+      localStorage.setItem('auth_token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      setAuthState({
+        user: response.user,
+        isAuthenticated: true,
+        isLoading: false
+      });
+    } catch (error) {
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      throw error;
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('user');
-    setAuthState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false
-    });
+  const logout = async () => {
+    try {
+      await apiService.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
+    }
   };
 
   return {
