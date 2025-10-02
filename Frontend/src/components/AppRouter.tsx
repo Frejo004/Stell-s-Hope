@@ -24,6 +24,8 @@ import OrderDetailsPage from './OrderDetailsPage';
 import CartPage from './CartPage';
 import AdminLayout from './admin/AdminLayout';
 import ApiTest from './ApiTest';
+import ForgotPasswordPage from './ForgotPasswordPage';
+import VerifyCodePage from './VerifyCodePage';
 import { useAuth } from '../hooks/useAuth';
 import { useOrders } from '../hooks/useOrders';
 import { Order } from '../types/order';
@@ -87,6 +89,27 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
       <Route 
         path="/admin" 
         element={<AdminLayout />} 
+      />
+      
+      {/* Auth Routes - No Header/Footer */}
+      <Route 
+        path="/login" 
+        element={<LoginPage onClose={() => navigate('/')} />} 
+      />
+      
+      <Route 
+        path="/register" 
+        element={<RegisterPage onClose={() => navigate('/')} />} 
+      />
+      
+      <Route 
+        path="/forgot-password" 
+        element={<ForgotPasswordPage onClose={() => navigate('/')} />} 
+      />
+      
+      <Route 
+        path="/verify-code" 
+        element={<VerifyCodePage onClose={() => navigate('/')} />} 
       />
       
       {/* Regular Routes with Header/Footer */}
@@ -238,16 +261,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
               } 
             />
 
-            {/* Nouvelles pages */}
-            <Route 
-              path="/login" 
-              element={<LoginPage onClose={() => window.history.back()} />} 
-            />
-            
-            <Route 
-              path="/register" 
-              element={<RegisterPage onClose={() => window.history.back()} />} 
-            />
+
             
             <Route 
               path="/order-tracking/:orderId" 
@@ -286,6 +300,8 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
               path="/api-test" 
               element={<ApiTest />} 
             />
+            
+
             
 
 
