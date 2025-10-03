@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, X, Filter } from 'lucide-react';
 import { Product } from '../types';
-import ProductCard from './ProductCard';
+import ProductCard from '../components/ProductCard';
 
 interface SearchPageProps {
   products: Product[];

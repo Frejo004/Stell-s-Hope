@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
-import CheckoutPage from './CheckoutPage';
+import CheckoutPage from '../pages/CheckoutPage';
 import { Order } from '../types/order';
 
 interface CartProps {

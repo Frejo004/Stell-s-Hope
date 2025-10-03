@@ -3,7 +3,7 @@ import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react'
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
-import SearchPage from './SearchPage';
+import SearchPage from '../pages/SearchPage';
 import AccountPage from '../pages/AccountPage';
 import Logo from './Logo';
 import { Product } from '../types';

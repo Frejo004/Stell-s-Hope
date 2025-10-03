@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
-import ContactPage from './ContactPage';
+import ContactPage from '../pages/ContactPage';
 import AboutPage from '../pages/AboutPage';
 import FAQPage from '../pages/FAQPage';
 import LegalPage from '../pages/LegalPage';
