@@ -1,6 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User, AuthState } from '../types/auth';
 import { apiService } from '../services/api';
+
+// Utilitaire pour sanitiser les données utilisateur
+const sanitizeUserData = (user: any): User => {
+  if (!user) return user;
+  return {
+    ...user,
+    firstName: user.firstName?.toString().trim() || '',
+    lastName: user.lastName?.toString().trim() || '',
+    email: user.email?.toString().trim() || ''
+  };
+};
 
 export const useAuth = () => {
   const [authState, setAuthState] = useState<AuthState>({
@@ -15,8 +26,9 @@ export const useAuth = () => {
       // Vérifier le token avec l'API
       apiService.getMe()
         .then((user) => {
+          const sanitizedUser = sanitizeUserData(user);
           setAuthState({
-            user,
+            user: sanitizedUser,
             isAuthenticated: true,
             isLoading: false
           });
@@ -41,14 +53,18 @@ export const useAuth = () => {
     try {
       const response = await apiService.login(email, password);
       
-      localStorage.setItem('auth_token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      setAuthState({
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false
-      });
+      if (response.token && response.user) {
+        localStorage.setItem('auth_token', response.token);
+        localStorage.setItem('user', JSON.stringify(sanitizeUserData(response.user)));
+        
+        setAuthState({
+          user: sanitizeUserData(response.user),
+          isAuthenticated: true,
+          isLoading: false
+        });
+      } else {
+        throw new Error('Réponse d\'authentification invalide');
+      }
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;
@@ -61,14 +77,18 @@ export const useAuth = () => {
     try {
       const response = await apiService.register(userData);
       
-      localStorage.setItem('auth_token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
-      setAuthState({
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false
-      });
+      if (response.token && response.user) {
+        localStorage.setItem('auth_token', response.token);
+        localStorage.setItem('user', JSON.stringify(sanitizeUserData(response.user)));
+        
+        setAuthState({
+          user: sanitizeUserData(response.user),
+          isAuthenticated: true,
+          isLoading: false
+        });
+      } else {
+        throw new Error('Réponse d\'inscription invalide');
+      }
     } catch (error) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
       throw error;

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 import ContactPage from './ContactPage';
-import AboutPage from './AboutPage';
-import FAQPage from './FAQPage';
-import LegalPage from './LegalPage';
-import AccountPage from './AccountPage';
+import AboutPage from '../pages/AboutPage';
+import FAQPage from '../pages/FAQPage';
+import LegalPage from '../pages/LegalPage';
+import AccountPage from '../pages/AccountPage';
 import Logo from './Logo';
 import { useAuth } from '../hooks/useAuth';
 

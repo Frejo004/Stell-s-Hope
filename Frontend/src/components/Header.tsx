@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, memo, useCallback, useMemo } from 'react';
 import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
 import SearchPage from './SearchPage';
-import AccountPage from './AccountPage';
+import AccountPage from '../pages/AccountPage';
 import Logo from './Logo';
 import { Product } from '../types';
 
@@ -15,7 +15,7 @@ interface HeaderProps {
   onProductClick: (product: Product) => void;
 }
 
-export default function Header({ onCategoryChange, currentCategory, products, onProductClick }: HeaderProps) {
+const Header = memo(({ onCategoryChange, currentCategory, products, onProductClick }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -24,19 +24,19 @@ export default function Header({ onCategoryChange, currentCategory, products, on
   const { cartItemsCount, setIsOpen } = useCart();
   const { user, isAuthenticated, logout } = useAuth();
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     setIsSearchOpen(true);
-  };
+  }, []);
 
-  const categories = [
+  const categories = useMemo(() => [
     { id: 'home', label: 'Accueil', href: '#' },
     { id: 'all', label: 'Boutique', href: '#' },
     { id: 'homme', label: 'Homme', href: '#' },
     { id: 'femme', label: 'Femme', href: '#' },
     { id: 'accessories', label: 'Accessoires', href: '#' },
     { id: 'sale', label: 'Promos', href: '#' }
-  ];
+  ], []);
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -229,4 +229,8 @@ export default function Header({ onCategoryChange, currentCategory, products, on
       )}
     </header>
   );
-}
+});
+
+Header.displayName = 'Header';
+
+export default Header;

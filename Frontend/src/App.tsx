@@ -1,5 +1,5 @@
 import React from 'react';
-import AppRouter from './components/AppRouter';
+import AppRouter from './routes/AppRouter';
 import Cart from './components/Cart';
 import ToastContainer from './components/ToastContainer';
 import { useToast } from './hooks/useToast';

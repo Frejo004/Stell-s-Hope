@@ -1,34 +1,44 @@
-import React from 'react';
+import React, { Suspense, lazy, memo, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Product } from '../types';
 import { products } from '../data/products';
-import Header from './Header';
-import Footer from './Footer';
-import HomePage from './HomePage';
-import CategoryPage from './CategoryPage';
-import ProductDetail from './ProductDetail';
-import SearchPage from './SearchPage';
-import ContactPage from './ContactPage';
-import AboutPage from './AboutPage';
-import FAQPage from './FAQPage';
-import LegalPage from './LegalPage';
-import AccountPage from './AccountPage';
-import CheckoutPage from './CheckoutPage';
-import OrderConfirmationPage from './OrderConfirmationPage';
-import NotFoundPage from './NotFoundPage';
-import LoginPage from './LoginPage';
-import RegisterPage from './RegisterPage';
-import OrderTrackingPage from './OrderTrackingPage';
-import WishlistPage from './WishlistPage';
-import OrderDetailsPage from './OrderDetailsPage';
-import CartPage from './CartPage';
-import AdminLayout from './admin/AdminLayout';
-import ApiTest from './ApiTest';
-import ForgotPasswordPage from './ForgotPasswordPage';
-import VerifyCodePage from './VerifyCodePage';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import ErrorBoundary from '../components/ErrorBoundary';
 import { useAuth } from '../hooks/useAuth';
 import { useOrders } from '../hooks/useOrders';
 import { Order } from '../types/order';
+
+// Lazy loading des pages
+const HomePage = lazy(() => import('../pages/HomePage'));
+const CategoryPage = lazy(() => import('../pages/CategoryPage'));
+const ProductDetail = lazy(() => import('../components/ProductDetail'));
+const SearchPage = lazy(() => import('../pages/SearchPage'));
+const ContactPage = lazy(() => import('../pages/ContactPage'));
+const AboutPage = lazy(() => import('../pages/AboutPage'));
+const FAQPage = lazy(() => import('../pages/FAQPage'));
+const LegalPage = lazy(() => import('../pages/LegalPage'));
+const AccountPage = lazy(() => import('../pages/AccountPage'));
+const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
+const OrderConfirmationPage = lazy(() => import('../pages/OrderConfirmationPage'));
+const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+const LoginPage = lazy(() => import('../pages/LoginPage'));
+const RegisterPage = lazy(() => import('../pages/RegisterPage'));
+const OrderTrackingPage = lazy(() => import('../pages/OrderTrackingPage'));
+const WishlistPage = lazy(() => import('../pages/WishlistPage'));
+const OrderDetailsPage = lazy(() => import('../pages/OrderDetailsPage'));
+const CartPage = lazy(() => import('../pages/CartPage'));
+const AdminLayout = lazy(() => import('../components/admin/AdminLayout'));
+const ApiTest = lazy(() => import('../components/ApiTest'));
+const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
+const VerifyCodePage = lazy(() => import('../pages/VerifyCodePage'));
+
+// Composant de loading
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-300"></div>
+  </div>
+);
 
 interface AppRouterProps {
   onOrderComplete: (order: Order) => void;
@@ -173,7 +183,6 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
               element={
                 <ProductDetail
                   product={products[0]}
-                  isOpen={true}
                   onClose={() => window.history.back()}
                 />
               } 
