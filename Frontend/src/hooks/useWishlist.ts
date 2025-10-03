@@ -5,34 +5,26 @@ export const useWishlist = () => {
   const [wishlist, setWishlist] = useState<Product[]>([]);
 
   useEffect(() => {
-    const savedWishlist = localStorage.getItem('wishlist');
-    if (savedWishlist) {
-      try {
-        setWishlist(JSON.parse(savedWishlist));
-      } catch (error) {
-        console.error('Erreur parsing wishlist:', error);
-        localStorage.removeItem('wishlist');
-      }
+    const saved = localStorage.getItem('wishlist');
+    if (saved) {
+      setWishlist(JSON.parse(saved));
     }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-  }, [wishlist]);
-
   const addToWishlist = (product: Product) => {
-    setWishlist(prev => {
-      if (prev.find(p => p.id === product.id)) return prev;
-      return [...prev, product];
-    });
+    const newWishlist = [...wishlist, product];
+    setWishlist(newWishlist);
+    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
   };
 
   const removeFromWishlist = (productId: string) => {
-    setWishlist(prev => prev.filter(p => p.id !== productId));
+    const newWishlist = wishlist.filter(item => item.id !== productId);
+    setWishlist(newWishlist);
+    localStorage.setItem('wishlist', JSON.stringify(newWishlist));
   };
 
   const isInWishlist = (productId: string) => {
-    return wishlist.some(p => p.id === productId);
+    return wishlist.some(item => item.id === productId);
   };
 
   return {

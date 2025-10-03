@@ -1,45 +1,46 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from './useAuth';
 import { Order } from '../types/order';
 
 export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    const savedOrders = localStorage.getItem('orders');
-    if (savedOrders) {
-      try {
-        setOrders(JSON.parse(savedOrders));
-      } catch (error) {
-        console.error('Erreur parsing orders:', error);
-        localStorage.removeItem('orders');
-      }
+  const fetchOrders = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      setLoading(true);
+      // Mock data for now
+      setOrders([]);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
+
+  const createOrder = async (orderData: any) => {
+    try {
+      // Mock implementation
+      const newOrder = { id: 'CMD123', ...orderData } as Order;
+      await fetchOrders();
+      return newOrder;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      throw error;
+    }
+  };
+
+  const getOrderById = (orderId: string): Order | undefined => {
+    return orders.find(order => order.id === orderId);
+  };
 
   useEffect(() => {
-    localStorage.setItem('orders', JSON.stringify(orders));
-  }, [orders]);
+    fetchOrders();
+  }, [isAuthenticated]);
 
-  const addOrder = (order: Order) => {
-    setOrders(prev => [order, ...prev]);
-  };
-
-  const getOrderById = (id: string) => {
-    return orders.find(order => order.id === id);
-  };
-
-  const updateOrderStatus = (id: string, status: Order['status']) => {
-    setOrders(prev => 
-      prev.map(order => 
-        order.id === id ? { ...order, status } : order
-      )
-    );
-  };
-
-  return {
-    orders,
-    addOrder,
-    getOrderById,
-    updateOrderStatus
-  };
+  return { orders, loading, error, createOrder, getOrderById, refetch: fetchOrders };
 };

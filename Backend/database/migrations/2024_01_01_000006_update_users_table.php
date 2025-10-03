@@ -8,18 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('name');
-            $table->string('first_name')->after('id');
-            $table->string('last_name')->after('first_name');
-            $table->string('phone')->nullable()->after('email');
-            $table->text('address')->nullable()->after('phone');
-            $table->string('city')->nullable()->after('address');
-            $table->string('postal_code')->nullable()->after('city');
-            $table->string('country')->nullable()->after('postal_code');
-            $table->boolean('is_admin')->default(false)->after('country');
-            $table->boolean('is_active')->default(true)->after('is_admin');
-        });
+        // Users table already has the correct structure, no changes needed
     }
 
     public function down()

@@ -220,7 +220,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                 {newProducts.slice(0, 3).map((product) => (
                   <div key={product.id} className="flex items-center space-x-4">
                     <img
-                      src={product.images[0]}
+                      src={product.images?.[0] || '/placeholder.jpg'}
                       alt={product.name}
                       className="w-16 h-16 object-cover rounded"
                     />
@@ -231,7 +231,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                           <span key={i} className="text-yellow-400 text-xs">★</span>
                         ))}
                       </div>
-                      <p className="font-semibold text-gray-800">${product.price}</p>
+                      <p className="font-semibold text-gray-800">${Number(product.price || 0).toFixed(2)} €</p>
                     </div>
                   </div>
                 ))}
@@ -245,7 +245,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                 {bestSellers.slice(0, 3).map((product) => (
                   <div key={product.id} className="flex items-center space-x-4">
                     <img
-                      src={product.images[0]}
+                      src={product.images?.[0] || '/placeholder.jpg'}
                       alt={product.name}
                       className="w-16 h-16 object-cover rounded"
                     />
@@ -256,7 +256,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                           <span key={i} className="text-yellow-400 text-xs">★</span>
                         ))}
                       </div>
-                      <p className="font-semibold text-gray-800">${product.price}</p>
+                      <p className="font-semibold text-gray-800">{Number(product.price || 0).toFixed(2)} €</p>
                     </div>
                   </div>
                 ))}
@@ -270,7 +270,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                 {products.slice(0, 3).map((product) => (
                   <div key={product.id} className="flex items-center space-x-4">
                     <img
-                      src={product.images[0]}
+                      src={product.images?.[0] || '/placeholder.jpg'}
                       alt={product.name}
                       className="w-16 h-16 object-cover rounded"
                     />
@@ -281,7 +281,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                           <span key={i} className="text-yellow-400 text-xs">★</span>
                         ))}
                       </div>
-                      <p className="font-semibold text-gray-800">${product.price}</p>
+                      <p className="font-semibold text-gray-800">{Number(product.price || 0).toFixed(2)} €</p>
                     </div>
                   </div>
                 ))}

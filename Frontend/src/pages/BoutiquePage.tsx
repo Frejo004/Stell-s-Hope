@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
-import { Product, FilterState } from '../types';
 import ProductFilters from '../components/ProductFilters';
 import InfiniteProductList from '../components/InfiniteProductList';
-import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
-import { useProductFilters } from '../hooks/useProductFilters';
 
-export default function CategoryPage() {
+export default function BoutiquePage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const { getFilters } = useProductFilters();
-  const { products } = useInfiniteProducts(getFilters());
-
-
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -20,15 +13,12 @@ export default function CategoryPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Boutique - Tous nos produits
         </h1>
-        <p className="text-gray-600">
-          {products.length} produit{products.length > 1 ? 's' : ''}
-        </p>
       </div>
 
       <div className="lg:grid lg:grid-cols-4 lg:gap-8">
         {/* Filters Sidebar */}
         <div className="lg:col-span-1">
-          <div className="lg:sticky lg:top-24 z-10">
+          <div className="lg:sticky lg:top-24">
             {/* Mobile Filter Toggle */}
             <div className="lg:hidden mb-6">
               <button
@@ -40,11 +30,13 @@ export default function CategoryPage() {
               </button>
             </div>
 
-            <ProductFilters />
+            <div className={`${isFiltersOpen ? 'block' : 'hidden'} lg:block`}>
+              <ProductFilters />
+            </div>
           </div>
         </div>
 
-        {/* Products Grid */}
+        {/* Products Grid with Infinite Scroll */}
         <div className="lg:col-span-3">
           <InfiniteProductList />
         </div>

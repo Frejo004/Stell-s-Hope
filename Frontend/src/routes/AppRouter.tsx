@@ -1,7 +1,8 @@
 import React, { Suspense, lazy, memo, useCallback } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { NuqsAdapter } from 'nuqs/adapters/react-router';
 import { Product } from '../types';
-import { products } from '../data/products';
+import { useProducts } from '../hooks/useProducts';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -68,8 +69,13 @@ function OrderDetailsPageWrapper({ onClose }: { onClose: () => void }) {
 function AppContent({ onOrderComplete }: AppRouterProps) {
   const { isAuthenticated } = useAuth();
   const { getOrderById } = useOrders();
+  const { products, loading } = useProducts();
   const location = useLocation();
   const navigate = useNavigate();
+
+  if (loading) {
+    return <PageLoader />;
+  }
 
   const getCurrentCategory = () => {
     const path = location.pathname;
@@ -338,7 +344,9 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
 export default function AppRouter({ onOrderComplete }: AppRouterProps) {
   return (
     <Router>
-      <AppContent onOrderComplete={onOrderComplete} />
+      <NuqsAdapter>
+        <AppContent onOrderComplete={onOrderComplete} />
+      </NuqsAdapter>
     </Router>
   );
 }
