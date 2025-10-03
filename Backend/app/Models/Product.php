@@ -14,35 +14,23 @@ class Product extends Model
         'description',
         'price',
         'category_id',
-        'type',
-        'gender',
         'images',
-        'sizes',
-        'colors',
-        'composition',
-        'care_instructions',
         'stock_quantity',
         'is_active',
         'is_featured',
-        'is_new',
         'is_bestseller',
-        'discount_percentage'
+        'sku',
+        'weight',
+        'dimensions'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'images' => 'array',
-            'sizes' => 'array',
-            'colors' => 'array',
-            'price' => 'decimal:2',
-            'discount_percentage' => 'decimal:2',
-            'is_active' => 'boolean',
-            'is_featured' => 'boolean',
-            'is_new' => 'boolean',
-            'is_bestseller' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'price' => 'decimal:2',
+        'is_active' => 'boolean',
+        'is_featured' => 'boolean',
+        'is_bestseller' => 'boolean',
+        'images' => 'array'
+    ];
 
     public function category()
     {
@@ -64,11 +52,14 @@ class Product extends Model
         return $this->reviews()->avg('rating') ?? 0;
     }
 
-    public function getDiscountedPriceAttribute()
+    public function getReviewsCountAttribute()
     {
-        if ($this->discount_percentage > 0) {
-            return $this->price * (1 - $this->discount_percentage / 100);
-        }
-        return $this->price;
+        return $this->reviews()->count();
+    }
+
+    public function getMainImageAttribute()
+    {
+        $images = $this->images;
+        return is_array($images) && count($images) > 0 ? $images[0] : null;
     }
 }

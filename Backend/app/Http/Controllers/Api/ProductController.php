@@ -10,24 +10,14 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'reviews'])
-            ->where('is_active', true);
+        $query = Product::with(['category', 'reviews']);
 
-        // Filtres
         if ($request->has('category')) {
             $query->where('category_id', $request->category);
         }
 
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
-
-        if ($request->has('gender')) {
-            $query->where('gender', $request->gender);
-        }
-
         if ($request->has('search')) {
-            $query->where('name', 'ILIKE', '%' . $request->search . '%');
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
 
         if ($request->has('min_price')) {
@@ -38,32 +28,25 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
-        // Tri
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $query->orderBy($sortBy, $sortOrder);
-
-        $products = $query->paginate($request->get('per_page', 12));
+        $products = $query->where('is_active', true)
+                         ->paginate($request->get('per_page', 12));
 
         return response()->json($products);
     }
 
-    public function show($id)
+    public function show(Product $product)
     {
-        $product = Product::with(['category', 'reviews.user'])
-            ->where('is_active', true)
-            ->findOrFail($id);
-
+        $product->load(['category', 'reviews.user']);
         return response()->json($product);
     }
 
     public function featured()
     {
         $products = Product::where('is_featured', true)
-            ->where('is_active', true)
-            ->with(['category', 'reviews'])
-            ->limit(8)
-            ->get();
+                          ->where('is_active', true)
+                          ->with('category')
+                          ->limit(8)
+                          ->get();
 
         return response()->json($products);
     }
@@ -71,10 +54,23 @@ class ProductController extends Controller
     public function bestsellers()
     {
         $products = Product::where('is_bestseller', true)
-            ->where('is_active', true)
-            ->with(['category', 'reviews'])
-            ->limit(8)
-            ->get();
+                          ->where('is_active', true)
+                          ->with('category')
+                          ->limit(8)
+                          ->get();
+
+        return response()->json($products);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('q');
+        
+        $products = Product::where('name', 'like', '%' . $query . '%')
+                          ->orWhere('description', 'like', '%' . $query . '%')
+                          ->where('is_active', true)
+                          ->with('category')
+                          ->paginate(12);
 
         return response()->json($products);
     }

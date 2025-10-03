@@ -18,28 +18,19 @@ class Order extends Model
         'billing_address',
         'payment_method',
         'payment_status',
-        'notes',
+        'tracking_number',
         'shipped_at',
-        'delivered_at'
+        'delivered_at',
+        'notes',
+        'status_updated_at'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'total_amount' => 'decimal:2',
-            'shipping_address' => 'array',
-            'billing_address' => 'array',
-            'shipped_at' => 'datetime',
-            'delivered_at' => 'datetime',
-        ];
-    }
-
-    const STATUS_PENDING = 'pending';
-    const STATUS_CONFIRMED = 'confirmed';
-    const STATUS_PROCESSING = 'processing';
-    const STATUS_SHIPPED = 'shipped';
-    const STATUS_DELIVERED = 'delivered';
-    const STATUS_CANCELLED = 'cancelled';
+    protected $casts = [
+        'total_amount' => 'decimal:2',
+        'shipped_at' => 'datetime',
+        'delivered_at' => 'datetime',
+        'status_updated_at' => 'datetime'
+    ];
 
     public function user()
     {
@@ -51,8 +42,22 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function generateOrderNumber()
+    public function getStatusLabelAttribute()
     {
-        return 'SH-' . date('Y') . '-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
+        $labels = [
+            'pending' => 'En attente',
+            'confirmed' => 'Confirmée',
+            'processing' => 'En traitement',
+            'shipped' => 'Expédiée',
+            'delivered' => 'Livrée',
+            'cancelled' => 'Annulée'
+        ];
+
+        return $labels[$this->status] ?? $this->status;
+    }
+
+    public function getTotalItemsAttribute()
+    {
+        return $this->items->sum('quantity');
     }
 }

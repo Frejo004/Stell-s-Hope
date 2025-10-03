@@ -13,17 +13,12 @@ class OrderItem extends Model
         'order_id',
         'product_id',
         'quantity',
-        'price',
-        'size',
-        'color'
+        'price'
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'price' => 'decimal:2',
-        ];
-    }
+    protected $casts = [
+        'price' => 'decimal:2'
+    ];
 
     public function order()
     {
@@ -35,8 +30,8 @@ class OrderItem extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function getTotalAttribute()
+    public function getSubtotalAttribute()
     {
-        return $this->quantity * $this->price;
+        return $this->price * $this->quantity;
     }
 }

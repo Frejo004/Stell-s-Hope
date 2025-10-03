@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -14,71 +14,98 @@ class DatabaseSeeder extends Seeder
     {
         // Créer un admin
         User::create([
-            'name' => 'Admin Stell\'s Hope',
+            'first_name' => 'Admin',
+            'last_name' => 'User',
             'email' => 'admin@stellshope.com',
             'password' => Hash::make('password'),
             'is_admin' => true,
-            'email_verified_at' => now(),
+            'is_active' => true,
+        ]);
+
+        // Créer des utilisateurs de test
+        User::create([
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'email' => 'john@example.com',
+            'password' => Hash::make('password'),
+            'phone' => '+33123456789',
+            'is_admin' => false,
+            'is_active' => true,
         ]);
 
         // Créer des catégories
         $categories = [
-            ['name' => 'Hauts', 'slug' => 'hauts', 'description' => 'T-shirts, chemises, pulls'],
-            ['name' => 'Bas', 'slug' => 'bas', 'description' => 'Pantalons, jeans, shorts'],
-            ['name' => 'Accessoires', 'slug' => 'accessoires', 'description' => 'Sacs, bijoux, chaussures'],
+            ['name' => 'Homme', 'description' => 'Vêtements pour homme'],
+            ['name' => 'Femme', 'description' => 'Vêtements pour femme'],
+            ['name' => 'Unisexe', 'description' => 'Vêtements unisexe'],
+            ['name' => 'Accessoires', 'description' => 'Accessoires de mode'],
         ];
 
         foreach ($categories as $category) {
             Category::create($category);
         }
 
-        // Créer des produits de démonstration
+        // Créer des produits
         $products = [
             [
-                'name' => 'T-shirt Premium Coton',
+                'name' => 'T-shirt Premium Homme',
                 'description' => 'T-shirt en coton bio de haute qualité',
                 'price' => 29.99,
                 'category_id' => 1,
-                'type' => 'hauts',
-                'gender' => 'unisexe',
-                'images' => ['/images/tshirt1.jpg'],
-                'sizes' => ['S', 'M', 'L', 'XL'],
-                'colors' => ['blanc', 'noir', 'bleu'],
                 'stock_quantity' => 50,
                 'is_featured' => true,
-                'is_new' => true,
+                'sku' => 'TSH-001'
             ],
             [
-                'name' => 'Jean Slim Fit',
-                'description' => 'Jean coupe slim en denim stretch',
-                'price' => 79.99,
+                'name' => 'Robe Élégante',
+                'description' => 'Robe élégante pour toutes occasions',
+                'price' => 89.99,
                 'category_id' => 2,
-                'type' => 'bas',
-                'gender' => 'unisexe',
-                'images' => ['/images/jean1.jpg'],
-                'sizes' => ['28', '30', '32', '34', '36'],
-                'colors' => ['bleu', 'noir'],
-                'stock_quantity' => 30,
+                'stock_quantity' => 25,
                 'is_bestseller' => true,
+                'sku' => 'ROB-001'
+            ],
+            [
+                'name' => 'Sweat à Capuche Unisexe',
+                'description' => 'Sweat confortable pour tous',
+                'price' => 49.99,
+                'category_id' => 3,
+                'stock_quantity' => 75,
+                'is_featured' => true,
+                'sku' => 'SWE-001'
             ],
             [
                 'name' => 'Sac à Main Cuir',
                 'description' => 'Sac à main en cuir véritable',
-                'price' => 149.99,
-                'category_id' => 3,
-                'type' => 'accessoires',
-                'gender' => 'femme',
-                'images' => ['/images/sac1.jpg'],
-                'sizes' => ['Unique'],
-                'colors' => ['noir', 'marron', 'beige'],
-                'stock_quantity' => 20,
-                'is_featured' => true,
-                'discount_percentage' => 15,
+                'price' => 129.99,
+                'category_id' => 4,
+                'stock_quantity' => 15,
+                'sku' => 'SAC-001'
             ],
         ];
 
         foreach ($products as $product) {
             Product::create($product);
         }
+
+        // Créer des promotions de test
+        \App\Models\Promotion::create([
+            'code' => 'WELCOME10',
+            'type' => 'percentage',
+            'value' => 10,
+            'min_amount' => 50,
+            'max_uses' => 100,
+            'starts_at' => now(),
+            'expires_at' => now()->addMonth(),
+        ]);
+
+        \App\Models\Promotion::create([
+            'code' => 'SAVE20',
+            'type' => 'fixed',
+            'value' => 20,
+            'min_amount' => 100,
+            'starts_at' => now(),
+            'expires_at' => now()->addWeeks(2),
+        ]);
     }
 }
