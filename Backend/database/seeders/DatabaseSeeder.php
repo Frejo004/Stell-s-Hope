@@ -88,6 +88,16 @@ class DatabaseSeeder extends Seeder
             Product::create($product);
         }
 
+        // Appeler les autres seeders
+        $this->call([
+            UserSeeder::class,
+            ProductSeeder::class,
+            OrderSeeder::class,
+            ReviewSeeder::class,
+            WishlistSeeder::class,
+            TicketSeeder::class,
+        ]);
+
         // Créer des promotions de test
         \App\Models\Promotion::create([
             'code' => 'WELCOME10',
