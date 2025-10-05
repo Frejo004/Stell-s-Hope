@@ -12,8 +12,13 @@ export default defineConfig({
     port: 5173,
     host: true,
     hmr: {
-      overlay: false
+      overlay: false,
+      port: 5173
     }
+  },
+  define: {
+    __WS_TOKEN__: JSON.stringify(''),
+    global: 'globalThis',
   },
   optimizeDeps: {
     include: ['react', 'react-dom'],
