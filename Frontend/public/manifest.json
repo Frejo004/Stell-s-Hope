@@ -1,0 +1,21 @@
+{
+  "name": "Stell's Hope - Mode & Élégance",
+  "short_name": "Stell's Hope",
+  "description": "Boutique de mode élégante et moderne",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "fashion", "lifestyle"],
+  "lang": "fr",
+  "dir": "ltr"
+}

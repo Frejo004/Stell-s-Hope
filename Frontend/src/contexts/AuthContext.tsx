@@ -27,29 +27,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = authService.getToken();
-      if (token) {
-        try {
+      try {
+        const token = authService.getToken();
+        if (token) {
           const userData = await authService.getMe();
           setUser(userData);
-        } catch (error) {
-          authService.logout();
         }
+      } catch (error) {
+        console.error('Auth initialization error:', error);
+        authService.logout();
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { user } = await authService.login({ email, password });
-    setUser(user);
+    try {
+      const { user } = await authService.login({ email, password });
+      setUser(user);
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
   const register = async (data: any) => {
-    const { user } = await authService.register(data);
-    setUser(user);
+    try {
+      const { user } = await authService.register(data);
+      setUser(user);
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
   };
 
   const logout = () => {

@@ -19,7 +19,9 @@ if (!rootElement) {
   throw new Error('Element root non trouvé');
 }
 
-createRoot(rootElement).render(
+const root = createRoot(rootElement);
+
+root.render(
   <StrictMode>
     <ErrorBoundary>
       <AuthProvider>
