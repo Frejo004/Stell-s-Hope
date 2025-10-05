@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Mail } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
 import { Link, useNavigate } from 'react-router-dom';
-import Logo from './Logo';
+import Logo from '../components/Logo';
 
 interface ForgotPasswordPageProps {
   onClose: () => void;

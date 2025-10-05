@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
 import { Link, useNavigate } from 'react-router-dom';
-import Logo from './Logo';
+import Logo from '../components/Logo';
 
 interface LoginPageProps {
   onClose: () => void;

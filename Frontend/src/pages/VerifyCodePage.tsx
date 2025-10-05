@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Shield } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
 import { Link, useNavigate } from 'react-router-dom';
-import Logo from './Logo';
+import Logo from '../components/Logo';
 
 interface VerifyCodePageProps {
   onClose: () => void;

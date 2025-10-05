@@ -21,7 +21,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   optimizeDeps: {
-    include: ['react', 'react-dom'],
+    include: ['react', 'react-dom', 'react-router-dom'],
     exclude: ['lucide-react'],
   },
   build: {
@@ -34,5 +34,10 @@ export default defineConfig({
         }
       }
     }
-  }
+  },
+  resolve: {
+    alias: {
+      '@': '/src',
+    },
+  },
 });
