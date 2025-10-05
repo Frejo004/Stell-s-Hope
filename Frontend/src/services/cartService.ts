@@ -1,23 +1,50 @@
 import api from './api';
+import { CartItem } from '../types';
+
+export interface CartResponse {
+  items: CartItem[];
+  total: number;
+  count: number;
+}
+
+export interface AddToCartData {
+  product_id: number;
+  quantity: number;
+  size?: string;
+  color?: string;
+}
+
+export interface UpdateCartData {
+  product_id: number;
+  quantity: number;
+  size?: string;
+  color?: string;
+}
+
+export interface RemoveFromCartData {
+  product_id: number;
+  size?: string;
+  color?: string;
+}
 
 export const cartService = {
-  async getCart() {
+  async getCart(): Promise<CartResponse> {
     const response = await api.get('/cart');
     return response.data;
   },
 
-  async addToCart(product_id: number, quantity: number) {
-    const response = await api.post('/cart/add', { product_id, quantity });
+  async addToCart(data: AddToCartData) {
+    const response = await api.post('/cart/add', data);
     return response.data;
   },
 
-  async updateCart(product_id: number, quantity: number) {
-    const response = await api.put('/cart/update', { product_id, quantity });
+  async updateCart(data: UpdateCartData) {
+    const response = await api.put('/cart/update', data);
     return response.data;
   },
 
-  async removeFromCart(product_id: number) {
-    const response = await api.delete('/cart/remove', { data: { product_id } });
+  async removeFromCart(data: RemoveFromCartData) {
+    const response = await api.delete('/cart/remove', { data });
     return response.data;
   },
 

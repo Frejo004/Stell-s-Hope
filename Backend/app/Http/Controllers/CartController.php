@@ -4,32 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Cart;
 
 class CartController extends Controller
 {
     public function index(Request $request)
     {
-        $cart = session()->get('cart', []);
-        $cartItems = [];
-        $total = 0;
-
-        foreach ($cart as $id => $details) {
-            $product = Product::find($id);
-            if ($product) {
-                $cartItems[] = [
-                    'id' => $id,
-                    'product' => $product,
-                    'quantity' => $details['quantity'],
-                    'subtotal' => $product->price * $details['quantity']
-                ];
-                $total += $product->price * $details['quantity'];
-            }
-        }
+        $cartItems = $request->user()->cart()->with('product.category')->get();
+        $total = $cartItems->sum('subtotal');
+        $count = $cartItems->sum('quantity');
 
         return response()->json([
             'items' => $cartItems,
             'total' => $total,
-            'count' => count($cartItems)
+            'count' => $count
         ]);
     }
 
@@ -37,21 +25,35 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
+            'size' => 'nullable|string',
+            'color' => 'nullable|string'
         ]);
 
         $product = Product::find($request->product_id);
-        $cart = session()->get('cart', []);
-
-        if (isset($cart[$request->product_id])) {
-            $cart[$request->product_id]['quantity'] += $request->quantity;
-        } else {
-            $cart[$request->product_id] = [
-                'quantity' => $request->quantity
-            ];
+        
+        if (!$product->is_active) {
+            return response()->json(['error' => 'Product is not available'], 400);
         }
 
-        session()->put('cart', $cart);
+        $cartItem = Cart::where('user_id', $request->user()->id)
+                       ->where('product_id', $request->product_id)
+                       ->where('size', $request->size)
+                       ->where('color', $request->color)
+                       ->first();
+
+        if ($cartItem) {
+            $cartItem->quantity += $request->quantity;
+            $cartItem->save();
+        } else {
+            Cart::create([
+                'user_id' => $request->user()->id,
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+                'size' => $request->size,
+                'color' => $request->color
+            ]);
+        }
 
         return response()->json(['message' => 'Product added to cart']);
     }
@@ -60,18 +62,28 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:0'
+            'quantity' => 'required|integer|min:0',
+            'size' => 'nullable|string',
+            'color' => 'nullable|string'
         ]);
 
-        $cart = session()->get('cart', []);
+        $cartItem = Cart::where('user_id', $request->user()->id)
+                       ->where('product_id', $request->product_id)
+                       ->where('size', $request->size)
+                       ->where('color', $request->color)
+                       ->first();
 
-        if ($request->quantity == 0) {
-            unset($cart[$request->product_id]);
-        } else {
-            $cart[$request->product_id]['quantity'] = $request->quantity;
+        if (!$cartItem) {
+            return response()->json(['error' => 'Item not found in cart'], 404);
         }
 
-        session()->put('cart', $cart);
+        if ($request->quantity == 0) {
+            $cartItem->delete();
+            return response()->json(['message' => 'Item removed from cart']);
+        }
+
+        $cartItem->quantity = $request->quantity;
+        $cartItem->save();
 
         return response()->json(['message' => 'Cart updated']);
     }
@@ -79,19 +91,28 @@ class CartController extends Controller
     public function remove(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id'
+            'product_id' => 'required|exists:products,id',
+            'size' => 'nullable|string',
+            'color' => 'nullable|string'
         ]);
 
-        $cart = session()->get('cart', []);
-        unset($cart[$request->product_id]);
-        session()->put('cart', $cart);
+        $cartItem = Cart::where('user_id', $request->user()->id)
+                       ->where('product_id', $request->product_id)
+                       ->where('size', $request->size)
+                       ->where('color', $request->color)
+                       ->first();
 
+        if (!$cartItem) {
+            return response()->json(['error' => 'Item not found in cart'], 404);
+        }
+
+        $cartItem->delete();
         return response()->json(['message' => 'Product removed from cart']);
     }
 
-    public function clear()
+    public function clear(Request $request)
     {
-        session()->forget('cart');
+        $request->user()->cart()->delete();
         return response()->json(['message' => 'Cart cleared']);
     }
 }

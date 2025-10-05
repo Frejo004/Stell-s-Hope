@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
-import { cartService } from '../services/cartService';
+import { cartService, AddToCartData, UpdateCartData, RemoveFromCartData } from '../services/cartService';
 import { useAuth } from '../contexts/AuthContext';
+import { CartItem } from '../types';
 
 export const useCart = () => {
-  const [cart, setCart] = useState({ items: [], total: 0, count: 0 });
+  const [cart, setCart] = useState<{ items: CartItem[]; total: number; count: number }>({ 
+    items: [], 
+    total: 0, 
+    count: 0 
+  });
   const [loading, setLoading] = useState(false);
   const { isAuthenticated } = useAuth();
 
@@ -21,9 +26,9 @@ export const useCart = () => {
     }
   };
 
-  const addToCart = async (productId: number, quantity: number = 1) => {
+  const addToCart = async (data: AddToCartData) => {
     try {
-      await cartService.addToCart(productId, quantity);
+      await cartService.addToCart(data);
       await fetchCart();
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -31,9 +36,9 @@ export const useCart = () => {
     }
   };
 
-  const updateCart = async (productId: number, quantity: number) => {
+  const updateCart = async (data: UpdateCartData) => {
     try {
-      await cartService.updateCart(productId, quantity);
+      await cartService.updateCart(data);
       await fetchCart();
     } catch (error) {
       console.error('Error updating cart:', error);
@@ -41,9 +46,9 @@ export const useCart = () => {
     }
   };
 
-  const removeFromCart = async (productId: number) => {
+  const removeFromCart = async (data: RemoveFromCartData) => {
     try {
-      await cartService.removeFromCart(productId);
+      await cartService.removeFromCart(data);
       await fetchCart();
     } catch (error) {
       console.error('Error removing from cart:', error);
@@ -72,6 +77,8 @@ export const useCart = () => {
     updateCart,
     removeFromCart,
     clearCart,
-    refetch: fetchCart
+    refetch: fetchCart,
+    cartItemsCount: cart.count,
+    setIsOpen: () => {} // Placeholder pour compatibilité
   };
 };

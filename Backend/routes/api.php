@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\AdminTicketController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TicketController;
+use App\Http\Controllers\Api\FileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,9 @@ Route::get('/products/search', [ProductController::class, 'search']);
 // Categories routes (public)
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
+
+// File routes (public)
+Route::get('/images/{path}', [FileController::class, 'getImage'])->where('path', '.*');
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -78,6 +82,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tickets', [TicketController::class, 'index']);
     Route::post('/tickets', [TicketController::class, 'store']);
     Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
+
+    // File Management
+    Route::post('/files/upload', [FileController::class, 'upload']);
+    Route::delete('/files/delete', [FileController::class, 'delete']);
 
     // Admin routes
     Route::middleware('admin')->prefix('admin')->group(function () {

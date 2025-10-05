@@ -1,10 +1,13 @@
 export interface Product {
-  id: string;
+  id: number;
   name: string;
   price: number;
   originalPrice?: number;
   images: string[];
-  category: 'homme' | 'femme' | 'unisexe';
+  category: {
+    id: number;
+    name: string;
+  };
   type: 'hauts' | 'bas' | 'accessoires';
   sizes: string[];
   colors: string[];
@@ -16,26 +19,38 @@ export interface Product {
   isNew?: boolean;
   isOnSale?: boolean;
   isBestSeller?: boolean;
+  stock_quantity: number;
+  sku: string;
+  weight?: number;
+  dimensions?: string;
+  is_active: boolean;
+  is_featured: boolean;
+  is_bestseller: boolean;
 }
 
 export interface Review {
-  id: string;
-  productId: string;
-  customerName: string;
+  id: number;
+  productId: number;
+  userId: number;
+  user: {
+    id: number;
+    first_name: string;
+    last_name: string;
+  };
   rating: number;
   comment: string;
-  date: string;
-  hasPhoto: boolean;
-  photoUrl?: string;
-  customerSize: string;
-  customerHeight: string;
+  is_approved: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CartItem {
+  id: number;
   product: Product;
+  quantity: number;
   size: string;
   color: string;
-  quantity: number;
+  subtotal: number;
 }
 
 export interface FilterState {

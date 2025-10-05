@@ -14,6 +14,33 @@ export interface RegisterData {
   phone?: string;
 }
 
+export interface UpdateProfileData {
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  country?: string;
+}
+
+export interface UpdatePasswordData {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  email: string;
+  token: string;
+  password: string;
+  password_confirmation: string;
+}
+
 export const authService = {
   async login(data: LoginData) {
     const response = await api.post('/login', data);
@@ -65,5 +92,27 @@ export const authService = {
   isAdmin() {
     const user = this.getUser();
     return user?.is_admin || false;
+  },
+
+  async updateProfile(data: UpdateProfileData) {
+    const response = await api.put('/profile', data);
+    const user = response.data;
+    localStorage.setItem('user', JSON.stringify(user));
+    return user;
+  },
+
+  async updatePassword(data: UpdatePasswordData) {
+    const response = await api.put('/password', data);
+    return response.data;
+  },
+
+  async forgotPassword(data: ForgotPasswordData) {
+    const response = await api.post('/forgot-password', data);
+    return response.data;
+  },
+
+  async resetPassword(data: ResetPasswordData) {
+    const response = await api.post('/reset-password', data);
+    return response.data;
   }
 };

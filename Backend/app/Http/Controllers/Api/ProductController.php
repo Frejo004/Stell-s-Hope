@@ -66,11 +66,18 @@ class ProductController extends Controller
     {
         $query = $request->get('q');
         
-        $products = Product::where('name', 'like', '%' . $query . '%')
-                          ->orWhere('description', 'like', '%' . $query . '%')
-                          ->where('is_active', true)
-                          ->with('category')
-                          ->paginate(12);
+        if (empty($query)) {
+            return response()->json(['products' => [], 'total' => 0]);
+        }
+
+        $products = Product::where('is_active', true)
+                          ->where(function($q) use ($query) {
+                              $q->where('name', 'like', '%' . $query . '%')
+                                ->orWhere('description', 'like', '%' . $query . '%')
+                                ->orWhere('sku', 'like', '%' . $query . '%');
+                          })
+                          ->with(['category', 'reviews'])
+                          ->paginate($request->get('per_page', 12));
 
         return response()->json($products);
     }
