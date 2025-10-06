@@ -14,7 +14,7 @@ export default function LoginPage({ onClose }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<any>({});
-  const { login, loading } = useAuth();
+  const { login, loading, isAdmin } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -23,13 +23,19 @@ export default function LoginPage({ onClose }: LoginPageProps) {
     setErrors({});
     
     try {
-      await login(formData.email, formData.password);
+      const user = await login(formData.email, formData.password);
       addToast({
         type: 'success',
         message: 'Connexion réussie ! Bienvenue sur Stell\'s Hope',
         duration: 3000
       });
-      onClose();
+      
+      // Redirection admin
+      if (user.is_admin) {
+        navigate('/admin');
+      } else {
+        onClose();
+      }
     } catch (error: any) {
       console.error('Erreur connexion:', error);
       if (error.response?.data?.errors) {
