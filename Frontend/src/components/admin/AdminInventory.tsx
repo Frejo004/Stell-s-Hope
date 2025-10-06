@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, AlertTriangle, Package, TrendingDown, TrendingUp } from 'lucide-react';
-import { products } from '../../data/products';
+import { useAdminInventory } from '../../hooks/useAdminData';
 
 interface AdminInventoryProps {
   onNavigate: (page: string) => void;
@@ -9,15 +9,15 @@ interface AdminInventoryProps {
 export default function AdminInventory({ onNavigate }: AdminInventoryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [stockFilter, setStockFilter] = useState('all');
+  const { inventory, stats, loading } = useAdminInventory();
 
-  // Mock stock data
-  const inventory = products.map(product => ({
-    ...product,
-    stock: Math.floor(Math.random() * 50) + 1,
-    reserved: Math.floor(Math.random() * 10),
-    reorderLevel: 5,
-    supplier: 'Fournisseur ' + Math.floor(Math.random() * 3 + 1)
-  }));
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const filteredInventory = inventory.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -45,31 +45,23 @@ export default function AdminInventory({ onNavigate }: AdminInventoryProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{inventory.length}</div>
+          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
           <div className="text-sm text-gray-600">Produits Total</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {inventory.filter(item => item.stock > item.reorderLevel).length}
-          </div>
+          <div className="text-2xl font-bold text-green-600">{stats.inStock}</div>
           <div className="text-sm text-gray-600">En Stock</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-yellow-600">
-            {inventory.filter(item => item.stock <= item.reorderLevel && item.stock > 0).length}
-          </div>
+          <div className="text-2xl font-bold text-yellow-600">{stats.lowStock}</div>
           <div className="text-sm text-gray-600">Stock Faible</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-red-600">
-            {inventory.filter(item => item.stock === 0).length}
-          </div>
+          <div className="text-2xl font-bold text-red-600">{stats.outOfStock}</div>
           <div className="text-sm text-gray-600">Rupture</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">
-            {inventory.reduce((sum, item) => sum + item.stock, 0)}
-          </div>
+          <div className="text-2xl font-bold text-blue-600">{stats.totalUnits}</div>
           <div className="text-sm text-gray-600">Unités Total</div>
         </div>
       </div>
@@ -81,7 +73,7 @@ export default function AdminInventory({ onNavigate }: AdminInventoryProps) {
           <div className="ml-3">
             <h3 className="text-sm font-semibold text-yellow-800">Alertes Stock</h3>
             <p className="text-sm text-yellow-700 mt-1">
-              {inventory.filter(item => item.stock <= item.reorderLevel).length} produits ont un stock faible
+              {stats.lowStock} produits ont un stock faible
             </p>
           </div>
         </div>

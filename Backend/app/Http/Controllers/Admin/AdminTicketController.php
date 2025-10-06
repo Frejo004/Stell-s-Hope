@@ -40,14 +40,41 @@ class AdminTicketController extends Controller
         return response()->json($ticket);
     }
 
+    public function updateStatus(Request $request, Ticket $ticket)
+    {
+        $request->validate([
+            'status' => 'required|in:open,pending,resolved'
+        ]);
+
+        $ticket->update(['status' => $request->status]);
+        return response()->json(['message' => 'Statut mis à jour']);
+    }
+
     public function stats()
     {
+        $tickets = Ticket::with('user')->get()->map(function($ticket) {
+            return [
+                'id' => $ticket->id,
+                'customer' => ($ticket->user->first_name ?? 'Client') . ' ' . ($ticket->user->last_name ?? ''),
+                'email' => $ticket->user->email ?? 'Non renseigné',
+                'subject' => $ticket->subject,
+                'status' => $ticket->status,
+                'priority' => $ticket->priority ?? 'medium',
+                'created' => $ticket->created_at->toISOString(),
+                'updated' => $ticket->updated_at->toISOString()
+            ];
+        });
+
+        $stats = [
+            'total' => $tickets->count(),
+            'open' => $tickets->where('status', 'open')->count(),
+            'pending' => $tickets->where('status', 'pending')->count(),
+            'resolved' => $tickets->where('status', 'resolved')->count()
+        ];
+
         return response()->json([
-            'total' => Ticket::count(),
-            'open' => Ticket::where('status', 'open')->count(),
-            'in_progress' => Ticket::where('status', 'in_progress')->count(),
-            'resolved' => Ticket::where('status', 'resolved')->count(),
-            'closed' => Ticket::where('status', 'closed')->count(),
+            'tickets' => $tickets,
+            'stats' => $stats
         ]);
     }
 }

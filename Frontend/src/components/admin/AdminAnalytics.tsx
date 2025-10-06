@@ -1,22 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, Package } from 'lucide-react';
+import { useAdminAnalytics } from '../../hooks/useAdminExtended';
 
 interface AdminAnalyticsProps {
   onNavigate: (page: string) => void;
 }
 
 export default function AdminAnalytics({ onNavigate }: AdminAnalyticsProps) {
-  const metrics = [
-    { title: 'Revenus', value: '12,450€', change: '+15%', trend: 'up', icon: DollarSign },
-    { title: 'Commandes', value: '156', change: '+12%', trend: 'up', icon: ShoppingCart },
-    { title: 'Clients', value: '89', change: '+8%', trend: 'up', icon: Users },
-    { title: 'Taux Conversion', value: '3.2%', change: '-2%', trend: 'down', icon: TrendingUp }
-  ];
+  const [period, setPeriod] = useState('7d');
+  const { analytics, loading } = useAdminAnalytics(period);
 
-  const topProducts = [
-    { name: 'Chemise Oxford Premium', sales: 45, revenue: '3,595€' },
-    { name: 'Robe Midi Évasée', sales: 38, revenue: '4,936€' },
-    { name: 'Jean Slim Stretch', sales: 32, revenue: '2,877€' }
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  const metrics = [
+    { title: 'Revenus', value: `${analytics.metrics.revenue}€`, change: '+15%', trend: 'up', icon: DollarSign },
+    { title: 'Commandes', value: analytics.metrics.orders.toString(), change: '+12%', trend: 'up', icon: ShoppingCart },
+    { title: 'Clients', value: analytics.metrics.customers.toString(), change: '+8%', trend: 'up', icon: Users },
+    { title: 'Taux Conversion', value: `${analytics.metrics.conversion}%`, change: '-2%', trend: 'down', icon: TrendingUp }
   ];
 
   return (
@@ -24,10 +30,14 @@ export default function AdminAnalytics({ onNavigate }: AdminAnalyticsProps) {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
         <div className="flex space-x-2">
-          <select className="border rounded-lg px-3 py-2 text-sm">
-            <option>7 derniers jours</option>
-            <option>30 derniers jours</option>
-            <option>3 derniers mois</option>
+          <select 
+            value={period}
+            onChange={(e) => setPeriod(e.target.value)}
+            className="border rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="7d">7 derniers jours</option>
+            <option value="30d">30 derniers jours</option>
+            <option value="90d">3 derniers mois</option>
           </select>
         </div>
       </div>
@@ -89,7 +99,7 @@ export default function AdminAnalytics({ onNavigate }: AdminAnalyticsProps) {
         <div className="bg-white rounded-xl shadow-sm border p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Produits les Plus Vendus</h3>
           <div className="space-y-4">
-            {topProducts.map((product, index) => (
+            {analytics.topProducts.map((product, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">

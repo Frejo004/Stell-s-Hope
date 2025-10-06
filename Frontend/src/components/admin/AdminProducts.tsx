@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
-import { products } from '../../data/products';
+import { useAdminProducts } from '../../hooks/useAdminData';
 
 interface AdminProductsProps {
   onNavigate: (page: string) => void;
@@ -9,12 +9,21 @@ interface AdminProductsProps {
 export default function AdminProducts({ onNavigate }: AdminProductsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const { products, loading } = useAdminProducts();
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product: any) => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -104,7 +113,11 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
                     )}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    <span className="text-green-600 font-medium">En stock</span>
+                    <span className={`font-medium ${
+                      (product.stock || 0) > 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {(product.stock || 0) > 0 ? `${product.stock} en stock` : 'Rupture'}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex space-x-1">

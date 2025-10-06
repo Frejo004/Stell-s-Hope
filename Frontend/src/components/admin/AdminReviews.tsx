@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, Eye, Check, X, Star } from 'lucide-react';
+import { useAdminReviews } from '../../hooks/useAdminData';
 
 interface AdminReviewsProps {
   onNavigate: (page: string) => void;
@@ -8,36 +9,15 @@ interface AdminReviewsProps {
 export default function AdminReviews({ onNavigate }: AdminReviewsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const { reviews, stats, loading, updateReviewStatus } = useAdminReviews();
 
-  const reviews = [
-    { 
-      id: '1', 
-      customer: 'Sophie Martin', 
-      product: 'Chemise Oxford Premium', 
-      rating: 5, 
-      comment: 'Excellente qualité, très satisfaite de mon achat !', 
-      status: 'approved',
-      date: '2024-01-15'
-    },
-    { 
-      id: '2', 
-      customer: 'Marc Dubois', 
-      product: 'Jean Slim Stretch', 
-      rating: 4, 
-      comment: 'Bon produit, taille parfaite. Livraison rapide.', 
-      status: 'pending',
-      date: '2024-01-14'
-    },
-    { 
-      id: '3', 
-      customer: 'Emma Rousseau', 
-      product: 'Robe Midi Évasée', 
-      rating: 2, 
-      comment: 'Déçue de la qualité, tissu trop fin à mon goût.', 
-      status: 'pending',
-      date: '2024-01-13'
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const filteredReviews = reviews.filter(review => {
     const matchesSearch = review.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,25 +56,19 @@ export default function AdminReviews({ onNavigate }: AdminReviewsProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{reviews.length}</div>
+          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
           <div className="text-sm text-gray-600">Total Avis</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-yellow-600">
-            {reviews.filter(r => r.status === 'pending').length}
-          </div>
+          <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
           <div className="text-sm text-gray-600">En Attente</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {reviews.filter(r => r.status === 'approved').length}
-          </div>
+          <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
           <div className="text-sm text-gray-600">Approuvés</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">
-            {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
-          </div>
+          <div className="text-2xl font-bold text-blue-600">{stats.averageRating.toFixed(1)}</div>
           <div className="text-sm text-gray-600">Note Moyenne</div>
         </div>
       </div>
@@ -175,11 +149,17 @@ export default function AdminReviews({ onNavigate }: AdminReviewsProps) {
                   
                   {review.status === 'pending' && (
                     <div className="flex items-center space-x-2">
-                      <button className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200">
+                      <button 
+                        onClick={() => updateReviewStatus(review.id, 'approved')}
+                        className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200"
+                      >
                         <Check className="w-4 h-4" />
                         <span>Approuver</span>
                       </button>
-                      <button className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200">
+                      <button 
+                        onClick={() => updateReviewStatus(review.id, 'rejected')}
+                        className="flex items-center space-x-1 px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                      >
                         <X className="w-4 h-4" />
                         <span>Rejeter</span>
                       </button>

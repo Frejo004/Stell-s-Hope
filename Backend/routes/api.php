@@ -13,6 +13,10 @@ use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminPromotionController;
 use App\Http\Controllers\Admin\AdminTicketController;
+use App\Http\Controllers\Admin\AdminSidebarController;
+use App\Http\Controllers\Admin\AdminInventoryController;
+use App\Http\Controllers\Admin\AdminReviewController;
+use App\Http\Controllers\Admin\AdminAnalyticsController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TicketController;
@@ -110,7 +114,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders/export', [AdminOrderController::class, 'export']);
 
         // Customers management
-        Route::get('/customers', [AdminCustomerController::class, 'index']);
+        Route::get('/customers', [AdminDashboardController::class, 'getCustomers']);
+        Route::get('/customers/detailed', [AdminCustomerController::class, 'index']);
         Route::get('/customers/stats', [AdminCustomerController::class, 'stats']);
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show']);
         Route::get('/customers/{customer}/orders', [AdminCustomerController::class, 'orders']);
@@ -163,7 +168,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/promotions/{promotion}', [AdminPromotionController::class, 'destroy']);
 
         // Support Tickets
-        Route::get('/tickets', [AdminTicketController::class, 'index']);
+        Route::get('/tickets', [AdminTicketController::class, 'stats']);
+        Route::get('/tickets/list', [AdminTicketController::class, 'index']);
         Route::get('/tickets/stats', [AdminTicketController::class, 'stats']);
         Route::get('/tickets/{ticket}', [AdminTicketController::class, 'show']);
         Route::put('/tickets/{ticket}', [AdminTicketController::class, 'update']);
@@ -171,5 +177,22 @@ Route::middleware('auth:sanctum')->group(function () {
         // Settings
         Route::get('/settings', [AdminDashboardController::class, 'settings']);
         Route::put('/settings', [AdminDashboardController::class, 'updateSettings']);
+
+        // Sidebar Stats
+        Route::get('/sidebar-stats', [AdminSidebarController::class, 'getSidebarStats']);
+
+        // Inventory
+        Route::get('/inventory', [AdminInventoryController::class, 'index']);
+        Route::put('/inventory/{product}', [AdminInventoryController::class, 'updateStock']);
+
+        // Reviews Management
+        Route::get('/reviews', [AdminReviewController::class, 'index']);
+        Route::put('/reviews/{review}/status', [AdminReviewController::class, 'updateStatus']);
+
+        // Analytics
+        Route::get('/analytics', [AdminAnalyticsController::class, 'index']);
+
+        // Tickets Status Update
+        Route::put('/tickets/{ticket}/status', [AdminTicketController::class, 'updateStatus']);
     });
 });

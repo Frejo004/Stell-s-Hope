@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart3, Package, ShoppingCart, Users, Settings, LogOut, Menu, X, Search, Bell, MessageSquare, Tag, Star, FileText, HelpCircle, Archive, Percent, Truck, CreditCard } from 'lucide-react';
+import { useSidebarData } from '../../hooks/useSidebarData';
 import AdminDashboard from './AdminDashboard';
 import AdminProducts from './AdminProducts';
 import AdminOrders from './AdminOrders';
@@ -19,16 +20,17 @@ export default function AdminLayout() {
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { stats, loading } = useSidebarData();
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'products', label: 'Produits', icon: Package },
-    { id: 'orders', label: 'Commandes', icon: ShoppingCart },
+    { id: 'orders', label: 'Commandes', icon: ShoppingCart, badge: stats.pendingOrders },
     { id: 'customers', label: 'Clients', icon: Users },
     { id: 'categories', label: 'Catégories', icon: Tag },
-    { id: 'inventory', label: 'Stocks', icon: Archive },
-    { id: 'reviews', label: 'Avis', icon: Star },
-    { id: 'support', label: 'Support', icon: HelpCircle },
+    { id: 'inventory', label: 'Stocks', icon: Archive, badge: stats.lowStock },
+    { id: 'reviews', label: 'Avis', icon: Star, badge: stats.pendingReviews },
+    { id: 'support', label: 'Support', icon: HelpCircle, badge: stats.supportTickets },
     { id: 'content', label: 'Contenu', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'promotions', label: 'Promotions', icon: Percent },
@@ -96,14 +98,21 @@ export default function AdminLayout() {
                 setCurrentPage(item.id);
                 setSidebarOpen(false);
               }}
-              className={`w-full flex items-center px-6 py-3 text-left hover:bg-gray-50 transition-colors ${
+              className={`w-full flex items-center justify-between px-6 py-3 text-left hover:bg-gray-50 transition-colors ${
                 currentPage === item.id ? 'bg-blue-50 text-blue-600 border-r-2 border-blue-600' : 'text-gray-700'
               }`}
             >
-              <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
-              <span className={`transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>
-                {item.label}
-              </span>
+              <div className="flex items-center">
+                <item.icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                <span className={`transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>
+                  {item.label}
+                </span>
+              </div>
+              {item.badge && item.badge > 0 && (
+                <span className={`bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center transition-opacity duration-300 ${sidebarCollapsed ? 'opacity-0' : 'opacity-100'}`}>
+                  {item.badge}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -166,13 +175,21 @@ export default function AdminLayout() {
             <div className="relative">
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                {stats.notifications > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {stats.notifications > 99 ? '99+' : stats.notifications}
+                  </span>
+                )}
               </button>
             </div>
             <div className="relative">
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <MessageSquare className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">2</span>
+                {stats.messages > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {stats.messages > 99 ? '99+' : stats.messages}
+                  </span>
+                )}
               </button>
             </div>
             <button className="p-1 text-gray-400 hover:text-gray-600">

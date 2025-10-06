@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, Percent, Calendar, Users } from 'lucide-react';
+import { useAdminPromotions } from '../../hooks/useAdminExtended';
 
 interface AdminPromotionsProps {
   onNavigate: (page: string) => void;
@@ -8,48 +9,15 @@ interface AdminPromotionsProps {
 export default function AdminPromotions({ onNavigate }: AdminPromotionsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const { promotions, stats, loading } = useAdminPromotions();
 
-  const promotions = [
-    {
-      id: 'PROMO001',
-      name: 'Soldes d\'Été',
-      code: 'SUMMER20',
-      type: 'percentage',
-      value: 20,
-      minAmount: 50,
-      maxUses: 1000,
-      used: 245,
-      status: 'active',
-      startDate: '2024-06-01',
-      endDate: '2024-08-31'
-    },
-    {
-      id: 'PROMO002',
-      name: 'Livraison Gratuite',
-      code: 'FREESHIP',
-      type: 'shipping',
-      value: 0,
-      minAmount: 75,
-      maxUses: 500,
-      used: 89,
-      status: 'active',
-      startDate: '2024-01-01',
-      endDate: '2024-12-31'
-    },
-    {
-      id: 'PROMO003',
-      name: 'Première Commande',
-      code: 'WELCOME10',
-      type: 'fixed',
-      value: 10,
-      minAmount: 30,
-      maxUses: 200,
-      used: 156,
-      status: 'expired',
-      startDate: '2024-01-01',
-      endDate: '2024-01-31'
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const filteredPromotions = promotions.filter(promo => {
     const matchesSearch = promo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -89,25 +57,19 @@ export default function AdminPromotions({ onNavigate }: AdminPromotionsProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{promotions.length}</div>
+          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
           <div className="text-sm text-gray-600">Total Promotions</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {promotions.filter(p => p.status === 'active').length}
-          </div>
+          <div className="text-2xl font-bold text-green-600">{stats.active}</div>
           <div className="text-sm text-gray-600">Actives</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">
-            {promotions.reduce((sum, p) => sum + p.used, 0)}
-          </div>
+          <div className="text-2xl font-bold text-blue-600">{stats.used}</div>
           <div className="text-sm text-gray-600">Utilisations</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-purple-600">
-            {((promotions.reduce((sum, p) => sum + p.used, 0) / promotions.reduce((sum, p) => sum + p.maxUses, 0)) * 100).toFixed(1)}%
-          </div>
+          <div className="text-2xl font-bold text-purple-600">{stats.usageRate}%</div>
           <div className="text-sm text-gray-600">Taux d'Usage</div>
         </div>
       </div>

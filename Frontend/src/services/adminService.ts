@@ -2,28 +2,24 @@ import api from './api';
 
 export const adminService = {
   // Dashboard
-  async getDashboard() {
+  async getDashboardStats() {
     const response = await api.get('/admin/dashboard');
     return response.data;
   },
 
   // Products
-  async getAdminProducts(params?: any) {
-    const response = await api.get('/admin/products', { params });
+  async getProducts(page = 1) {
+    const response = await api.get(`/admin/products?page=${page}`);
     return response.data;
   },
 
-  async createProduct(data: FormData) {
-    const response = await api.post('/admin/products', data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+  async createProduct(data: any) {
+    const response = await api.post('/admin/products', data);
     return response.data;
   },
 
-  async updateProduct(id: number, data: FormData) {
-    const response = await api.put(`/admin/products/${id}`, data, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+  async updateProduct(id: number, data: any) {
+    const response = await api.put(`/admin/products/${id}`, data);
     return response.data;
   },
 
@@ -33,8 +29,8 @@ export const adminService = {
   },
 
   // Orders
-  async getAdminOrders(params?: any) {
-    const response = await api.get('/admin/orders', { params });
+  async getOrders(page = 1) {
+    const response = await api.get(`/admin/orders?page=${page}`);
     return response.data;
   },
 
@@ -43,24 +39,54 @@ export const adminService = {
     return response.data;
   },
 
-  async getOrderStats() {
-    const response = await api.get('/admin/orders/stats');
-    return response.data;
-  },
-
   // Customers
-  async getCustomers(params?: any) {
-    const response = await api.get('/admin/customers', { params });
+  async getCustomers(page = 1) {
+    const response = await api.get(`/admin/customers?page=${page}`);
     return response.data;
   },
 
-  async getCustomer(id: number) {
-    const response = await api.get(`/admin/customers/${id}`);
+  // Categories
+  async getCategories() {
+    const response = await api.get('/admin/categories');
     return response.data;
   },
 
-  async getCustomerStats() {
-    const response = await api.get('/admin/customers/stats');
+  async createCategory(data: any) {
+    const response = await api.post('/admin/categories', data);
+    return response.data;
+  },
+
+  // Sidebar Stats
+  async getSidebarStats() {
+    const response = await api.get('/admin/sidebar-stats');
+    return response.data;
+  },
+
+  // Inventory
+  async getInventory() {
+    const response = await api.get('/admin/inventory');
+    return response.data;
+  },
+
+  async updateStock(id: number, stock: number) {
+    const response = await api.put(`/admin/inventory/${id}`, { stock });
+    return response.data;
+  },
+
+  // Reviews
+  async getReviews() {
+    const response = await api.get('/admin/reviews');
+    return response.data;
+  },
+
+  async updateReviewStatus(id: number, status: string) {
+    const response = await api.put(`/admin/reviews/${id}/status`, { status });
+    return response.data;
+  },
+
+  // Analytics
+  async getAnalytics(period = '7d') {
+    const response = await api.get(`/admin/analytics?period=${period}`);
     return response.data;
   },
 
@@ -70,34 +96,14 @@ export const adminService = {
     return response.data;
   },
 
-  async createPromotion(data: any) {
-    const response = await api.post('/admin/promotions', data);
+  // Support
+  async getTickets() {
+    const response = await api.get('/admin/tickets');
     return response.data;
   },
 
-  async updatePromotion(id: number, data: any) {
-    const response = await api.put(`/admin/promotions/${id}`, data);
-    return response.data;
-  },
-
-  async deletePromotion(id: number) {
-    const response = await api.delete(`/admin/promotions/${id}`);
-    return response.data;
-  },
-
-  // Tickets
-  async getAdminTickets(params?: any) {
-    const response = await api.get('/admin/tickets', { params });
-    return response.data;
-  },
-
-  async updateTicket(id: number, data: any) {
-    const response = await api.put(`/admin/tickets/${id}`, data);
-    return response.data;
-  },
-
-  async getTicketStats() {
-    const response = await api.get('/admin/tickets/stats');
+  async updateTicketStatus(id: string, status: string) {
+    const response = await api.put(`/admin/tickets/${id}/status`, { status });
     return response.data;
   }
 };

@@ -1,24 +1,52 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart3, Package, Users, ShoppingCart, TrendingUp, AlertCircle, DollarSign, Percent, Truck, CreditCard, Star, HelpCircle, TrendingDown } from 'lucide-react';
+import { adminService } from '../../services/adminService';
 
 interface AdminDashboardProps {
   onNavigate: (page: string) => void;
 }
 
 export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const data = await adminService.getDashboardStats();
+        setDashboardData(data);
+      } catch (error) {
+        console.error('Erreur chargement dashboard:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   const stats = [
-    { title: 'Chiffre d\'Affaires', value: '45,678€', change: '+12.5%', icon: DollarSign, color: 'bg-green-500', trend: 'up' },
-    { title: 'Commandes', value: '234', change: '+8.2%', icon: ShoppingCart, color: 'bg-blue-500', trend: 'up' },
-    { title: 'Clients', value: '156', change: '+15.3%', icon: Users, color: 'bg-purple-500', trend: 'up' },
-    { title: 'Panier Moyen', value: '195€', change: '-2.1%', icon: Package, color: 'bg-orange-500', trend: 'down' }
+    { title: 'Chiffre d\'Affaires', value: `${dashboardData?.stats?.revenue || 0}€`, change: '+12.5%', icon: DollarSign, color: 'bg-green-500', trend: 'up' },
+    { title: 'Commandes', value: dashboardData?.stats?.orders || 0, change: '+8.2%', icon: ShoppingCart, color: 'bg-blue-500', trend: 'up' },
+    { title: 'Clients', value: dashboardData?.stats?.customers || 0, change: '+15.3%', icon: Users, color: 'bg-purple-500', trend: 'up' },
+    { title: 'Panier Moyen', value: `${Math.round(dashboardData?.stats?.average_order || 0)}€`, change: '-2.1%', icon: Package, color: 'bg-orange-500', trend: 'down' }
   ];
 
-  const recentOrders = [
-    { id: 'CMD001', customer: 'Sophie Martin', amount: '89.90€', status: 'shipped', time: '2h' },
-    { id: 'CMD002', customer: 'Marc Dubois', amount: '156.80€', status: 'pending', time: '4h' },
-    { id: 'CMD003', customer: 'Emma Rousseau', amount: '234.50€', status: 'delivered', time: '6h' },
-    { id: 'CMD004', customer: 'Pierre Leroy', amount: '67.80€', status: 'pending', time: '8h' }
-  ];
+  const recentOrders = dashboardData?.recent_orders?.map((order: any) => ({
+    id: `CMD${order.id.toString().padStart(3, '0')}`,
+    customer: `${order.user?.first_name || 'Client'} ${order.user?.last_name || ''}`,
+    amount: `${order.total}€`,
+    status: order.status || 'pending',
+    time: new Date(order.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  })) || [];
 
   const quickStats = [
     { label: 'Promotions Actives', value: '3', icon: Percent, color: 'text-green-600', bg: 'bg-green-100' },
@@ -29,13 +57,11 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     { label: 'Stock Faible', value: '3', icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-100' }
   ];
 
-  const topProducts = [
-    { name: 'Chemise Oxford Premium', sales: 45, revenue: '2,250€' },
-    { name: 'Jean Slim Stretch', sales: 38, revenue: '1,900€' },
-    { name: 'Robe Midi Évasée', sales: 32, revenue: '1,920€' },
-    { name: 'Pull Col Rond', sales: 28, revenue: '1,400€' },
-    { name: 'Veste Blazer', sales: 25, revenue: '2,500€' }
-  ];
+  const topProducts = dashboardData?.top_products?.map((product: any) => ({
+    name: product.name,
+    sales: Math.floor(Math.random() * 50) + 10,
+    revenue: `${(product.price * (Math.floor(Math.random() * 50) + 10)).toFixed(0)}€`
+  })) || [];
 
   const monthlyRevenue = [
     { month: 'Jan', revenue: 15234, orders: 89, growth: 12 },
@@ -46,12 +72,16 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     { month: 'Juin', revenue: 28934, orders: 167, growth: 13 }
   ];
 
-  const categoryStats = [
-    { name: 'Homme', sales: 145, percentage: 42, color: 'bg-blue-500' },
-    { name: 'Femme', sales: 89, percentage: 26, color: 'bg-pink-500' },
-    { name: 'Unisexe', sales: 67, percentage: 19, color: 'bg-purple-500' },
-    { name: 'Accessoires', sales: 45, percentage: 13, color: 'bg-green-500' }
-  ];
+  const categoryStats = dashboardData?.categories?.map((category: any, index: number) => {
+    const colors = ['bg-blue-500', 'bg-pink-500', 'bg-purple-500', 'bg-green-500'];
+    const totalProducts = dashboardData.categories.reduce((sum: number, cat: any) => sum + cat.products_count, 0);
+    return {
+      name: category.name,
+      sales: category.products_count,
+      percentage: totalProducts > 0 ? Math.round((category.products_count / totalProducts) * 100) : 0,
+      color: colors[index % colors.length]
+    };
+  }) || [];
 
   const recentActivity = [
     { type: 'order', message: 'Nouvelle commande #CMD234', time: '2 min', icon: ShoppingCart, color: 'text-blue-600' },

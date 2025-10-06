@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, MessageCircle, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { useAdminSupport } from '../../hooks/useAdminExtended';
 
 interface AdminSupportProps {
   onNavigate: (page: string) => void;
@@ -8,39 +9,15 @@ interface AdminSupportProps {
 export default function AdminSupport({ onNavigate }: AdminSupportProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const { tickets, stats, loading, updateTicketStatus } = useAdminSupport();
 
-  const tickets = [
-    {
-      id: 'T001',
-      customer: 'Sophie Martin',
-      email: 'sophie.martin@email.com',
-      subject: 'Problème avec ma commande #CMD001',
-      status: 'open',
-      priority: 'high',
-      created: '2024-01-15T10:30:00',
-      updated: '2024-01-15T14:20:00'
-    },
-    {
-      id: 'T002',
-      customer: 'Marc Dubois',
-      email: 'marc.dubois@email.com',
-      subject: 'Question sur les tailles',
-      status: 'pending',
-      priority: 'medium',
-      created: '2024-01-14T16:45:00',
-      updated: '2024-01-14T16:45:00'
-    },
-    {
-      id: 'T003',
-      customer: 'Emma Rousseau',
-      email: 'emma.rousseau@email.com',
-      subject: 'Demande de remboursement',
-      status: 'resolved',
-      priority: 'low',
-      created: '2024-01-13T09:15:00',
-      updated: '2024-01-13T17:30:00'
-    }
-  ];
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = ticket.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -88,25 +65,19 @@ export default function AdminSupport({ onNavigate }: AdminSupportProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{tickets.length}</div>
+          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
           <div className="text-sm text-gray-600">Total Tickets</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-red-600">
-            {tickets.filter(t => t.status === 'open').length}
-          </div>
+          <div className="text-2xl font-bold text-red-600">{stats.open}</div>
           <div className="text-sm text-gray-600">Ouverts</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-yellow-600">
-            {tickets.filter(t => t.status === 'pending').length}
-          </div>
+          <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
           <div className="text-sm text-gray-600">En Attente</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {tickets.filter(t => t.status === 'resolved').length}
-          </div>
+          <div className="text-2xl font-bold text-green-600">{stats.resolved}</div>
           <div className="text-sm text-gray-600">Résolus</div>
         </div>
       </div>
@@ -205,6 +176,7 @@ export default function AdminSupport({ onNavigate }: AdminSupportProps) {
                       </button>
                       <select
                         value={ticket.status}
+                        onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
                         className="text-xs border rounded px-2 py-1"
                       >
                         <option value="open">Ouvert</option>

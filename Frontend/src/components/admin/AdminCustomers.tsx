@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Filter, Eye, Mail, Phone } from 'lucide-react';
+import { useAdminCustomers } from '../../hooks/useAdminData';
 
 interface AdminCustomersProps {
   onNavigate: (page: string) => void;
@@ -7,12 +8,15 @@ interface AdminCustomersProps {
 
 export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const { customers, stats, loading } = useAdminCustomers();
 
-  const customers = [
-    { id: '1', name: 'Sophie Martin', email: 'sophie.martin@email.com', phone: '+33 6 12 34 56 78', orders: 5, total: '450.90€', status: 'active', joined: '2024-01-15' },
-    { id: '2', name: 'Marc Dubois', email: 'marc.dubois@email.com', phone: '+33 6 98 76 54 32', orders: 3, total: '280.50€', status: 'active', joined: '2024-02-20' },
-    { id: '3', name: 'Emma Rousseau', email: 'emma.rousseau@email.com', phone: '+33 6 11 22 33 44', orders: 8, total: '720.30€', status: 'vip', joined: '2023-12-10' }
-  ];
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   const filteredCustomers = customers.filter(customer =>
     customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,25 +35,19 @@ export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{customers.length}</div>
+          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
           <div className="text-sm text-gray-600">Total Clients</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">
-            {customers.filter(c => c.status === 'active').length}
-          </div>
+          <div className="text-2xl font-bold text-green-600">{stats.active}</div>
           <div className="text-sm text-gray-600">Actifs</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-yellow-600">
-            {customers.filter(c => c.status === 'vip').length}
-          </div>
+          <div className="text-2xl font-bold text-yellow-600">{stats.vip}</div>
           <div className="text-sm text-gray-600">VIP</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">
-            {customers.reduce((sum, c) => sum + c.orders, 0)}
-          </div>
+          <div className="text-2xl font-bold text-blue-600">{stats.totalOrders}</div>
           <div className="text-sm text-gray-600">Commandes Total</div>
         </div>
       </div>
