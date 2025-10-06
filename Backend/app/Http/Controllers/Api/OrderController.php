@@ -4,105 +4,71 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\OrderItem;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $orders = $request->user()
-                         ->orders()
-                         ->with(['items.product'])
+        $orders = $request->user()->orders()
                          ->orderBy('created_at', 'desc')
                          ->paginate(10);
-
+        
         return response()->json($orders);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'items' => 'required|array',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'shipping_address' => 'required|string',
-            'billing_address' => 'required|string',
-            'payment_method' => 'required|string',
+        $validated = $request->validate([
+            'total' => 'required|numeric|min:0',
+            'shipping_address' => 'required|array',
+            'billing_address' => 'required|array'
         ]);
 
-        DB::beginTransaction();
-        try {
-            $total = 0;
-            foreach ($request->items as $item) {
-                $product = \App\Models\Product::find($item['product_id']);
-                $total += $product->price * $item['quantity'];
-            }
+        $order = $request->user()->orders()->create([
+            'total' => $validated['total'],
+            'status' => 'pending',
+            'shipping_address' => $validated['shipping_address'],
+            'billing_address' => $validated['billing_address']
+        ]);
 
-            $order = Order::create([
-                'user_id' => $request->user()->id,
-                'order_number' => 'ORD-' . time(),
-                'status' => 'pending',
-                'total_amount' => $total,
-                'shipping_address' => $request->shipping_address,
-                'billing_address' => $request->billing_address,
-                'payment_method' => $request->payment_method,
-            ]);
-
-            foreach ($request->items as $item) {
-                $product = \App\Models\Product::find($item['product_id']);
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $product->price,
-                ]);
-            }
-
-            DB::commit();
-            return response()->json($order->load('items.product'), 201);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return response()->json(['error' => 'Order creation failed'], 500);
-        }
+        return response()->json($order, 201);
     }
 
-    public function show(Order $order)
+    public function show(Request $request, Order $order)
     {
-        if ($order->user_id !== auth()->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($order->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Non autorisé'], 403);
         }
 
-        $order->load(['items.product']);
         return response()->json($order);
     }
 
-    public function track(Order $order)
+    public function track(Request $request, Order $order)
     {
-        if ($order->user_id !== auth()->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($order->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Non autorisé'], 403);
         }
 
         return response()->json([
-            'order_number' => $order->order_number,
+            'order' => $order,
             'status' => $order->status,
-            'tracking_number' => $order->tracking_number,
-            'estimated_delivery' => $order->estimated_delivery,
+            'tracking_info' => 'Commande en cours de traitement'
         ]);
     }
 
-    public function cancel(Order $order)
+    public function cancel(Request $request, Order $order)
     {
-        if ($order->user_id !== auth()->id()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        if ($order->user_id !== $request->user()->id) {
+            return response()->json(['message' => 'Non autorisé'], 403);
         }
 
-        if (!in_array($order->status, ['pending', 'confirmed'])) {
-            return response()->json(['error' => 'Cannot cancel this order'], 400);
+        if ($order->status !== 'pending') {
+            return response()->json(['message' => 'Impossible d\'annuler cette commande'], 400);
         }
 
         $order->update(['status' => 'cancelled']);
-        return response()->json(['message' => 'Order cancelled successfully']);
+
+        return response()->json(['message' => 'Commande annulée']);
     }
 }

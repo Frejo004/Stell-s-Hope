@@ -5,40 +5,33 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class FileController extends Controller
 {
+    public function getImage($path)
+    {
+        $fullPath = storage_path('app/public/' . $path);
+        
+        if (!file_exists($fullPath)) {
+            return response()->json(['message' => 'Image non trouvée'], 404);
+        }
+
+        return response()->file($fullPath);
+    }
+
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'type' => 'required|in:product,category,user'
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
         $file = $request->file('file');
-        $type = $request->type;
-        
-        // Générer un nom de fichier unique
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        
-        // Définir le chemin selon le type
-        $path = match($type) {
-            'product' => 'products',
-            'category' => 'categories',
-            'user' => 'users',
-            default => 'uploads'
-        };
-        
-        // Stocker le fichier
-        $storedPath = $file->storeAs($path, $filename, 'public');
-        
+        $path = $file->store('uploads', 'public');
+
         return response()->json([
-            'filename' => $filename,
-            'path' => $storedPath,
-            'url' => Storage::url($storedPath),
-            'size' => $file->getSize(),
-            'mime_type' => $file->getMimeType()
+            'message' => 'Fichier uploadé avec succès',
+            'path' => $path,
+            'url' => Storage::url($path)
         ]);
     }
 
@@ -48,22 +41,11 @@ class FileController extends Controller
             'path' => 'required|string'
         ]);
 
-        $path = $request->path;
-        
-        if (Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->delete($path);
-            return response()->json(['message' => 'File deleted successfully']);
+        if (Storage::disk('public')->exists($request->path)) {
+            Storage::disk('public')->delete($request->path);
+            return response()->json(['message' => 'Fichier supprimé']);
         }
 
-        return response()->json(['error' => 'File not found'], 404);
-    }
-
-    public function getImage($path)
-    {
-        if (Storage::disk('public')->exists($path)) {
-            return Storage::disk('public')->response($path);
-        }
-
-        return response()->json(['error' => 'Image not found'], 404);
+        return response()->json(['message' => 'Fichier non trouvé'], 404);
     }
 }

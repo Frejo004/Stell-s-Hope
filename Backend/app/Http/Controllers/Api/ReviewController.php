@@ -8,32 +8,41 @@ use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
+    public function index(Request $request)
+    {
+        $reviews = $request->user()->reviews()
+                          ->with('product')
+                          ->orderBy('created_at', 'desc')
+                          ->paginate(10);
+        
+        return response()->json($reviews);
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000'
         ]);
 
-        $review = Review::updateOrCreate(
-            [
-                'user_id' => $request->user()->id,
-                'product_id' => $request->product_id
-            ],
-            [
-                'rating' => $request->rating,
-                'comment' => $request->comment,
-                'is_approved' => false
-            ]
-        );
+        // Vérifier si l'utilisateur a déjà laissé un avis pour ce produit
+        $existingReview = Review::where('user_id', $request->user()->id)
+                               ->where('product_id', $validated['product_id'])
+                               ->first();
 
-        return response()->json($review->load('user'), 201);
-    }
+        if ($existingReview) {
+            return response()->json(['message' => 'Vous avez déjà laissé un avis pour ce produit'], 400);
+        }
 
-    public function index(Request $request)
-    {
-        $reviews = $request->user()->reviews()->with('product')->get();
-        return response()->json($reviews);
+        $review = Review::create([
+            'user_id' => $request->user()->id,
+            'product_id' => $validated['product_id'],
+            'rating' => $validated['rating'],
+            'comment' => $validated['comment'],
+            'is_approved' => false
+        ]);
+
+        return response()->json($review, 201);
     }
 }

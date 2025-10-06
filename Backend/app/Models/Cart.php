@@ -12,9 +12,7 @@ class Cart extends Model
     protected $fillable = [
         'user_id',
         'product_id',
-        'quantity',
-        'size',
-        'color'
+        'quantity'
     ];
 
     protected $casts = [
@@ -29,10 +27,5 @@ class Cart extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
-    }
-
-    public function getSubtotalAttribute()
-    {
-        return $this->product->price * $this->quantity;
     }
 }

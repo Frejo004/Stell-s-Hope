@@ -13,9 +13,9 @@ class Product extends Model
         'name',
         'description',
         'price',
+        'stock_quantity',
         'category_id',
         'images',
-        'stock_quantity',
         'is_active',
         'is_featured',
         'is_bestseller',
@@ -26,10 +26,12 @@ class Product extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'stock_quantity' => 'integer',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
         'is_bestseller' => 'boolean',
-        'images' => 'array'
+        'images' => 'array',
+        'weight' => 'decimal:2'
     ];
 
     public function category()
@@ -42,24 +44,13 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
-    public function orderItems()
+    public function wishlist()
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->hasMany(Wishlist::class);
     }
 
-    public function getAverageRatingAttribute()
+    public function cart()
     {
-        return $this->reviews()->avg('rating') ?? 0;
-    }
-
-    public function getReviewsCountAttribute()
-    {
-        return $this->reviews()->count();
-    }
-
-    public function getMainImageAttribute()
-    {
-        $images = $this->images;
-        return is_array($images) && count($images) > 0 ? $images[0] : null;
+        return $this->hasMany(Cart::class);
     }
 }

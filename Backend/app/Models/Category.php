@@ -13,8 +13,7 @@ class Category extends Model
         'name',
         'description',
         'image',
-        'is_active',
-        'sort_order'
+        'is_active'
     ];
 
     protected $casts = [
@@ -24,10 +23,5 @@ class Category extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
-    }
-
-    public function activeProducts()
-    {
-        return $this->hasMany(Product::class)->where('is_active', true);
     }
 }

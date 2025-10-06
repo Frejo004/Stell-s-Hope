@@ -14,7 +14,7 @@ export default function LoginPage({ onClose }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<any>({});
-  const { login, isLoading } = useAuth();
+  const { login, loading } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -137,10 +137,10 @@ export default function LoginPage({ onClose }: LoginPageProps) {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={loading}
               className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
             >
-              {isLoading ? (
+              {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                   Connexion...
