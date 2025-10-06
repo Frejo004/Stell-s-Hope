@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Home, ArrowRight, Package, Heart, Sparkles } from 'lucide-react';
 import { Product } from '../types';
-import ProductCard from './ProductCard';
+import ProductCard from '../components/ProductCard';
 
 interface NotFoundPageProps {
   products: Product[];
