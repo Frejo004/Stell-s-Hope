@@ -13,7 +13,7 @@ interface ProductDetailProps {
 export default function ProductDetail({ product, onClose }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
+  const [selectedColor, setSelectedColor] = useState(product.colors && product.colors.length > 0 ? product.colors[0] : '');
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -26,11 +26,14 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   ).slice(0, 4);
 
   const handleAddToCart = () => {
-    if (!selectedSize && product.sizes.length > 1) {
+    // Vérifier si product.sizes existe et a des éléments
+    if (!selectedSize && product.sizes && product.sizes.length > 1) {
       alert('Veuillez sélectionner une taille');
       return;
     }
-    addToCart(product, selectedSize || product.sizes[0], selectedColor, quantity);
+    // Utiliser selectedSize ou la première taille si disponible, sinon une chaîne vide
+    const size = selectedSize || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : '');
+    addToCart(product, size, selectedColor, quantity);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -69,7 +72,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                 onMouseLeave={() => setIsZooming(false)}
               >
                 <img
-                  src={product.images[selectedImage]}
+                  src={product.images && product.images[selectedImage] ? product.images[selectedImage] : '/placeholder.jpg'}
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-200"
                   style={{
@@ -94,7 +97,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
             </div>
             
             <div className="grid grid-cols-4 gap-3">
-              {product.images.map((image, index) => (
+              {product.images && product.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -142,12 +145,12 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               
               <div className="flex items-baseline space-x-4 mb-6">
                 <span className="text-4xl font-bold text-gray-900">
-                  {product.price.toFixed(2)} €
+                  {typeof product.price === 'number' ? product.price.toFixed(2) : product.price} €
                 </span>
                 {product.originalPrice && (
                   <>
                     <span className="text-2xl text-gray-500 line-through">
-                      {product.originalPrice.toFixed(2)} €
+                      {typeof product.originalPrice === 'number' ? product.originalPrice.toFixed(2) : product.originalPrice} €
                     </span>
                     <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-medium">
                       Livraison gratuite
@@ -170,7 +173,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                 </button>
               </div>
               <div className="grid grid-cols-5 gap-3">
-                {product.sizes.map((size) => (
+                {product.sizes?.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
@@ -182,7 +185,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   >
                     {size}
                   </button>
-                ))}
+                )) || <p>Aucune taille disponible</p>}
               </div>
             </div>
 
@@ -190,7 +193,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
             <div>
               <h3 className="font-semibold text-lg mb-4">Couleur</h3>
               <div className="flex space-x-4">
-                {product.colors.map((color) => (
+                {product.colors?.map((color) => (
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
@@ -213,7 +216,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                       <div className="absolute inset-0 rounded-full border-2 border-white" />
                     )}
                   </button>
-                ))}
+                )) || <p>Aucune couleur disponible</p>}
               </div>
               <p className="text-gray-700 mt-3 font-medium">
                 {selectedColor}
@@ -430,13 +433,13 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               <div key={relatedProduct.id} className="group cursor-pointer">
                 <div className="aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden mb-4">
                   <img
-                    src={relatedProduct.images[0]}
+                    src={relatedProduct.images && relatedProduct.images[0] ? relatedProduct.images[0] : '/placeholder.jpg'}
                     alt={relatedProduct.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
                 <h3 className="font-medium text-gray-900 mb-2">{relatedProduct.name}</h3>
-                <p className="text-lg font-semibold">{relatedProduct.price.toFixed(2)} €</p>
+                <p className="text-lg font-semibold">{typeof relatedProduct.price === 'number' ? relatedProduct.price.toFixed(2) : relatedProduct.price} €</p>
               </div>
             ))}
           </div>
