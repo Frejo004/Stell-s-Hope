@@ -1,24 +1,24 @@
 import api from './api';
 
-export interface TicketData {
+export interface CreateTicketData {
   subject: string;
   message: string;
   priority: 'low' | 'medium' | 'high';
 }
 
 export const ticketService = {
-  async getTickets() {
+  getTickets: async () => {
     const response = await api.get('/tickets');
     return response.data;
   },
 
-  async getTicket(id: number) {
-    const response = await api.get(`/tickets/${id}`);
+  createTicket: async (data: CreateTicketData) => {
+    const response = await api.post('/tickets', data);
     return response.data;
   },
 
-  async createTicket(data: TicketData) {
-    const response = await api.post('/tickets', data);
+  getTicket: async (id: number) => {
+    const response = await api.get(`/tickets/${id}`);
     return response.data;
   }
 };

@@ -1,11 +1,17 @@
 export interface User {
-  id: string;
+  id: number;
+  first_name: string;
+  last_name: string;
   email: string;
-  firstName: string;
-  lastName: string;
   phone?: string;
-  addresses: Address[];
-  createdAt: string;
+  address?: string;
+  city?: string;
+  postal_code?: string;
+  country?: string;
+  is_admin: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Address {

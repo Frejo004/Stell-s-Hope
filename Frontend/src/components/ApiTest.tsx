@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { apiService } from '../services/api';
+import api from '../services/api';
 
 export default function ApiTest() {
   const [status, setStatus] = useState('Testing API connection...');
@@ -10,17 +10,17 @@ export default function ApiTest() {
     const testApi = async () => {
       try {
         // Test des produits
-        const productsData = await apiService.getProducts();
-        setProducts(productsData);
+        const productsResponse = await api.get('/products');
+        setProducts(productsResponse.data);
         
         // Test des catégories
-        const categoriesData = await apiService.getCategories();
-        setCategories(categoriesData);
+        const categoriesResponse = await api.get('/categories');
+        setCategories(categoriesResponse.data);
         
         setStatus('✅ API connection successful!');
       } catch (error) {
         console.error('API Test Error:', error);
-        setStatus('❌ API connection failed: ' + error.message);
+        setStatus('❌ API connection failed: ' + (error.response?.data?.message || error.message));
       }
     };
 

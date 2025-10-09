@@ -1,31 +1,27 @@
 export interface Product {
   id: number;
   name: string;
-  price: number;
-  originalPrice?: number;
-  images: string[];
-  category: {
-    id: number;
-    name: string;
-  };
-  type: 'hauts' | 'bas' | 'accessoires';
-  sizes: string[];
-  colors: string[];
   description: string;
-  composition: string;
-  care: string;
-  rating: number;
-  reviewCount: number;
-  isNew?: boolean;
-  isOnSale?: boolean;
-  isBestSeller?: boolean;
+  price: number;
   stock_quantity: number;
+  category_id: number;
+  images: string[];
   sku: string;
   weight?: number;
   dimensions?: string;
   is_active: boolean;
   is_featured: boolean;
   is_bestseller: boolean;
+  created_at: string;
+  updated_at: string;
+  category: {
+    id: number;
+    name: string;
+    description?: string;
+    image?: string;
+    is_active: boolean;
+  };
+  reviews?: Review[];
 }
 
 export interface Review {

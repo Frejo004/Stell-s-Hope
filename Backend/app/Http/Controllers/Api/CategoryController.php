@@ -10,61 +10,55 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::where('is_active', true)
-                            ->withCount('products')
-                            ->get();
-        
+        $categories = Category::where('is_active', true)->get();
         return response()->json($categories);
     }
 
     public function show(Category $category)
     {
         if (!$category->is_active) {
-            return response()->json(['message' => 'Catégorie non disponible'], 404);
+            return response()->json(['message' => 'Category not found'], 404);
         }
-        
-        $category->load(['products' => function($query) {
-            $query->where('is_active', true);
-        }]);
-        
+
+        $category->load('products');
         return response()->json($category);
     }
 
     public function adminIndex()
     {
-        $categories = Category::withCount('products')->get();
+        $categories = Category::all();
         return response()->json($categories);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
 
-        $category = Category::create($validated);
+        $category = Category::create($request->all());
         return response()->json($category, 201);
     }
 
     public function update(Request $request, Category $category)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
+        $request->validate([
+            'name' => 'string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string',
             'is_active' => 'boolean'
         ]);
 
-        $category->update($validated);
+        $category->update($request->all());
         return response()->json($category);
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
-        return response()->json(['message' => 'Catégorie supprimée']);
+        return response()->json(['message' => 'Category deleted']);
     }
 }

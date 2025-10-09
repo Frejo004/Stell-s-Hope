@@ -1,18 +1,18 @@
 import api from './api';
 
-export interface ReviewData {
+export interface CreateReviewData {
   product_id: number;
   rating: number;
-  comment?: string;
+  comment: string;
 }
 
 export const reviewService = {
-  async getMyReviews() {
+  getReviews: async () => {
     const response = await api.get('/reviews');
     return response.data;
   },
 
-  async createReview(data: ReviewData) {
+  createReview: async (data: CreateReviewData) => {
     const response = await api.post('/reviews', data);
     return response.data;
   }

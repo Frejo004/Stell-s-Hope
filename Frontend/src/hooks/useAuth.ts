@@ -1,15 +1,37 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User, AuthState } from '../types/auth';
-import { apiService } from '../services/api';
+import { authService, RegisterData } from '../services/authService';
 
 // Utilitaire pour sanitiser les données utilisateur
-const sanitizeUserData = (user: any): User => {
-  if (!user) return user;
+const sanitizeUserData = (user: Partial<User>): User => {
+  if (!user) {
+    // Retourner un objet User vide mais valide si user est null/undefined
+    return {
+      id: 0,
+      first_name: '',
+      last_name: '',
+      email: '',
+      is_admin: false,
+      is_active: false,
+      created_at: '',
+      updated_at: ''
+    };
+  }
+  
   return {
-    ...user,
-    firstName: user.firstName?.toString().trim() || '',
-    lastName: user.lastName?.toString().trim() || '',
-    email: user.email?.toString().trim() || ''
+    id: user.id || 0,
+    first_name: user.first_name?.toString().trim() || '',
+    last_name: user.last_name?.toString().trim() || '',
+    email: user.email?.toString().trim() || '',
+    phone: user.phone?.toString().trim(),
+    address: user.address?.toString().trim(),
+    city: user.city?.toString().trim(),
+    postal_code: user.postal_code?.toString().trim(),
+    country: user.country?.toString().trim(),
+    is_admin: user.is_admin || false,
+    is_active: user.is_active || false,
+    created_at: user.created_at || '',
+    updated_at: user.updated_at || ''
   };
 };
 
@@ -24,7 +46,7 @@ export const useAuth = () => {
     const token = localStorage.getItem('auth_token');
     if (token) {
       // Vérifier le token avec l'API
-      apiService.getMe()
+      authService.getMe()
         .then((user) => {
           const sanitizedUser = sanitizeUserData(user);
           setAuthState({
@@ -51,7 +73,7 @@ export const useAuth = () => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      const response = await apiService.login(email, password);
+      const response = await authService.login({ email, password });
       
       if (response.token && response.user) {
         localStorage.setItem('auth_token', response.token);
@@ -71,33 +93,48 @@ export const useAuth = () => {
     }
   };
 
-  const register = async (userData: any) => {
+  const register = async (userData: RegisterData) => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
     
     try {
-      const response = await apiService.register(userData);
+      // S'assurer que tous les champs requis sont présents
+      const registerData: RegisterData = {
+        first_name: userData.first_name || '',
+        last_name: userData.last_name || '',
+        email: userData.email || '',
+        password: userData.password || '',
+        password_confirmation: userData.password_confirmation || '',
+        phone: userData.phone
+      };
       
-      if (response.token && response.user) {
+      const response = await authService.register(registerData);
+      
+      if (response && response.token && response.user) {
+        // Stocker le token et les données utilisateur
         localStorage.setItem('auth_token', response.token);
-        localStorage.setItem('user', JSON.stringify(sanitizeUserData(response.user)));
+        const sanitizedUser = sanitizeUserData(response.user);
+        localStorage.setItem('user', JSON.stringify(sanitizedUser));
         
         setAuthState({
-          user: sanitizeUserData(response.user),
+          user: sanitizedUser,
           isAuthenticated: true,
           isLoading: false
         });
+        
+        return sanitizedUser;
       } else {
         throw new Error('Réponse d\'inscription invalide');
       }
-    } catch (error) {
+    } catch (error: any) {
       setAuthState(prev => ({ ...prev, isLoading: false }));
+      console.error('Erreur lors de l\'inscription:', error.message || error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await apiService.logout();
+      await authService.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

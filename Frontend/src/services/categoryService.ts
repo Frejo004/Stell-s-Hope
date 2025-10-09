@@ -1,23 +1,23 @@
-import { apiService } from './api';
+import api from './api';
 
-export class CategoryService {
-  async getCategories() {
-    try {
-      return await apiService.getCategories();
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      throw error;
-    }
-  }
-
-  async getCategory(id: number) {
-    try {
-      return await apiService.getCategory(id);
-    } catch (error) {
-      console.error('Error fetching category:', error);
-      throw error;
-    }
-  }
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  image?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
-export const categoryService = new CategoryService();
+export const categoryService = {
+  getCategories: async (): Promise<Category[]> => {
+    const response = await api.get('/categories');
+    return response.data;
+  },
+
+  getCategory: async (id: number): Promise<Category> => {
+    const response = await api.get(`/categories/${id}`);
+    return response.data;
+  }
+};

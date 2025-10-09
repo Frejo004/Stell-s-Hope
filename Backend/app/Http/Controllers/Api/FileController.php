@@ -8,17 +8,6 @@ use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
-    public function getImage($path)
-    {
-        $fullPath = storage_path('app/public/' . $path);
-        
-        if (!file_exists($fullPath)) {
-            return response()->json(['message' => 'Image non trouvée'], 404);
-        }
-
-        return response()->file($fullPath);
-    }
-
     public function upload(Request $request)
     {
         $request->validate([
@@ -26,26 +15,31 @@ class FileController extends Controller
         ]);
 
         $file = $request->file('file');
-        $path = $file->store('uploads', 'public');
+        $path = $file->store('images', 'public');
 
         return response()->json([
-            'message' => 'Fichier uploadé avec succès',
             'path' => $path,
             'url' => Storage::url($path)
         ]);
     }
 
-    public function delete(Request $request)
+    public function getImage($path)
     {
-        $request->validate([
-            'path' => 'required|string'
-        ]);
-
-        if (Storage::disk('public')->exists($request->path)) {
-            Storage::disk('public')->delete($request->path);
-            return response()->json(['message' => 'Fichier supprimé']);
+        if (!Storage::disk('public')->exists('images/' . $path)) {
+            abort(404);
         }
 
-        return response()->json(['message' => 'Fichier non trouvé'], 404);
+        return response()->file(storage_path('app/public/images/' . $path));
+    }
+
+    public function delete(Request $request)
+    {
+        $request->validate(['path' => 'required|string']);
+        
+        if (Storage::disk('public')->exists($request->path)) {
+            Storage::disk('public')->delete($request->path);
+        }
+
+        return response()->json(['message' => 'File deleted']);
     }
 }

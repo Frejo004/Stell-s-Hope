@@ -48,7 +48,7 @@ export const productService = {
     return response.data;
   },
 
-  searchProducts: async (query: string, filters?: Omit<ProductFilters, 'search'>): Promise<ProductResponse> => {
+  searchProducts: async (query: string, filters?: Omit<ProductFilters, 'search'>): Promise<Product[]> => {
     const params = new URLSearchParams({ q: query });
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -59,11 +59,6 @@ export const productService = {
     }
     
     const response = await api.get(`/products/search?${params.toString()}`);
-    return response.data;
-  },
-
-  getCategories: async () => {
-    const response = await api.get('/categories');
     return response.data;
   }
 };

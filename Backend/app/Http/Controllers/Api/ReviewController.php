@@ -10,36 +10,34 @@ class ReviewController extends Controller
 {
     public function index(Request $request)
     {
-        $reviews = $request->user()->reviews()
-                          ->with('product')
-                          ->orderBy('created_at', 'desc')
-                          ->paginate(10);
-        
+        $reviews = Review::where('user_id', $request->user()->id)
+                        ->with('product')
+                        ->latest()
+                        ->paginate(10);
         return response()->json($reviews);
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'product_id' => 'required|exists:products,id',
             'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:1000'
+            'comment' => 'required|string|max:1000'
         ]);
 
-        // Vérifier si l'utilisateur a déjà laissé un avis pour ce produit
         $existingReview = Review::where('user_id', $request->user()->id)
-                               ->where('product_id', $validated['product_id'])
+                               ->where('product_id', $request->product_id)
                                ->first();
 
         if ($existingReview) {
-            return response()->json(['message' => 'Vous avez déjà laissé un avis pour ce produit'], 400);
+            return response()->json(['message' => 'You have already reviewed this product'], 400);
         }
 
         $review = Review::create([
             'user_id' => $request->user()->id,
-            'product_id' => $validated['product_id'],
-            'rating' => $validated['rating'],
-            'comment' => $validated['comment'],
+            'product_id' => $request->product_id,
+            'rating' => $request->rating,
+            'comment' => $request->comment,
             'is_approved' => false
         ]);
 

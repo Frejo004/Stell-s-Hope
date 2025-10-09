@@ -1,37 +1,48 @@
 import api from './api';
+import { Order } from '../types/order';
 
-export interface OrderData {
-  items: Array<{
-    product_id: number;
-    quantity: number;
-  }>;
-  shipping_address: string;
-  billing_address: string;
+export interface CreateOrderData {
+  shipping_address: {
+    first_name: string;
+    last_name: string;
+    street: string;
+    city: string;
+    postal_code: string;
+    country: string;
+  };
+  billing_address: {
+    first_name: string;
+    last_name: string;
+    street: string;
+    city: string;
+    postal_code: string;
+    country: string;
+  };
   payment_method: string;
 }
 
 export const orderService = {
-  async getOrders(page = 1) {
-    const response = await api.get('/orders', { params: { page } });
+  getOrders: async () => {
+    const response = await api.get('/orders');
     return response.data;
   },
 
-  async getOrder(id: number) {
-    const response = await api.get(`/orders/${id}`);
-    return response.data;
-  },
-
-  async createOrder(data: OrderData) {
+  createOrder: async (data: CreateOrderData) => {
     const response = await api.post('/orders', data);
     return response.data;
   },
 
-  async trackOrder(id: number) {
+  getOrder: async (id: number) => {
+    const response = await api.get(`/orders/${id}`);
+    return response.data;
+  },
+
+  trackOrder: async (id: number) => {
     const response = await api.get(`/orders/${id}/track`);
     return response.data;
   },
 
-  async cancelOrder(id: number) {
+  cancelOrder: async (id: number) => {
     const response = await api.post(`/orders/${id}/cancel`);
     return response.data;
   }
