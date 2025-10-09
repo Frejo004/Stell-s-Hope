@@ -39,13 +39,25 @@ export const productService = {
   },
 
   getFeaturedProducts: async (): Promise<Product[]> => {
-    const response = await api.get('/products/featured');
-    return response.data;
+    try {
+      // Utiliser le endpoint correct avec query parameter
+      const response = await api.get('/products', { params: { featured: true } });
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching featured products:', error);
+      return [];
+    }
   },
 
   getBestsellers: async (): Promise<Product[]> => {
-    const response = await api.get('/products/bestsellers');
-    return response.data;
+    try {
+      // Utiliser le endpoint correct avec query parameter
+      const response = await api.get('/products', { params: { bestseller: true } });
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching bestsellers:', error);
+      return [];
+    }
   },
   
   getCategories: async () => {

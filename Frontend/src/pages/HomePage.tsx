@@ -17,15 +17,29 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
   useEffect(() => {
     const loadProducts = async () => {
       try {
+        // Utiliser les méthodes corrigées du service
         const [featured, best] = await Promise.all([
           productService.getFeaturedProducts(),
           productService.getBestsellers()
         ]);
-        setFeaturedProducts(featured);
-        setBestsellers(best);
+        
+        // Vérifier si les données sont valides avant de les utiliser
+        if (featured && featured.length > 0) {
+          setFeaturedProducts(featured);
+        } else {
+          // Fallback aux données locales pour featured
+          setFeaturedProducts(products.filter(p => p.isFeatured || p.isNew).slice(0, 8));
+        }
+        
+        if (best && best.length > 0) {
+          setBestsellers(best);
+        } else {
+          // Fallback aux données locales pour bestsellers
+          setBestsellers(products.filter(p => p.isBestSeller).slice(0, 8));
+        }
       } catch (error) {
         console.error('Error loading products:', error);
-        // Fallback aux données locales
+        // Fallback aux données locales en cas d'erreur
         setFeaturedProducts(products.filter(p => p.isFeatured || p.isNew).slice(0, 8));
         setBestsellers(products.filter(p => p.isBestSeller).slice(0, 8));
       } finally {
