@@ -47,6 +47,11 @@ export const productService = {
     const response = await api.get('/products/bestsellers');
     return response.data;
   },
+  
+  getCategories: async () => {
+    const response = await api.get('/categories');
+    return response.data;
+  },
 
   searchProducts: async (query: string, filters?: Omit<ProductFilters, 'search'>): Promise<Product[]> => {
     const params = new URLSearchParams({ q: query });
