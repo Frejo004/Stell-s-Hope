@@ -58,7 +58,13 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
 
         {/* Quick view on hover */}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button className="w-full bg-white text-black py-2 px-4 rounded font-medium hover:bg-gray-100 transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onProductClick(product);
+            }}
+            className="w-full bg-white text-black py-2 px-4 rounded font-medium hover:bg-gray-100 transition-colors"
+          >
             Aperçu rapide
           </button>
         </div>

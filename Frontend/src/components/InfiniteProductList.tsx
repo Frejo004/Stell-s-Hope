@@ -36,7 +36,7 @@ const InfiniteProductList: React.FC = () => {
                   ♥
                 </button>
                 <button
-                  onClick={() => console.log('Voir détails:', product.id)}
+                  onClick={() => window.location.href = `/product/${product.id}`}
                   className="p-2 bg-white text-gray-600 rounded-full shadow-md hover:bg-green-600 hover:text-white transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
