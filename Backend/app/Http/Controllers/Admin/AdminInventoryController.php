@@ -10,7 +10,7 @@ class AdminInventoryController extends Controller
 {
     public function index()
     {
-        $inventory = Product::select('id', 'name', 'price', 'stock', 'category_id', 'images')
+        $inventory = Product::select('id', 'name', 'price', 'stock_quantity', 'category_id', 'images')
                            ->with('category:id,name')
                            ->get()
                            ->map(function ($product) {
@@ -18,7 +18,7 @@ class AdminInventoryController extends Controller
                                    'id' => $product->id,
                                    'name' => $product->name,
                                    'price' => $product->price,
-                                   'stock' => $product->stock ?? 0,
+                                   'stock' => $product->stock_quantity ?? 0,
                                    'reserved' => rand(0, 5),
                                    'reorderLevel' => 5,
                                    'category' => $product->category->name ?? 'Non catégorisé',
@@ -47,7 +47,7 @@ class AdminInventoryController extends Controller
             'stock' => 'required|integer|min:0'
         ]);
 
-        $product->update(['stock' => $request->stock]);
+        $product->update(['stock_quantity' => $request->stock]);
 
         return response()->json(['message' => 'Stock mis à jour']);
     }
