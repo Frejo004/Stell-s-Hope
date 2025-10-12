@@ -127,9 +127,11 @@ export const useAdminCustomers = () => {
       try {
         const data = await adminService.getCustomers();
         setCustomers(data.data || data);
-        const total = data.data?.length || 0;
-        const active = data.data?.filter(c => c.is_active)?.length || 0;
-        setStats({ total, active, vip: 0, totalOrders: 0 });
+        const customersData = data.data || data;
+        const total = data.total || customersData?.length || 0;
+        const active = customersData?.filter(c => c.is_active)?.length || 0;
+        const totalOrders = customersData?.reduce((sum, c) => sum + (c.orders_count || 0), 0) || 0;
+        setStats({ total, active, vip: 0, totalOrders });
       } catch (error) {
         console.error('Erreur clients:', error);
       } finally {

@@ -12,8 +12,14 @@ class AdminCustomerController extends Controller
     {
         $customers = User::where('is_admin', false)
                         ->withCount('orders')
+                        ->withSum('orders', 'total_amount')
                         ->orderBy('created_at', 'desc')
                         ->paginate(20);
+        
+        $customers->getCollection()->transform(function ($customer) {
+            $customer->total_spent = $customer->orders_sum_total_amount ?? 0;
+            return $customer;
+        });
         
         return response()->json($customers);
     }

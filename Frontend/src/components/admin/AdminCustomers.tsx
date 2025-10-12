@@ -124,10 +124,10 @@ export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    0 commande
+                    {customer.orders_count || 0} commande{(customer.orders_count || 0) > 1 ? 's' : ''}
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    0€
+                    {customer.total_spent ? Number(customer.total_spent).toFixed(2) : '0.00'}€
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
