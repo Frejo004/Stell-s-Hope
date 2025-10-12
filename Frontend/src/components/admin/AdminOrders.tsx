@@ -3,6 +3,7 @@ import { Search, Filter, Eye, Truck, Package, CheckCircle } from 'lucide-react';
 import { useAdminOrders } from '../../hooks/useAdminData';
 import { adminService } from '../../services/adminService';
 import Toast from '../ui/Toast';
+import OrderDetailsModal from './OrderDetailsModal';
 
 interface AdminOrdersProps {
   onNavigate: (page: string) => void;
@@ -13,6 +14,7 @@ export default function AdminOrders({ onNavigate }: AdminOrdersProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [toast, setToast] = useState<{type: 'success' | 'error' | 'warning', message: string} | null>(null);
+  const [orderDetailsModal, setOrderDetailsModal] = useState<{isOpen: boolean, orderId: number | null}>({isOpen: false, orderId: null});
   const [stats, setStats] = useState({ pending: 0, confirmed: 0, shipped: 0, delivered: 0, cancelled: 0 });
 
   const handleSearchChange = (value: string) => {
@@ -52,7 +54,7 @@ export default function AdminOrders({ onNavigate }: AdminOrdersProps) {
   }, []);
 
   const handleViewOrder = (orderId: number) => {
-    window.location.href = `/order-details/${orderId}`;
+    setOrderDetailsModal({ isOpen: true, orderId });
   };
 
   const getStatusIcon = (status: string) => {
@@ -308,6 +310,12 @@ export default function AdminOrders({ onNavigate }: AdminOrdersProps) {
           onClose={() => setToast(null)}
         />
       )}
+      
+      <OrderDetailsModal
+        isOpen={orderDetailsModal.isOpen}
+        orderId={orderDetailsModal.orderId}
+        onClose={() => setOrderDetailsModal({ isOpen: false, orderId: null })}
+      />
     </div>
   );
 }
