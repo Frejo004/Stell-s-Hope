@@ -51,6 +51,10 @@ export default function AdminOrders({ onNavigate }: AdminOrdersProps) {
     fetchStats();
   }, []);
 
+  const handleViewOrder = (orderId: number) => {
+    window.location.href = `/order-details/${orderId}`;
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <Package className="w-4 h-4" />;
@@ -208,8 +212,9 @@ export default function AdminOrders({ onNavigate }: AdminOrdersProps) {
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2">
                       <button 
-                        onClick={() => window.location.href = `/order-details/${order.id}`}
+                        onClick={() => handleViewOrder(order.id)}
                         className="text-blue-600 hover:text-blue-900"
+                        title="Voir détails"
                       >
                         <Eye className="w-4 h-4" />
                       </button>

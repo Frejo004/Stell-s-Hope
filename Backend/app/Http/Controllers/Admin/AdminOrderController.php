@@ -31,8 +31,12 @@ class AdminOrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load('user');
-        return response()->json($order);
+        try {
+            $order->load(['user', 'orderItems.product']);
+            return response()->json($order);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function updateStatus(Request $request, Order $order)

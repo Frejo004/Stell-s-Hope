@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Package, Truck, CheckCircle, Clock } from 'lucide-react';
-import { useOrders } from '../hooks/useOrders';
-import { Order } from '../types/order';
+import { adminService } from '../services/adminService';
 
 interface OrderTrackingPageProps {
   orderId: string;
@@ -9,8 +8,35 @@ interface OrderTrackingPageProps {
 }
 
 export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPageProps) {
-  const { getOrderById } = useOrders();
-  const order = getOrderById(orderId);
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const data = await adminService.getOrder(parseInt(orderId));
+        setOrder(data);
+      } catch (error) {
+        console.error('Erreur commande:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrder();
+  }, [orderId]);
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+        <div className="max-w-2xl mx-auto p-6">
+          <div className="text-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4">Chargement...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -29,7 +55,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
     );
   }
 
-  const getStatusIcon = (status: Order['status']) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <Clock className="w-6 h-6" />;
       case 'confirmed': return <Package className="w-6 h-6" />;
@@ -39,7 +65,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
     }
   };
 
-  const getStatusLabel = (status: Order['status']) => {
+  const getStatusLabel = (status: string) => {
     const labels = {
       pending: 'En attente',
       confirmed: 'Confirmée',
@@ -66,7 +92,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Suivi de commande</h1>
-          <p className="text-gray-600">Commande #{order.id}</p>
+          <p className="text-gray-600">Commande #{order.order_number || order.id}</p>
         </div>
 
         {/* Statut actuel */}
@@ -82,7 +108,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
             <div>
               <h3 className="text-xl font-semibold">{getStatusLabel(order.status)}</h3>
               <p className="text-gray-600">
-                Commandé le {new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                Commandé le {new Date(order.created_at).toLocaleDateString('fr-FR')}
               </p>
             </div>
           </div>
@@ -109,21 +135,21 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
         <div className="border rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-4">Détails de la commande</h3>
           <div className="space-y-4">
-            {order.items.map((item, index) => (
+            {(order.order_items || []).map((item, index) => (
               <div key={index} className="flex items-center space-x-4">
                 <img
-                  src={item.product.images[0]}
-                  alt={item.product.name}
+                  src={item.product?.images?.[0] || '/placeholder.jpg'}
+                  alt={item.product?.name || 'Produit'}
                   className="w-16 h-16 object-cover rounded"
                 />
                 <div className="flex-1">
-                  <h4 className="font-medium">{item.product.name}</h4>
+                  <h4 className="font-medium">{item.product?.name || 'Produit supprimé'}</h4>
                   <p className="text-sm text-gray-600">
-                    Taille: {item.size} • Couleur: {item.color} • Qté: {item.quantity}
+                    Qté: {item.quantity}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">{(item.product.price * item.quantity).toFixed(2)}€</p>
+                  <p className="font-medium">{Number(item.price * item.quantity).toFixed(2)}€</p>
                 </div>
               </div>
             ))}
@@ -132,7 +158,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
           <div className="border-t mt-4 pt-4">
             <div className="flex justify-between text-lg font-semibold">
               <span>Total</span>
-              <span>{order.total.toFixed(2)}€</span>
+              <span>{Number(order.total_amount || 0).toFixed(2)}€</span>
             </div>
           </div>
         </div>
