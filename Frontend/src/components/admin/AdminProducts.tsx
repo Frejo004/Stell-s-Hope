@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
 import { useAdminProducts } from '../../hooks/useAdminData';
+import { adminService } from '../../services/adminService';
+import Toast from '../ui/Toast';
+import ConfirmModal from '../ui/ConfirmModal';
 
 interface AdminProductsProps {
   onNavigate: (page: string) => void;
@@ -12,6 +15,8 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
   const [priceFilter, setPriceFilter] = useState('all');
   const [stockFilter, setStockFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [toast, setToast] = useState<{type: 'success' | 'error' | 'warning', message: string} | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, productId: number, productName: string}>({isOpen: false, productId: 0, productName: ''});
   const { products, loading, pagination, refetch } = useAdminProducts();
 
   const applyFilters = () => {
@@ -28,6 +33,26 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     refetch(1, searchTerm, category, priceFilter, stockFilter, statusFilter, false);
+  };
+
+  const handleDeleteClick = (id: number, name: string) => {
+    setConfirmModal({ isOpen: true, productId: id, productName: name });
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await adminService.deleteProduct(confirmModal.productId);
+      setToast({ type: 'success', message: 'Produit supprimé avec succès' });
+      refetch(pagination.current_page, searchTerm, selectedCategory, priceFilter, stockFilter, statusFilter, false);
+    } catch (error) {
+      setToast({ type: 'error', message: 'Erreur lors de la suppression' });
+    }
+    setConfirmModal({ isOpen: false, productId: 0, productName: '' });
+  };
+
+  const handleEdit = (id: number) => {
+    // TODO: Ouvrir modal d'édition
+    setToast({ type: 'warning', message: 'Fonctionnalité d\'édition en cours de développement' });
   };
 
   if (loading) {
@@ -179,10 +204,18 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
                   </td>
                   <td className="px-6 py-4 text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
+                      <button 
+                        onClick={() => handleEdit(product.id)}
+                        className="text-blue-600 hover:text-blue-900"
+                        title="Modifier"
+                      >
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button 
+                        onClick={() => handleDeleteClick(product.id, product.name)}
+                        className="text-red-600 hover:text-red-900"
+                        title="Supprimer"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -253,6 +286,25 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
           </div>
         </div>
       </div>
+      
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
+      
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title="Supprimer le produit"
+        message={`Êtes-vous sûr de vouloir supprimer le produit "${confirmModal.productName}" ? Cette action est irréversible.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmModal({ isOpen: false, productId: 0, productName: '' })}
+        confirmText="Supprimer"
+        cancelText="Annuler"
+        type="danger"
+      />
     </div>
   );
 }
