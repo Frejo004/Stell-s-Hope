@@ -75,6 +75,37 @@ export const useAdminInventory = () => {
   return { inventory, stats, loading };
 };
 
+export const useAdminOrders = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ current_page: 1, total: 0, last_page: 1, per_page: 20 });
+
+  const fetchOrders = async (page = 1, search = '', status = 'all', showLoading = true) => {
+    try {
+      if (showLoading) setLoading(true);
+      const data = await adminService.getOrders(page, search, status);
+      console.log('Données commandes reçues:', data);
+      console.log('Premier ordre:', data.data?.[0]);
+      setOrders(data.data || data);
+      setPagination({
+        current_page: data.current_page || 1,
+        total: data.total || 0,
+        last_page: data.last_page || 1,
+        per_page: data.per_page || 20
+      });
+    } catch (error) {
+      console.error('Erreur commandes:', error);
+      console.error('Détails erreur:', error.response?.data);
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchOrders(); }, []);
+
+  return { orders, loading, pagination, refetch: fetchOrders };
+};
+
 export const useAdminReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, averageRating: 0 });

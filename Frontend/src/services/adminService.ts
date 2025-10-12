@@ -63,8 +63,13 @@ export const adminService = {
   },
 
   // Orders management
-  getOrders: async (page = 1) => {
-    const response = await api.get(`/admin/orders?page=${page}`);
+  getOrders: async (page = 1, search = '', status = 'all') => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      ...(search && { search }),
+      ...(status !== 'all' && { status })
+    });
+    const response = await api.get(`/admin/orders?${params}`);
     return response.data;
   },
 
