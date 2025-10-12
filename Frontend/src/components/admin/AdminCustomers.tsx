@@ -18,9 +18,9 @@ export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
     );
   }
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCustomers = (customers || []).filter(customer =>
+    `${customer.first_name} ${customer.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    customer.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -35,19 +35,19 @@ export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+          <div className="text-2xl font-bold text-gray-900">{(stats && stats.total) || 0}</div>
           <div className="text-sm text-gray-600">Total Clients</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+          <div className="text-2xl font-bold text-green-600">{stats?.active || 0}</div>
           <div className="text-sm text-gray-600">Actifs</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-yellow-600">{stats.vip}</div>
+          <div className="text-2xl font-bold text-yellow-600">{stats?.vip || 0}</div>
           <div className="text-sm text-gray-600">VIP</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">{stats.totalOrders}</div>
+          <div className="text-2xl font-bold text-blue-600">{stats?.totalOrders || 0}</div>
           <div className="text-sm text-gray-600">Commandes Total</div>
         </div>
       </div>
@@ -104,11 +104,11 @@ export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
                         <span className="text-white font-medium text-sm">
-                          {customer.name.split(' ').map(n => n[0]).join('')}
+                          {(customer.first_name?.[0] || '') + (customer.last_name?.[0] || '')}
                         </span>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                        <div className="text-sm font-medium text-gray-900">{customer.first_name} {customer.last_name}</div>
                         <div className="text-sm text-gray-500">ID: {customer.id}</div>
                       </div>
                     </div>
@@ -116,31 +116,28 @@ export default function AdminCustomers({ onNavigate }: AdminCustomersProps) {
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900 flex items-center">
                       <Mail className="w-4 h-4 mr-2 text-gray-400" />
-                      {customer.email}
+                      {customer.email || 'N/A'}
                     </div>
                     <div className="text-sm text-gray-500 flex items-center mt-1">
                       <Phone className="w-4 h-4 mr-2 text-gray-400" />
-                      {customer.phone}
+                      {customer.phone || 'N/A'}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {customer.orders} commande{customer.orders > 1 ? 's' : ''}
+                    0 commande
                   </td>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {customer.total}
+                    0€
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      customer.status === 'vip' ? 'bg-yellow-100 text-yellow-800' :
-                      customer.status === 'active' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
+                      customer.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                     }`}>
-                      {customer.status === 'vip' ? 'VIP' : 
-                       customer.status === 'active' ? 'Actif' : 'Inactif'}
+                      {customer.is_active ? 'Actif' : 'Inactif'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {new Date(customer.joined).toLocaleDateString('fr-FR')}
+                    {customer.created_at ? new Date(customer.created_at).toLocaleDateString('fr-FR') : 'N/A'}
                   </td>
                   <td className="px-6 py-4">
                     <button className="text-blue-600 hover:text-blue-900">

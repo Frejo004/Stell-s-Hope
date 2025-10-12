@@ -29,28 +29,7 @@ export const useAdminProducts = () => {
   return { products, loading, pagination, refetch: fetchProducts };
 };
 
-export const useAdminCustomers = () => {
-  const [customers, setCustomers] = useState([]);
-  const [stats, setStats] = useState({ total: 0, active: 0, vip: 0, totalOrders: 0 });
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const data = await adminService.getCustomers();
-        setCustomers(data.customers);
-        setStats(data.stats);
-      } catch (error) {
-        console.error('Erreur clients:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCustomers();
-  }, []);
-
-  return { customers, stats, loading };
-};
 
 export const useAdminInventory = () => {
   const [inventory, setInventory] = useState([]);
@@ -136,4 +115,29 @@ export const useAdminReviews = () => {
   }, []);
 
   return { reviews, stats, loading, updateReviewStatus };
+};
+
+export const useAdminCustomers = () => {
+  const [customers, setCustomers] = useState([]);
+  const [stats, setStats] = useState({ total: 0, active: 0, vip: 0, totalOrders: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const data = await adminService.getCustomers();
+        setCustomers(data.data || data);
+        const total = data.data?.length || 0;
+        const active = data.data?.filter(c => c.is_active)?.length || 0;
+        setStats({ total, active, vip: 0, totalOrders: 0 });
+      } catch (error) {
+        console.error('Erreur clients:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCustomers();
+  }, []);
+
+  return { customers, stats, loading };
 };

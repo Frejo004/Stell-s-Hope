@@ -18,7 +18,7 @@ class AdminDashboardController extends Controller
             'total_users' => User::where('is_admin', false)->count(),
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
-            'total_revenue' => Order::where('status', 'completed')->sum('total'),
+            'total_revenue' => Order::where('status', 'delivered')->sum('total_amount'),
             'pending_orders' => Order::where('status', 'pending')->count(),
             'low_stock_products' => Product::where('stock_quantity', '<', 10)->count(),
             'open_tickets' => Ticket::where('status', 'open')->count(),
@@ -30,9 +30,9 @@ class AdminDashboardController extends Controller
 
     public function revenueAnalytics()
     {
-        $monthlyRevenue = Order::where('status', 'completed')
+        $monthlyRevenue = Order::where('status', 'delivered')
                               ->where('created_at', '>=', Carbon::now()->subMonths(12))
-                              ->selectRaw('MONTH(created_at) as month, SUM(total) as revenue')
+                              ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as revenue')
                               ->groupBy('month')
                               ->get();
 
