@@ -26,7 +26,7 @@ class CategoryController extends Controller
 
     public function adminIndex()
     {
-        $categories = Category::all();
+        $categories = Category::withCount('products')->get();
         return response()->json($categories);
     }
 
