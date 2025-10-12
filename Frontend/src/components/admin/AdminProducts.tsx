@@ -89,7 +89,7 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <img
-                        src={product.images[0]}
+                        src={product.images?.[0] || '/placeholder-image.jpg'}
                         alt={product.name}
                         className="w-12 h-12 object-cover rounded"
                       />
@@ -101,14 +101,14 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
                   </td>
                   <td className="px-6 py-4">
                     <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
-                      {product.category}
+                      {product.category?.name || product.category}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
-                    {product.price.toFixed(2)}€
+                    {Number(product.price || 0).toFixed(2)}€
                     {product.originalPrice && (
                       <div className="text-xs text-gray-500 line-through">
-                        {product.originalPrice.toFixed(2)}€
+                        {Number(product.originalPrice || 0).toFixed(2)}€
                       </div>
                     )}
                   </td>
