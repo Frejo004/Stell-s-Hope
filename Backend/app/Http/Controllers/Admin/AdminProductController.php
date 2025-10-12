@@ -103,7 +103,8 @@ class AdminProductController extends Controller
             'stock_quantity' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'is_active' => 'boolean',
-            'is_featured' => 'boolean'
+            'is_featured' => 'boolean',
+            'images' => 'array'
         ]);
 
         $product->update($validated);

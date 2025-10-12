@@ -178,5 +178,13 @@ export const adminService = {
   getSidebarStats: async () => {
     const response = await api.get('/admin/sidebar-stats');
     return response.data;
+  },
+
+  // File upload
+  uploadFile: async (formData: FormData) => {
+    const response = await api.post('/files/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
   }
 };

@@ -4,6 +4,7 @@ import { useAdminProducts } from '../../hooks/useAdminData';
 import { adminService } from '../../services/adminService';
 import Toast from '../ui/Toast';
 import ConfirmModal from '../ui/ConfirmModal';
+import ProductEditModal from './ProductEditModal';
 
 interface AdminProductsProps {
   onNavigate: (page: string) => void;
@@ -17,6 +18,7 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [toast, setToast] = useState<{type: 'success' | 'error' | 'warning', message: string} | null>(null);
   const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, productId: number, productName: string}>({isOpen: false, productId: 0, productName: ''});
+  const [editModal, setEditModal] = useState<{isOpen: boolean, productId: number | null}>({isOpen: false, productId: null});
   const { products, loading, pagination, refetch } = useAdminProducts();
 
   const applyFilters = () => {
@@ -51,8 +53,12 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
   };
 
   const handleEdit = (id: number) => {
-    // TODO: Ouvrir modal d'édition
-    setToast({ type: 'warning', message: 'Fonctionnalité d\'édition en cours de développement' });
+    setEditModal({ isOpen: true, productId: id });
+  };
+
+  const handleEditSuccess = () => {
+    setToast({ type: 'success', message: 'Produit modifié avec succès' });
+    refetch(pagination.current_page, searchTerm, selectedCategory, priceFilter, stockFilter, statusFilter, false);
   };
 
   if (loading) {
@@ -304,6 +310,13 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
         confirmText="Supprimer"
         cancelText="Annuler"
         type="danger"
+      />
+      
+      <ProductEditModal
+        isOpen={editModal.isOpen}
+        productId={editModal.productId}
+        onClose={() => setEditModal({ isOpen: false, productId: null })}
+        onSuccess={handleEditSuccess}
       />
     </div>
   );
