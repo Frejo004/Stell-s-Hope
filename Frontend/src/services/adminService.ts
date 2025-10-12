@@ -24,8 +24,16 @@ export const adminService = {
   },
 
   // Products management
-  getProducts: async (page = 1) => {
-    const response = await api.get(`/admin/products?page=${page}`);
+  getProducts: async (page = 1, search = '', category = 'all', price = 'all', stock = 'all', status = 'all') => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      ...(search && { search }),
+      ...(category !== 'all' && { category }),
+      ...(price !== 'all' && { price }),
+      ...(stock !== 'all' && { stock }),
+      ...(status !== 'all' && { status })
+    });
+    const response = await api.get(`/admin/products?${params}`);
     return response.data;
   },
 

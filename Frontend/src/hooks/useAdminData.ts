@@ -4,18 +4,23 @@ import { adminService } from '../services/adminService';
 export const useAdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ current_page: 1, total: 0 });
+  const [pagination, setPagination] = useState({ current_page: 1, total: 0, last_page: 1, per_page: 20 });
 
-  const fetchProducts = async (page = 1) => {
+  const fetchProducts = async (page = 1, search = '', category = 'all', price = 'all', stock = 'all', status = 'all', showLoading = true) => {
     try {
-      setLoading(true);
-      const data = await adminService.getProducts(page);
-      setProducts(data.data);
-      setPagination(data.pagination);
+      if (showLoading) setLoading(true);
+      const data = await adminService.getProducts(page, search, category, price, stock, status);
+      setProducts(data.data || data);
+      setPagination({
+        current_page: data.current_page || 1,
+        total: data.total || 0,
+        last_page: data.last_page || 1,
+        per_page: data.per_page || 20
+      });
     } catch (error) {
       console.error('Erreur produits:', error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 

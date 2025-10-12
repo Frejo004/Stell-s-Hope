@@ -9,13 +9,26 @@ interface AdminProductsProps {
 export default function AdminProducts({ onNavigate }: AdminProductsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const { products, loading } = useAdminProducts();
+  const [priceFilter, setPriceFilter] = useState('all');
+  const [stockFilter, setStockFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const { products, loading, pagination, refetch } = useAdminProducts();
 
-  const filteredProducts = products.filter((product: any) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const applyFilters = () => {
+    refetch(1, searchTerm, selectedCategory, priceFilter, stockFilter, statusFilter, false);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setTimeout(() => {
+      refetch(1, value, selectedCategory, priceFilter, stockFilter, statusFilter, false);
+    }, 300);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    refetch(1, searchTerm, category, priceFilter, stockFilter, statusFilter, false);
+  };
 
   if (loading) {
     return (
@@ -45,7 +58,7 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
                 type="text"
                 placeholder="Rechercher un produit..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -53,7 +66,7 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
           <div className="flex items-center space-x-4">
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(e) => handleCategoryChange(e.target.value)}
               className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Toutes catégories</option>
@@ -61,10 +74,37 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
               <option value="femme">Femme</option>
               <option value="unisexe">Unisexe</option>
             </select>
-            <button className="border rounded-lg px-3 py-2 hover:bg-gray-50 flex items-center space-x-2">
-              <Filter className="w-4 h-4" />
-              <span>Filtres</span>
-            </button>
+            <select
+              value={priceFilter}
+              onChange={(e) => { setPriceFilter(e.target.value); setTimeout(() => refetch(1, searchTerm, selectedCategory, e.target.value, stockFilter, statusFilter, false), 100); }}
+              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tous prix</option>
+              <option value="0-25">0€ - 25€</option>
+              <option value="25-50">25€ - 50€</option>
+              <option value="50-100">50€ - 100€</option>
+              <option value="100+">100€+</option>
+            </select>
+            <select
+              value={stockFilter}
+              onChange={(e) => { setStockFilter(e.target.value); setTimeout(() => refetch(1, searchTerm, selectedCategory, priceFilter, e.target.value, statusFilter, false), 100); }}
+              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tout stock</option>
+              <option value="in-stock">En stock</option>
+              <option value="low-stock">Stock faible</option>
+              <option value="out-of-stock">Rupture</option>
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setTimeout(() => refetch(1, searchTerm, selectedCategory, priceFilter, stockFilter, e.target.value, false), 100); }}
+              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Tous statuts</option>
+              <option value="active">Actif</option>
+              <option value="inactive">Inactif</option>
+              <option value="featured">Vedette</option>
+            </select>
           </div>
         </div>
       </div>
@@ -84,7 +124,7 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredProducts.map((product) => (
+              {products.map((product) => (
                 <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
@@ -114,26 +154,25 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">
                     <span className={`font-medium ${
-                      (product.stock || 0) > 0 ? 'text-green-600' : 'text-red-600'
+                      (product.stock_quantity || 0) > 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {(product.stock || 0) > 0 ? `${product.stock} en stock` : 'Rupture'}
+                      {(product.stock_quantity || 0) > 0 ? `${product.stock_quantity} en stock` : 'Rupture'}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex space-x-1">
-                      {product.isNew && (
+                      {product.is_featured && (
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                          Nouveau
+                          Vedette
                         </span>
                       )}
-                      {product.isOnSale && (
+                      {product.is_active ? (
+                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                          Actif
+                        </span>
+                      ) : (
                         <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                          Promo
-                        </span>
-                      )}
-                      {product.isBestSeller && (
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                          Best
+                          Inactif
                         </span>
                       )}
                     </div>
@@ -152,6 +191,66 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
               ))}
             </tbody>
           </table>
+        </div>
+        
+        {/* Pagination */}
+        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
+          <div className="flex-1 flex justify-between sm:hidden">
+            <button 
+              onClick={() => refetch(pagination.current_page - 1)}
+              disabled={pagination.current_page === 1}
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Précédent
+            </button>
+            <button 
+              onClick={() => refetch(pagination.current_page + 1)}
+              disabled={pagination.current_page === pagination.last_page}
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Suivant
+            </button>
+          </div>
+          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm text-gray-700">
+                Affichage de <span className="font-medium">{((pagination.current_page - 1) * pagination.per_page) + 1}</span> à{' '}
+                <span className="font-medium">{Math.min(pagination.current_page * pagination.per_page, pagination.total)}</span> sur{' '}
+                <span className="font-medium">{pagination.total}</span> produits
+              </p>
+            </div>
+            <div>
+              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                <button 
+                  onClick={() => refetch(pagination.current_page - 1)}
+                  disabled={pagination.current_page === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Précédent
+                </button>
+                {[...Array(pagination.last_page)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => refetch(i + 1)}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      pagination.current_page === i + 1
+                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button 
+                  onClick={() => refetch(pagination.current_page + 1)}
+                  disabled={pagination.current_page === pagination.last_page}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Suivant
+                </button>
+              </nav>
+            </div>
+          </div>
         </div>
       </div>
     </div>

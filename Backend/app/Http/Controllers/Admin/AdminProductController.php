@@ -8,11 +8,66 @@ use Illuminate\Http\Request;
 
 class AdminProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')
-                          ->orderBy('created_at', 'desc')
-                          ->paginate(20);
+        $query = Product::with('category');
+        
+        if ($request->has('search') && $request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        
+        if ($request->has('category') && $request->category) {
+            $query->whereHas('category', function($q) use ($request) {
+                $q->where('name', $request->category);
+            });
+        }
+        
+        if ($request->has('price') && $request->price) {
+            switch ($request->price) {
+                case '0-25':
+                    $query->whereBetween('price', [0, 25]);
+                    break;
+                case '25-50':
+                    $query->whereBetween('price', [25, 50]);
+                    break;
+                case '50-100':
+                    $query->whereBetween('price', [50, 100]);
+                    break;
+                case '100+':
+                    $query->where('price', '>', 100);
+                    break;
+            }
+        }
+        
+        if ($request->has('stock') && $request->stock) {
+            switch ($request->stock) {
+                case 'in-stock':
+                    $query->where('stock_quantity', '>', 0);
+                    break;
+                case 'low-stock':
+                    $query->whereBetween('stock_quantity', [1, 10]);
+                    break;
+                case 'out-of-stock':
+                    $query->where('stock_quantity', 0);
+                    break;
+            }
+        }
+        
+        if ($request->has('status') && $request->status) {
+            switch ($request->status) {
+                case 'active':
+                    $query->where('is_active', true);
+                    break;
+                case 'inactive':
+                    $query->where('is_active', false);
+                    break;
+                case 'featured':
+                    $query->where('is_featured', true);
+                    break;
+            }
+        }
+        
+        $products = $query->orderBy('name', 'asc')->paginate(20);
         
         return response()->json($products);
     }
