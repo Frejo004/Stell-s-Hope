@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, Percent, Calendar, Users } from 'lucide-react';
 import { useAdminPromotions } from '../../hooks/useAdminExtended';
+import CreatePromotionModal from './CreatePromotionModal';
 
 interface AdminPromotionsProps {
   onNavigate: (page: string) => void;
@@ -9,6 +10,7 @@ interface AdminPromotionsProps {
 export default function AdminPromotions({ onNavigate }: AdminPromotionsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { promotions, stats, loading } = useAdminPromotions();
 
   if (loading) {
@@ -19,7 +21,7 @@ export default function AdminPromotions({ onNavigate }: AdminPromotionsProps) {
     );
   }
 
-  const filteredPromotions = promotions.filter(promo => {
+  const filteredPromotions = (promotions || []).filter(promo => {
     const matchesSearch = promo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          promo.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || promo.status === statusFilter;
@@ -48,7 +50,10 @@ export default function AdminPromotions({ onNavigate }: AdminPromotionsProps) {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Gestion des Promotions</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+        <button 
+          onClick={() => setShowCreateModal(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+        >
           <Plus className="w-4 h-4" />
           <span>Nouvelle Promotion</span>
         </button>
@@ -57,19 +62,19 @@ export default function AdminPromotions({ onNavigate }: AdminPromotionsProps) {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
+          <div className="text-2xl font-bold text-gray-900">{stats?.total || 0}</div>
           <div className="text-sm text-gray-600">Total Promotions</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+          <div className="text-2xl font-bold text-green-600">{stats?.active || 0}</div>
           <div className="text-sm text-gray-600">Actives</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">{stats.used}</div>
+          <div className="text-2xl font-bold text-blue-600">{stats?.used || 0}</div>
           <div className="text-sm text-gray-600">Utilisations</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-purple-600">{stats.usageRate}%</div>
+          <div className="text-2xl font-bold text-purple-600">{stats?.usageRate || 0}%</div>
           <div className="text-sm text-gray-600">Taux d'Usage</div>
         </div>
       </div>
@@ -196,6 +201,25 @@ export default function AdminPromotions({ onNavigate }: AdminPromotionsProps) {
           </table>
         </div>
       </div>
+      <CreatePromotionModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={async (data) => {
+          try {
+            const response = await fetch('http://localhost:8000/api/admin/promotions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            if (response.ok) {
+              setShowCreateModal(false);
+              window.location.reload();
+            }
+          } catch (error) {
+            console.error('Erreur création promotion:', error);
+          }
+        }}
+      />
     </div>
   );
 }

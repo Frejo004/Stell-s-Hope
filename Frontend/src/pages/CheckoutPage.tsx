@@ -21,10 +21,16 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
     sameAsShipping: true
   });
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [promoError, setPromoError] = useState('');
 
   const shipping = 5.99;
-  const tax = cartTotal * 0.2;
-  const total = cartTotal + shipping + tax;
+  const discount = appliedPromo ? 
+    (appliedPromo.type === 'percentage' ? cartTotal * (appliedPromo.value / 100) : appliedPromo.value) : 0;
+  const discountedSubtotal = cartTotal - discount;
+  const tax = discountedSubtotal * 0.2;
+  const total = discountedSubtotal + shipping + tax;
 
   const handleNextStep = () => {
     if (checkoutState.step === 'shipping') {
@@ -32,6 +38,34 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
     } else if (checkoutState.step === 'payment') {
       setCheckoutState(prev => ({ ...prev, step: 'review' }));
     }
+  };
+
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) return;
+    
+    try {
+      const response = await fetch('http://localhost:8000/api/promotions/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode, amount: cartTotal })
+      });
+      
+      if (response.ok) {
+        const promo = await response.json();
+        setAppliedPromo(promo);
+        setPromoError('');
+      } else {
+        setPromoError('Code promo invalide');
+      }
+    } catch {
+      setPromoError('Erreur lors de la validation');
+    }
+  };
+
+  const removePromoCode = () => {
+    setAppliedPromo(null);
+    setPromoCode('');
+    setPromoError('');
   };
 
   const handlePlaceOrder = () => {
@@ -62,9 +96,11 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
         isDefault: true
       },
       subtotal: cartTotal,
+      discount: discount,
       shipping: shipping,
       tax: tax,
       total: total,
+      promoCode: appliedPromo?.code,
       status: 'confirmed',
       createdAt: new Date().toISOString(),
       paymentMethod: checkoutState.paymentMethod || 'card'
@@ -249,6 +285,12 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
                 <span>Sous-total</span>
                 <span>{cartTotal.toFixed(2)} €</span>
               </div>
+              {appliedPromo && (
+                <div className="flex justify-between text-green-600">
+                  <span>Réduction ({appliedPromo.code})</span>
+                  <span>-{discount.toFixed(2)} €</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Livraison</span>
                 <span>{shipping.toFixed(2)} €</span>
@@ -264,6 +306,34 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
               </div>
             </div>
             
+            {/* Code Promo */}
+            <div className="mt-4 space-y-2">
+              {!appliedPromo ? (
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Code promo"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    className="flex-1 border rounded px-3 py-2 text-sm"
+                  />
+                  <button
+                    onClick={applyPromoCode}
+                    className="bg-gray-800 text-white px-4 py-2 rounded text-sm hover:bg-gray-900"
+                  >
+                    Appliquer
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between bg-green-50 p-2 rounded">
+                  <span className="text-green-800 text-sm font-medium">{appliedPromo.code} appliqué</span>
+                  <button onClick={removePromoCode} className="text-red-600 text-sm hover:text-red-800">
+                    Retirer
+                  </button>
+                </div>
+              )}
+              {promoError && <p className="text-red-600 text-sm">{promoError}</p>}
+            </div>
             <button
               onClick={checkoutState.step === 'review' ? handlePlaceOrder : handleNextStep}
               className="w-full bg-black text-white py-3 rounded mt-6 hover:bg-gray-900"

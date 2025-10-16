@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\PromotionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,10 @@ Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
 // File routes (public)
 Route::get('/images/{path}', [FileController::class, 'getImage'])->where('path', '.*');
+
+// Promotion validation (public)
+Route::post('/promotions/validate', [PromotionController::class, 'validate']);
+Route::post('/promotions/apply', [PromotionController::class, 'apply']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
