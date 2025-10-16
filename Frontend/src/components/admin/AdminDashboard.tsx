@@ -229,17 +229,29 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           </div>
           <div className="p-4">
             <div className="space-y-3">
-              {recentActivity.slice(0, 4).map((activity, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
-                    <activity.icon className={`w-3 h-3 ${activity.color}`} />
+              {recentActivity.slice(0, 4).map((activity, index) => {
+                const getIcon = (type: string) => {
+                  switch(type) {
+                    case 'order': return ShoppingCart;
+                    case 'customer': return Users;
+                    case 'review': return Star;
+                    case 'stock': return AlertCircle;
+                    default: return ShoppingCart;
+                  }
+                };
+                const IconComponent = getIcon(activity.type);
+                return (
+                  <div key={index} className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+                      <IconComponent className={`w-3 h-3 ${activity.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 truncate">{activity.message}</p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 truncate">{activity.message}</p>
-                    <p className="text-xs text-gray-500">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
