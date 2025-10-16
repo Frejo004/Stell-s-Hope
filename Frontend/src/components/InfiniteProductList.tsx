@@ -26,7 +26,7 @@ const InfiniteProductList: React.FC = () => {
               />
               <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button
-                  onClick={() => toggleWishlist(product.id)}
+                  onClick={() => toggleWishlist(product)}
                   className={`p-2 rounded-full shadow-md ${
                     isInWishlist(product.id) 
                       ? 'bg-red-500 text-white' 

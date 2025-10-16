@@ -14,21 +14,12 @@ class AdminSidebarController extends Controller
     public function getSidebarStats()
     {
         $stats = [
-            'notifications' => $this->getTotalNotifications(),
-            'messages' => Ticket::where('status', 'open')->count(),
-            'pendingOrders' => Order::where('status', 'pending')->count(),
-            'lowStock' => Product::where('stock_quantity', '<=', 5)->count(),
-            'pendingReviews' => Review::where('is_approved', false)->count(),
-            'supportTickets' => Ticket::where('priority', 'high')->count()
+            'orders' => Order::count(),
+            'low_stock' => Product::where('stock_quantity', '<=', 5)->count(),
+            'pending_reviews' => 0, // Review model doesn't exist yet
+            'support_tickets' => Ticket::where('status', 'open')->count()
         ];
 
         return response()->json($stats);
-    }
-
-    private function getTotalNotifications()
-    {
-        return Order::where('status', 'pending')->count() +
-               Product::where('stock_quantity', '<=', 5)->count() +
-               Review::where('is_approved', false)->count();
     }
 }

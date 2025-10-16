@@ -25,12 +25,12 @@ export default function AdminLayout() {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'products', label: 'Produits', icon: Package },
-    { id: 'orders', label: 'Commandes', icon: ShoppingCart, badge: stats.pendingOrders },
+    { id: 'orders', label: 'Commandes', icon: ShoppingCart, badge: stats.orders },
     { id: 'customers', label: 'Clients', icon: Users },
     { id: 'categories', label: 'Catégories', icon: Tag },
-    { id: 'inventory', label: 'Stocks', icon: Archive, badge: stats.lowStock },
-    { id: 'reviews', label: 'Avis', icon: Star, badge: stats.pendingReviews },
-    { id: 'support', label: 'Support', icon: HelpCircle, badge: stats.supportTickets },
+    { id: 'inventory', label: 'Stocks', icon: Archive, badge: stats.low_stock },
+    { id: 'reviews', label: 'Avis', icon: Star, badge: stats.pending_reviews },
+    { id: 'support', label: 'Support', icon: HelpCircle, badge: stats.support_tickets },
     { id: 'content', label: 'Contenu', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'promotions', label: 'Promotions', icon: Percent },
@@ -175,9 +175,9 @@ export default function AdminLayout() {
             <div className="relative">
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <Bell className="w-5 h-5" />
-                {stats.notifications > 0 && (
+                {(stats.low_stock + stats.support_tickets) > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {stats.notifications > 99 ? '99+' : stats.notifications}
+                    {(stats.low_stock + stats.support_tickets) > 99 ? '99+' : (stats.low_stock + stats.support_tickets)}
                   </span>
                 )}
               </button>
@@ -185,9 +185,9 @@ export default function AdminLayout() {
             <div className="relative">
               <button className="p-2 text-gray-400 hover:text-gray-600">
                 <MessageSquare className="w-5 h-5" />
-                {stats.messages > 0 && (
+                {stats.support_tickets > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {stats.messages > 99 ? '99+' : stats.messages}
+                    {stats.support_tickets > 99 ? '99+' : stats.support_tickets}
                   </span>
                 )}
               </button>

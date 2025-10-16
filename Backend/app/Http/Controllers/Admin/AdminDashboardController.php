@@ -77,10 +77,10 @@ class AdminDashboardController extends Controller
         ];
         
         $quickStats = [
-            'active_promotions' => 3,
-            'shipping_methods' => 4,
-            'payment_methods' => 4,
-            'pending_reviews' => 2,
+            'active_promotions' => 0,
+            'shipping_methods' => 0,
+            'payment_methods' => 0,
+            'pending_reviews' => 0,
             'support_tickets' => Ticket::where('status', 'open')->count(),
             'low_stock' => Product::where('stock_quantity', '<', 10)->count()
         ];
@@ -96,38 +96,45 @@ class AdminDashboardController extends Controller
             ];
         });
         
-        $topProductsData = Product::where('is_active', true)->latest()->take(5)->get()->map(function($product, $index) {
-            $sales = rand(10, 60);
-            return [
-                'name' => $product->name,
-                'sales' => $sales,
-                'revenue' => round($product->price * $sales) . '€'
-            ];
-        });
+        $topProductsData = Product::where('is_active', true)
+            ->take(5)
+            ->get()
+            ->map(function($product) {
+                return [
+                    'name' => $product->name,
+                    'sales' => 0,
+                    'revenue' => '0€'
+                ];
+            });
         
+        $totalOrders = Order::count();
         $performance = [
-            'conversion' => rand(70, 85),
-            'satisfaction' => rand(85, 95)
+            'conversion' => $totalOrders > 0 ? min(round(($totalOrders / 1000) * 100), 100) : 0,
+            'satisfaction' => 0
         ];
         
+        $visitors = 1000;
+        $orders = Order::count();
+        $payments = Order::where('status', 'delivered')->count();
+        
         $salesFunnel = [
-            ['name' => 'Visiteurs', 'value' => rand(2000, 3000), 'percentage' => 100, 'color' => 'bg-blue-500'],
-            ['name' => 'Ajouts Panier', 'value' => rand(1200, 1800), 'percentage' => 65, 'color' => 'bg-green-500'],
-            ['name' => 'Commandes', 'value' => rand(800, 1200), 'percentage' => 45, 'color' => 'bg-yellow-500'],
-            ['name' => 'Paiements', 'value' => rand(600, 1000), 'percentage' => 38, 'color' => 'bg-purple-500']
+            ['name' => 'Visiteurs', 'value' => $visitors, 'percentage' => 100, 'color' => 'bg-blue-500'],
+            ['name' => 'Ajouts Panier', 'value' => 0, 'percentage' => 0, 'color' => 'bg-green-500'],
+            ['name' => 'Commandes', 'value' => $orders, 'percentage' => $visitors > 0 ? round(($orders / $visitors) * 100) : 0, 'color' => 'bg-yellow-500'],
+            ['name' => 'Paiements', 'value' => $payments, 'percentage' => $visitors > 0 ? round(($payments / $visitors) * 100) : 0, 'color' => 'bg-purple-500']
         ];
         
         $paymentMethods = [
-            ['name' => 'Carte Bancaire', 'percentage' => 67, 'transactions' => rand(1000, 1500)],
-            ['name' => 'PayPal', 'percentage' => 23, 'transactions' => rand(400, 700)],
-            ['name' => 'Virement', 'percentage' => 8, 'transactions' => rand(50, 150)],
-            ['name' => 'Autres', 'percentage' => 2, 'transactions' => rand(10, 50)]
+            ['name' => 'Carte Bancaire', 'percentage' => 0, 'transactions' => 0],
+            ['name' => 'PayPal', 'percentage' => 0, 'transactions' => 0],
+            ['name' => 'Virement', 'percentage' => 0, 'transactions' => 0],
+            ['name' => 'Autres', 'percentage' => 0, 'transactions' => 0]
         ];
         
         $liveMetrics = [
-            'online_visitors' => rand(8, 25),
-            'active_carts' => rand(5, 15),
-            'orders_per_hour' => round(Order::where('created_at', '>=', Carbon::now()->subHour())->count(), 1),
+            'online_visitors' => 0,
+            'active_carts' => 0,
+            'orders_per_hour' => Order::where('created_at', '>=', Carbon::now()->subHour())->count(),
             'today_revenue' => Order::where('status', 'delivered')
                 ->whereDate('created_at', Carbon::today())
                 ->sum('total_amount')
@@ -152,9 +159,9 @@ class AdminDashboardController extends Controller
             'category_stats' => $categoryStats,
             'performance' => $performance,
             'sales_funnel' => $salesFunnel,
-            'sales_funnel_conversion' => '38.0%',
+            'sales_funnel_conversion' => $visitors > 0 ? round(($payments / $visitors) * 100, 1) . '%' : '0%',
             'payment_methods' => $paymentMethods,
-            'payment_success_rate' => '94.2%'
+            'payment_success_rate' => $totalOrders > 0 ? round(($payments / $totalOrders) * 100, 1) . '%' : '0%'
         ];
 
         return response()->json($data);

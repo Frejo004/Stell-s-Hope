@@ -27,10 +27,19 @@ export const useWishlist = () => {
     return wishlist.some(item => item.id === productId);
   };
 
+  const toggleWishlist = (product: Product) => {
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
+
   return {
     wishlist,
     addToWishlist,
     removeFromWishlist,
-    isInWishlist
+    isInWishlist,
+    toggleWishlist
   };
 };

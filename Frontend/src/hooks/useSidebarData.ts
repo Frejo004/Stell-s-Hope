@@ -2,22 +2,18 @@ import { useState, useEffect } from 'react';
 import { adminService } from '../services/adminService';
 
 interface SidebarStats {
-  notifications: number;
-  messages: number;
-  pendingOrders: number;
-  lowStock: number;
-  pendingReviews: number;
-  supportTickets: number;
+  orders: number;
+  low_stock: number;
+  pending_reviews: number;
+  support_tickets: number;
 }
 
 export const useSidebarData = () => {
   const [stats, setStats] = useState<SidebarStats>({
-    notifications: 0,
-    messages: 0,
-    pendingOrders: 0,
-    lowStock: 0,
-    pendingReviews: 0,
-    supportTickets: 0
+    orders: 0,
+    low_stock: 0,
+    pending_reviews: 0,
+    support_tickets: 0
   });
   const [loading, setLoading] = useState(true);
 
