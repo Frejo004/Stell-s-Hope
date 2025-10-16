@@ -34,10 +34,38 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   }
 
   const stats = [
-    { title: 'Chiffre d\'Affaires', value: `${dashboardData?.stats?.revenue || 0}€`, change: '+12.5%', icon: DollarSign, color: 'bg-green-500', trend: 'up' },
-    { title: 'Commandes', value: dashboardData?.stats?.orders || 0, change: '+8.2%', icon: ShoppingCart, color: 'bg-blue-500', trend: 'up' },
-    { title: 'Clients', value: dashboardData?.stats?.customers || 0, change: '+15.3%', icon: Users, color: 'bg-purple-500', trend: 'up' },
-    { title: 'Panier Moyen', value: `${Math.round(dashboardData?.stats?.average_order || 0)}€`, change: '-2.1%', icon: Package, color: 'bg-orange-500', trend: 'down' }
+    { 
+      title: 'Chiffre d\'Affaires', 
+      value: `${dashboardData?.stats?.revenue || 0}€`, 
+      change: dashboardData?.stats?.revenue_change || '+0%', 
+      icon: DollarSign, 
+      color: 'bg-green-500', 
+      trend: (dashboardData?.stats?.revenue_change || '').startsWith('-') ? 'down' : 'up' 
+    },
+    { 
+      title: 'Commandes', 
+      value: dashboardData?.stats?.orders || 0, 
+      change: dashboardData?.stats?.orders_change || '+0%', 
+      icon: ShoppingCart, 
+      color: 'bg-blue-500', 
+      trend: (dashboardData?.stats?.orders_change || '').startsWith('-') ? 'down' : 'up' 
+    },
+    { 
+      title: 'Clients', 
+      value: dashboardData?.stats?.customers || 0, 
+      change: dashboardData?.stats?.customers_change || '+0%', 
+      icon: Users, 
+      color: 'bg-purple-500', 
+      trend: (dashboardData?.stats?.customers_change || '').startsWith('-') ? 'down' : 'up' 
+    },
+    { 
+      title: 'Panier Moyen', 
+      value: `${Math.round(dashboardData?.stats?.average_order || 0)}€`, 
+      change: dashboardData?.stats?.average_order_change || '+0%', 
+      icon: Package, 
+      color: 'bg-orange-500', 
+      trend: (dashboardData?.stats?.average_order_change || '').startsWith('-') ? 'down' : 'up' 
+    }
   ];
 
   const recentOrders = dashboardData?.recent_orders?.map((order: any) => ({
@@ -49,47 +77,26 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   })) || [];
 
   const quickStats = [
-    { label: 'Promotions Actives', value: '3', icon: Percent, color: 'text-green-600', bg: 'bg-green-100' },
-    { label: 'Modes Livraison', value: '4', icon: Truck, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { label: 'Moyens Paiement', value: '4', icon: CreditCard, color: 'text-purple-600', bg: 'bg-purple-100' },
-    { label: 'Avis en Attente', value: '2', icon: Star, color: 'text-yellow-600', bg: 'bg-yellow-100' },
-    { label: 'Tickets Support', value: '1', icon: HelpCircle, color: 'text-red-600', bg: 'bg-red-100' },
-    { label: 'Stock Faible', value: '3', icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-100' }
+    { label: 'Promotions Actives', value: dashboardData?.quick_stats?.active_promotions || '0', icon: Percent, color: 'text-green-600', bg: 'bg-green-100' },
+    { label: 'Modes Livraison', value: dashboardData?.quick_stats?.shipping_methods || '0', icon: Truck, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { label: 'Moyens Paiement', value: dashboardData?.quick_stats?.payment_methods || '0', icon: CreditCard, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { label: 'Avis en Attente', value: dashboardData?.quick_stats?.pending_reviews || '0', icon: Star, color: 'text-yellow-600', bg: 'bg-yellow-100' },
+    { label: 'Tickets Support', value: dashboardData?.quick_stats?.support_tickets || '0', icon: HelpCircle, color: 'text-red-600', bg: 'bg-red-100' },
+    { label: 'Stock Faible', value: dashboardData?.quick_stats?.low_stock || '0', icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-100' }
   ];
 
-  const topProducts = dashboardData?.top_products?.map((product: any) => ({
-    name: product.name,
-    sales: Math.floor(Math.random() * 50) + 10,
-    revenue: `${(product.price * (Math.floor(Math.random() * 50) + 10)).toFixed(0)}€`
-  })) || [];
+  const topProducts = dashboardData?.top_products || [];
 
-  const monthlyRevenue = [
-    { month: 'Jan', revenue: 15234, orders: 89, growth: 12 },
-    { month: 'Fév', revenue: 18456, orders: 102, growth: 21 },
-    { month: 'Mar', revenue: 22134, orders: 125, growth: 20 },
-    { month: 'Avr', revenue: 19876, orders: 115, growth: -10 },
-    { month: 'Mai', revenue: 25678, orders: 145, growth: 29 },
-    { month: 'Juin', revenue: 28934, orders: 167, growth: 13 }
+  const monthlyRevenue = dashboardData?.monthly_revenue || [
+    { month: 'Jan', revenue: 0, orders: 0, growth: 0 },
+    { month: 'Fév', revenue: 0, orders: 0, growth: 0 },
+    { month: 'Mar', revenue: 0, orders: 0, growth: 0 },
+    { month: 'Avr', revenue: 0, orders: 0, growth: 0 }
   ];
 
-  const categoryStats = dashboardData?.categories?.map((category: any, index: number) => {
-    const colors = ['bg-blue-500', 'bg-pink-500', 'bg-purple-500', 'bg-green-500'];
-    const totalProducts = dashboardData.categories.reduce((sum: number, cat: any) => sum + cat.products_count, 0);
-    return {
-      name: category.name,
-      sales: category.products_count,
-      percentage: totalProducts > 0 ? Math.round((category.products_count / totalProducts) * 100) : 0,
-      color: colors[index % colors.length]
-    };
-  }) || [];
+  const categoryStats = dashboardData?.category_stats || [];
 
-  const recentActivity = [
-    { type: 'order', message: 'Nouvelle commande #CMD234', time: '2 min', icon: ShoppingCart, color: 'text-blue-600' },
-    { type: 'customer', message: 'Nouveau client inscrit', time: '15 min', icon: Users, color: 'text-green-600' },
-    { type: 'review', message: 'Nouvel avis 5 étoiles', time: '1h', icon: Star, color: 'text-yellow-600' },
-    { type: 'stock', message: 'Stock faible: Jean Slim', time: '2h', icon: AlertCircle, color: 'text-red-600' },
-    { type: 'payment', message: 'Paiement reçu: 156€', time: '3h', icon: DollarSign, color: 'text-purple-600' }
-  ];
+  const recentActivity = dashboardData?.recent_activity || [];
 
   return (
     <div className="p-6 space-y-6">
@@ -245,7 +252,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <div className="p-4">
             <div className="space-y-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">12</div>
+                <div className="text-2xl font-bold text-green-600">{dashboardData?.live_metrics?.online_visitors || 0}</div>
                 <div className="text-xs text-gray-600">Visiteurs en ligne</div>
                 <div className="flex justify-center mt-2">
                   <div className="flex space-x-1">
@@ -259,15 +266,15 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <div className="border-t pt-3">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs text-gray-600">Paniers actifs</span>
-                  <span className="text-sm font-semibold text-blue-600">8</span>
+                  <span className="text-sm font-semibold text-blue-600">{dashboardData?.live_metrics?.active_carts || 0}</span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs text-gray-600">Commandes/h</span>
-                  <span className="text-sm font-semibold text-purple-600">3.2</span>
+                  <span className="text-sm font-semibold text-purple-600">{dashboardData?.live_metrics?.orders_per_hour || 0}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-600">CA aujourd'hui</span>
-                  <span className="text-sm font-semibold text-green-600">1,234€</span>
+                  <span className="text-sm font-semibold text-green-600">{dashboardData?.live_metrics?.today_revenue || 0}€</span>
                 </div>
               </div>
             </div>
@@ -339,12 +346,12 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                       {index + 1}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900 text-xs truncate">{product.name.split(' ').slice(0, 2).join(' ')}</p>
-                      <p className="text-xs text-gray-500">{product.sales} ventes</p>
+                      <p className="font-medium text-gray-900 text-xs truncate">{product.name?.split(' ').slice(0, 2).join(' ')}</p>
+                      <p className="text-xs text-gray-500">{product.sales || 0} ventes</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900 text-xs">{product.revenue}</p>
+                    <p className="font-semibold text-gray-900 text-xs">{product.revenue || '0€'}</p>
                   </div>
                 </div>
               ))}
@@ -437,63 +444,26 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                  <span className="text-sm font-medium">Visiteurs</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '100%' }}></div>
+              {(dashboardData?.sales_funnel || []).map((step, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-4 h-4 ${step.color} rounded`}></div>
+                    <span className="text-sm font-medium">{step.name}</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12">2,456</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-4 h-4 bg-green-500 rounded"></div>
-                  <span className="text-sm font-medium">Ajouts Panier</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div className={`${step.color} h-2 rounded-full`} style={{ width: `${step.percentage}%` }}></div>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-900 w-12">{step.value}</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12">1,596</span>
                 </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-4 h-4 bg-yellow-500 rounded"></div>
-                  <span className="text-sm font-medium">Commandes</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '45%' }}></div>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12">1,105</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-4 h-4 bg-purple-500 rounded"></div>
-                  <span className="text-sm font-medium">Paiements</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: '38%' }}></div>
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 w-12">934</span>
-                </div>
-              </div>
+              ))}
             </div>
             
             <div className="mt-6 pt-4 border-t border-gray-100">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Taux de conversion global</span>
-                <span className="font-semibold text-green-600">38.0%</span>
+                <span className="font-semibold text-green-600">{dashboardData?.sales_funnel_conversion || '0%'}</span>
               </div>
             </div>
           </div>
@@ -506,55 +476,29 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <CreditCard className="w-5 h-5 text-blue-600" />
-                  <span className="text-sm font-medium">Carte Bancaire</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-gray-900">67%</div>
-                  <div className="text-xs text-gray-500">1,245 trans.</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <DollarSign className="w-5 h-5 text-purple-600" />
-                  <span className="text-sm font-medium">PayPal</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-gray-900">23%</div>
-                  <div className="text-xs text-gray-500">567 trans.</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Truck className="w-5 h-5 text-green-600" />
-                  <span className="text-sm font-medium">Virement</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-gray-900">8%</div>
-                  <div className="text-xs text-gray-500">89 trans.</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <Percent className="w-5 h-5 text-gray-600" />
-                  <span className="text-sm font-medium">Autres</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-gray-900">2%</div>
-                  <div className="text-xs text-gray-500">23 trans.</div>
-                </div>
-              </div>
+              {(dashboardData?.payment_methods || []).map((method, index) => {
+                const icons = [CreditCard, DollarSign, Truck, Percent];
+                const colors = ['text-blue-600', 'text-purple-600', 'text-green-600', 'text-gray-600'];
+                const Icon = icons[index % icons.length];
+                return (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Icon className={`w-5 h-5 ${colors[index % colors.length]}`} />
+                      <span className="text-sm font-medium">{method.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-semibold text-gray-900">{method.percentage}%</div>
+                      <div className="text-xs text-gray-500">{method.transactions} trans.</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             
             <div className="mt-6 pt-4 border-t border-gray-100">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Taux de succès moyen</span>
-                <span className="font-semibold text-green-600">94.2%</span>
+                <span className="font-semibold text-green-600">{dashboardData?.payment_success_rate || '0%'}</span>
               </div>
             </div>
           </div>
