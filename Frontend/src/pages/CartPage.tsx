@@ -51,7 +51,7 @@ export default function CartPage({ onClose }: CartPageProps) {
                       <p className="text-sm text-gray-600 mb-2">
                         Couleur: {item.color} • Taille: {item.size}
                       </p>
-                      <p className="font-semibold">{item.product.price.toFixed(2)}€</p>
+                      <p className="font-semibold">{Number(item.product.price || 0).toFixed(2)}€</p>
                       
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center space-x-3">

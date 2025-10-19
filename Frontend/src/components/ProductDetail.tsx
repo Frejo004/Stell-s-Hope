@@ -145,12 +145,12 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               
               <div className="flex items-baseline space-x-4 mb-6">
                 <span className="text-4xl font-bold text-gray-900">
-                  {typeof product.price === 'number' ? product.price.toFixed(2) : product.price} €
+                  {Number(product.price || 0).toFixed(2)} €
                 </span>
                 {product.originalPrice && (
                   <>
                     <span className="text-2xl text-gray-500 line-through">
-                      {typeof product.originalPrice === 'number' ? product.originalPrice.toFixed(2) : product.originalPrice} €
+                      {Number(product.originalPrice || 0).toFixed(2)} €
                     </span>
                     <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-medium">
                       Livraison gratuite
@@ -439,7 +439,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   />
                 </div>
                 <h3 className="font-medium text-gray-900 mb-2">{relatedProduct.name}</h3>
-                <p className="text-lg font-semibold">{typeof relatedProduct.price === 'number' ? relatedProduct.price.toFixed(2) : relatedProduct.price} €</p>
+                <p className="text-lg font-semibold">{Number(relatedProduct.price || 0).toFixed(2)} €</p>
               </div>
             ))}
           </div>

@@ -69,10 +69,10 @@ export default function WishlistPage({ onClose, onProductClick }: WishlistPagePr
                     {product.name}
                   </h3>
                   <div className="flex items-center space-x-2">
-                    <span className="font-semibold">{product.price.toFixed(2)}€</span>
+                    <span className="font-semibold">{Number(product.price || 0).toFixed(2)}€</span>
                     {product.originalPrice && (
                       <span className="text-sm text-gray-500 line-through">
-                        {product.originalPrice.toFixed(2)}€
+                        {Number(product.originalPrice || 0).toFixed(2)}€
                       </span>
                     )}
                   </div>

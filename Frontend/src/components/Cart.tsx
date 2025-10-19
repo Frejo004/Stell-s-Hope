@@ -68,7 +68,7 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
                         {item.color} • {item.size}
                       </p>
                       <p className="font-semibold text-sm">
-                        {item.product.price.toFixed(2)} €
+                        {Number(item.product.price || 0).toFixed(2)} €
                       </p>
                       
                       <div className="flex items-center justify-between mt-2">
