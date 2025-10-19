@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Truck, CreditCard, CheckCircle } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { CheckoutState, Order } from '../types/order';
 import OrderConfirmationPage from './OrderConfirmationPage';
@@ -13,6 +14,7 @@ interface CheckoutPageProps {
 export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageProps) {
   const { cart, cartTotal, clearCart } = useCart();
   const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     step: 'shipping',
     shippingAddress: {},
@@ -125,11 +127,14 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
     return (
       <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Connexion requise</h2>
+          <h2 className="text-2xl font-bold mb-4">Vous devez être connecté</h2>
           <p className="text-gray-600 mb-6">Veuillez vous connecter pour finaliser votre commande</p>
-          <button onClick={onClose} className="bg-black text-white px-6 py-2 rounded">
-            Retour
-          </button>
+          <div className="flex justify-center space-x-4">
+            <button onClick={() => navigate('/login', { state: { from: '/cart' } })} className="bg-black text-white px-6 py-2 rounded">
+              Se connecter
+            </button>
+            <button onClick={onClose} className="border border-gray-300 px-6 py-2 rounded">Retour</button>
+          </div>
         </div>
       </div>
     );

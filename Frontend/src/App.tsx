@@ -1,6 +1,5 @@
 import React from 'react';
 import AppRouter from './routes/AppRouter';
-import Cart from './components/Cart';
 import ToastContainer from './components/ToastContainer';
 import { useToast } from './hooks/useToast';
 import { useOrders } from './hooks/useOrders';
@@ -22,7 +21,6 @@ function App() {
   return (
     <>
       <AppRouter onOrderComplete={handleOrderComplete} />
-      <Cart onOrderComplete={handleOrderComplete} />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>
   );

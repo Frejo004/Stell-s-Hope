@@ -24,6 +24,7 @@ import CheckoutPage from '../pages/CheckoutPage';
 import OrderConfirmationPage from '../pages/OrderConfirmationPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import LoginPage from '../pages/LoginPage';
+import Cart from '../components/Cart';
 import RegisterPage from '../pages/RegisterPage';
 import OrderTrackingPage from '../pages/OrderTrackingPage';
 import WishlistPage from '../pages/WishlistPage';
@@ -131,7 +132,8 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
       <Route 
         path="/*" 
         element={
-          <div className="min-h-screen bg-white">
+          <>
+            <div className="min-h-screen bg-white">
             <Header
               onCategoryChange={handleCategoryChange}
               currentCategory={getCurrentCategory()}
@@ -335,6 +337,8 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
             </main>
             <Footer />
           </div>
+            <Cart onOrderComplete={onOrderComplete} />
+          </>
         }
       />
     </Routes>

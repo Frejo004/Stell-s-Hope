@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 
 interface CartPageProps {
@@ -8,6 +9,7 @@ interface CartPageProps {
 
 export default function CartPage({ onClose }: CartPageProps) {
   const { cart, updateQuantity, removeFromCart, cartTotal, cartItemsCount } = useCart();
+  const navigate = useNavigate();
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
@@ -107,7 +109,7 @@ export default function CartPage({ onClose }: CartPageProps) {
                 </div>
                 
                 <button 
-                  onClick={() => window.location.href = '/checkout'}
+                  onClick={() => navigate('/checkout')}
                   className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-900 mb-3"
                 >
                   Commander

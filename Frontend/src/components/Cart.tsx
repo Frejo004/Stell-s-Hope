@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
+import { useNavigate } from 'react-router-dom';
 import CheckoutPage from '../pages/CheckoutPage';
 import { Order } from '../types/order';
 
@@ -18,7 +19,7 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
     cartTotal,
     cartItemsCount
   } = useCart();
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
@@ -114,10 +115,7 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
               
               <div className="space-y-2">
                 <button
-                  onClick={() => {
-                    setIsOpen(false);
-                    setIsCheckoutOpen(true);
-                  }}
+                  onClick={() => navigate('/checkout')}
                   className="w-full bg-black text-white py-3 rounded font-medium hover:bg-gray-900 transition-colors"
                 >
                   Commander
@@ -140,13 +138,6 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
           )}
         </div>
       </div>
-      
-      {isCheckoutOpen && (
-        <CheckoutPage 
-          onClose={() => setIsCheckoutOpen(false)}
-          onOrderComplete={onOrderComplete}
-        />
-      )}
     </div>
   );
 }
