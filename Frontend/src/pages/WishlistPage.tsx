@@ -14,16 +14,15 @@ export default function WishlistPage({ onClose, onProductClick }: WishlistPagePr
   const { addToCart } = useCart();
 
   const handleAddToCart = (product: Product) => {
-    addToCart(product, product.sizes[0], product.colors[0], 1);
+    // Assurez-vous que les tailles et couleurs existent avant de les utiliser
+    const size = product.sizes?.[0] || '';
+    const color = product.colors?.[0] || '';
+    addToCart(product, size, color, 1);
   };
 
   return (
-    <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
-      <div className="max-w-6xl mx-auto p-6">
-        <button onClick={onClose} className="mb-6 flex items-center text-gray-600 hover:text-black">
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Retour
-        </button>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Mes Favoris</h1>
