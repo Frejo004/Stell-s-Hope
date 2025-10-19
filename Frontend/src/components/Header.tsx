@@ -1,6 +1,7 @@
 import React, { useState, memo, useCallback, useMemo } from 'react';
 import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
+import { useWishlist } from '../hooks/useWishlist';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
 import SearchPage from '../pages/SearchPage';
@@ -22,6 +23,7 @@ const Header = memo(({ onCategoryChange, currentCategory, products, onProductCli
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const { cartItemsCount, setIsOpen } = useCart();
+  const { wishlist } = useWishlist();
   const { user, isAuthenticated, logout } = useAuth();
 
   const handleSearch = useCallback((query: string) => {
@@ -153,9 +155,14 @@ const Header = memo(({ onCategoryChange, currentCategory, products, onProductCli
               )}
               <button 
                 onClick={() => window.location.href = '/wishlist'}
-                className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                className="p-2 text-gray-600 hover:text-gray-900 transition-colors relative"
               >
                 <Heart className="w-6 h-6" />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {wishlist.length}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => setIsOpen(true)}

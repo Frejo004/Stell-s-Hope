@@ -45,7 +45,7 @@ const InfiniteProductList: React.FC = () => {
                   </svg>
                 </button>
                 <button
-                  onClick={() => addToCart(product.id)}
+                  onClick={() => addToCart({ productId: product.id, quantity: 1 })}
                   className="p-2 bg-white text-gray-600 rounded-full shadow-md hover:bg-blue-600 hover:text-white transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
