@@ -27,7 +27,13 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
           console.error('Failed to fetch wishlist:', error);
         }
       } else {
-        setWishlist([]);
+        // Charger depuis localStorage si pas connecté
+        const saved = localStorage.getItem('wishlist');
+        if (saved) {
+          setWishlist(JSON.parse(saved));
+        } else {
+          setWishlist([]);
+        }
       }
     };
 
@@ -35,22 +41,34 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   }, [user]);
 
   const addToWishlist = async (product: Product) => {
-    if (!user) return;
-    try {
-      await apiAddToWishlist(product.id);
-      setWishlist(prev => [...prev, product]);
-    } catch (error) {
-      console.error('Failed to add to wishlist:', error);
+    if (user) {
+      try {
+        await apiAddToWishlist(product.id);
+        setWishlist(prev => [...prev, product]);
+      } catch (error) {
+        console.error('Failed to add to wishlist:', error);
+      }
+    } else {
+      // Utiliser localStorage si pas connecté
+      const newWishlist = [...wishlist, product];
+      setWishlist(newWishlist);
+      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
     }
   };
 
   const removeFromWishlist = async (productId: number) => {
-    if (!user) return;
-    try {
-      await apiRemoveFromWishlist(productId);
-      setWishlist(prev => prev.filter(p => p.id !== productId));
-    } catch (error) {
-      console.error('Failed to remove from wishlist:', error);
+    if (user) {
+      try {
+        await apiRemoveFromWishlist(productId);
+        setWishlist(prev => prev.filter(p => p.id !== productId));
+      } catch (error) {
+        console.error('Failed to remove from wishlist:', error);
+      }
+    } else {
+      // Utiliser localStorage si pas connecté
+      const newWishlist = wishlist.filter(p => p.id !== productId);
+      setWishlist(newWishlist);
+      localStorage.setItem('wishlist', JSON.stringify(newWishlist));
     }
   };
 

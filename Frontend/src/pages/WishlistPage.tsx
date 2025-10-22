@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
-import { useWishlist } from '../hooks/useWishlist';
+import { useWishlist } from '../contexts/WishlistContext';
 import { useCart } from '../hooks/useCart';
 import { Product } from '../types';
 

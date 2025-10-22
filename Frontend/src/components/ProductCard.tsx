@@ -1,7 +1,7 @@
 import React from 'react';
 import { Heart, Star } from 'lucide-react';
 import { Product } from '../types';
-import { useWishlist } from '../hooks/useWishlist';
+import { useWishlist } from '../contexts/WishlistContext';
 
 interface ProductCardProps {
   product: Product;
@@ -9,8 +9,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onProductClick }: ProductCardProps) {
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const inWishlist = isInWishlist(product.id);
+  const { addToWishlist, removeFromWishlist, isProductInWishlist } = useWishlist();
+  const inWishlist = isProductInWishlist(product.id);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();

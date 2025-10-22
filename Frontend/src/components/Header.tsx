@@ -1,7 +1,7 @@
 import React, { useState, memo, useCallback, useMemo } from 'react';
 import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
-import { useWishlist } from '../hooks/useWishlist';
+import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
 import SearchPage from '../pages/SearchPage';

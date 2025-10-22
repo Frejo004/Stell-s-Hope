@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
+import { WishlistProvider } from './contexts/WishlistContext';
 import './index.css';
 
 // Gestion d'erreur globale pour les erreurs non capturées
@@ -25,7 +26,9 @@ root.render(
   <StrictMode>
     <ErrorBoundary>
       <AuthProvider>
-        <App />
+        <WishlistProvider>
+          <App />
+        </WishlistProvider>
       </AuthProvider>
     </ErrorBoundary>
   </StrictMode>
