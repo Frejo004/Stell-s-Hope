@@ -2,17 +2,24 @@ import api from './api';
 import { CartItem } from '../types';
 
 export interface AddToCartData {
-  product_id: number;
+  product_id?: number;
+  productId?: number;
   quantity: number;
 }
 
 export interface UpdateCartData {
-  cart_id: number;
+  cart_id?: number;
+  productId?: number;
   quantity: number;
 }
 
+export interface RemoveFromCartData {
+  cart_id?: number;
+  productId?: number;
+}
+
 export const cartService = {
-  getCart: async (): Promise<CartItem[]> => {
+  getCart: async (): Promise<{ items: CartItem[]; total: number; count: number }> => {
     const response = await api.get('/cart');
     return response.data;
   },
@@ -27,8 +34,8 @@ export const cartService = {
     return response.data;
   },
 
-  removeFromCart: async (cartId: number) => {
-    const response = await api.delete('/cart/remove', { data: { cart_id: cartId } });
+  removeFromCart: async (data: RemoveFromCartData) => {
+    const response = await api.delete('/cart/remove', { data });
     return response.data;
   },
 

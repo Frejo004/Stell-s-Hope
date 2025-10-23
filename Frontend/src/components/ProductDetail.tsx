@@ -26,14 +26,25 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   ).slice(0, 4);
 
   const handleAddToCart = () => {
+    console.log('🛒 handleAddToCart clicked');
+    console.log('Product ID:', product.id);
+    console.log('Quantity:', quantity);
+    console.log('addToCart function:', addToCart);
+    
     // Vérifier si product.sizes existe et a des éléments
     if (!selectedSize && product.sizes && product.sizes.length > 1) {
+      console.log('❌ Taille non sélectionnée');
       alert('Veuillez sélectionner une taille');
       return;
     }
-    // Utiliser selectedSize ou la première taille si disponible, sinon une chaîne vide
-    const size = selectedSize || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : '');
-    addToCart(product, size, selectedColor, quantity);
+    
+    try {
+      console.log('📦 Calling addToCart with:', { productId: product.id, quantity });
+      addToCart({ productId: product.id, quantity });
+      console.log('✅ addToCart called successfully');
+    } catch (error) {
+      console.error('❌ Error in addToCart:', error);
+    }
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -72,7 +83,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                 onMouseLeave={() => setIsZooming(false)}
               >
                 <img
-                  src={product.images && product.images[selectedImage] ? product.images[selectedImage] : '/placeholder.jpg'}
+                  src={product.images && Array.isArray(product.images) && product.images[selectedImage] ? product.images[selectedImage] : '/placeholder.jpg'}
                   alt={product.name}
                   className="w-full h-full object-cover transition-transform duration-200"
                   style={{
@@ -97,7 +108,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
             </div>
             
             <div className="grid grid-cols-4 gap-3">
-              {product.images && product.images.map((image, index) => (
+              {product.images && Array.isArray(product.images) && product.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -433,7 +444,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               <div key={relatedProduct.id} className="group cursor-pointer">
                 <div className="aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden mb-4">
                   <img
-                    src={relatedProduct.images && relatedProduct.images[0] ? relatedProduct.images[0] : '/placeholder.jpg'}
+                    src={relatedProduct.images && Array.isArray(relatedProduct.images) && relatedProduct.images[0] ? relatedProduct.images[0] : '/placeholder.jpg'}
                     alt={relatedProduct.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />

@@ -6,6 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
 import SearchPage from '../pages/SearchPage';
 import AccountPage from '../pages/AccountPage';
+import CartSidebar from './CartSidebar';
 import Logo from './Logo';
 import { Product } from '../types';
 
@@ -23,6 +24,9 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const { cartItemsCount, setIsOpen } = useCart();
+  
+  // Log pour debug
+  console.log('📊 Header cartItemsCount:', cartItemsCount);
   const { wishlist } = useWishlist();
   const { user, isAuthenticated, logout } = useAuth();
 
@@ -170,7 +174,10 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
                 )}
               </button>
               <button
-                onClick={() => setIsOpen(true)}
+                onClick={() => {
+                  console.log('🛒 Cart icon clicked');
+                  setIsOpen(true);
+                }}
                 className="p-2 text-gray-600 hover:text-gray-900 transition-colors relative"
               >
                 <ShoppingBag className="w-6 h-6" />
@@ -239,6 +246,8 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
       {isAccountOpen && isAuthenticated && (
         <AccountPage onClose={() => setIsAccountOpen(false)} />
       )}
+      
+      <CartSidebar />
     </header>
   );
 };
