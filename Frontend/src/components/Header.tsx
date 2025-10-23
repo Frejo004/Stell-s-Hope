@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react';
-import { useCart } from '../hooks/useCart';
+import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
 import SearchPage from '../pages/SearchPage';
 import AccountPage from '../pages/AccountPage';
-import CartSidebar from './CartSidebar';
+import CartSidebarNew from './CartSidebarNew';
 import Logo from './Logo';
 import { Product } from '../types';
 
@@ -23,17 +23,27 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
-  const { cartItemsCount, setIsOpen } = useCart();
+  const { cartItemsCount, isOpen, setIsOpen } = useCartContext();
+  
+  console.log('Header isOpen:', isOpen);
   
   // Log pour debug
   console.log('📊 Header cartItemsCount:', cartItemsCount);
   const { wishlist } = useWishlist();
   const { user, isAuthenticated, logout } = useAuth();
 
-  // Force re-render when wishlist changes
+  // Force re-render when wishlist or cart changes
   useEffect(() => {
     // This effect will run whenever wishlist changes
   }, [wishlist]);
+
+  useEffect(() => {
+    console.log('🔄 Header re-rendering, cartItemsCount:', cartItemsCount);
+  }, [cartItemsCount]);
+
+  useEffect(() => {
+    console.log('🔄 Header isOpen changed:', isOpen);
+  }, [isOpen]);
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
@@ -175,8 +185,10 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
               </button>
               <button
                 onClick={() => {
-                  console.log('🛒 Cart icon clicked');
+                  console.log('🛒 Cart icon clicked, current isOpen:', isOpen);
+                  console.log('setIsOpen function:', setIsOpen);
                   setIsOpen(true);
+                  console.log('After setIsOpen(true)');
                 }}
                 className="p-2 text-gray-600 hover:text-gray-900 transition-colors relative"
               >
@@ -247,7 +259,7 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
         <AccountPage onClose={() => setIsAccountOpen(false)} />
       )}
       
-      <CartSidebar />
+      <CartSidebarNew />
     </header>
   );
 };

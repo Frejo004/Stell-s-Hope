@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Heart, Truck, RotateCcw, Shield, Plus, Minus, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '../types';
-import { useCart } from '../hooks/useCart';
+import { useCartContext } from '../contexts/CartContext';
 import { reviews } from '../data/reviews';
 import { products } from '../data/products';
 
@@ -19,7 +19,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isZooming, setIsZooming] = useState(false);
   
-  const { addToCart } = useCart();
+  const { addToCart } = useCartContext();
   const productReviews = reviews.filter(review => review.productId === product.id);
   const relatedProducts = products.filter(p => 
     p.category === product.category && p.id !== product.id

@@ -4,6 +4,7 @@ import App from './App.tsx';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthProvider } from './contexts/AuthContext';
 import { WishlistProvider } from './contexts/WishlistContext';
+import { CartProvider } from './contexts/CartContext';
 import './index.css';
 
 // Gestion d'erreur globale pour les erreurs non capturées
@@ -27,7 +28,9 @@ root.render(
     <ErrorBoundary>
       <AuthProvider>
         <WishlistProvider>
-          <App />
+          <CartProvider>
+            <App />
+          </CartProvider>
         </WishlistProvider>
       </AuthProvider>
     </ErrorBoundary>

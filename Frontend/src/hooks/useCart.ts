@@ -20,6 +20,7 @@ export const useCart = () => {
   const [guestCart, setGuestCart] = useState<GuestCartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
   const { isAuthenticated } = useAuth();
 
   // Charger le panier invité depuis localStorage
@@ -92,6 +93,8 @@ export const useCart = () => {
         total: 0,
         count: newCount
       });
+      
+
       
       console.log('✅ Guest cart updated successfully');
       return;
@@ -179,6 +182,8 @@ export const useCart = () => {
     fetchCart();
   }, [isAuthenticated]);
 
+  const cartItemsCount = isAuthenticated ? cart.count : guestCart.reduce((sum, item) => sum + item.quantity, 0);
+
   return {
     cart,
     guestCart,
@@ -188,7 +193,7 @@ export const useCart = () => {
     removeFromCart,
     clearCart,
     refetch: fetchCart,
-    cartItemsCount: cart.count,
+    cartItemsCount,
     isOpen,
     setIsOpen
   };

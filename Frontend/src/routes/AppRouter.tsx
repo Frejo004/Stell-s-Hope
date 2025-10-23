@@ -29,7 +29,7 @@ import RegisterPage from '../pages/RegisterPage';
 import OrderTrackingPage from '../pages/OrderTrackingPage';
 import WishlistPage from '../pages/WishlistPage';
 import OrderDetailsPage from '../pages/OrderDetailsPage';
-import CartPage from '../pages/CartPage';
+import CartPageNew from '../pages/CartPageNew';
 import AdminLayout from '../components/admin/AdminLayout';
 import ApiTest from '../components/ApiTest';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
@@ -309,7 +309,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
             
             <Route 
               path="/cart" 
-              element={<CartPage onClose={() => window.history.back()} />} 
+              element={<CartPageNew onClose={() => window.history.back()} />} 
             />
             
             <Route 
