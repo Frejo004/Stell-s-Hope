@@ -51,7 +51,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
         {/* Wishlist button */}
         <button 
           onClick={handleWishlistClick}
-          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-gray-50"
+          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md opacity-100 transition-opacity duration-300 hover:bg-gray-50"
         >
           <Heart className={`w-4 h-4 ${inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
         </button>

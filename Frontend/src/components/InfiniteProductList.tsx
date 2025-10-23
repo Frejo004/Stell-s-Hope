@@ -1,14 +1,22 @@
 import React from 'react';
 import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
 import { useCart } from '../hooks/useCart';
-import { useWishlist } from '../hooks/useWishlist';
+import { useWishlist } from '../contexts/WishlistContext';
 import { useProductFilters } from '../hooks/useProductFilters';
 
 const InfiniteProductList: React.FC = () => {
   const { getFilters } = useProductFilters();
   const { products, loading, error, isFetching, hasMore } = useInfiniteProducts(getFilters());
   const { addToCart } = useCart();
-  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { addToWishlist: addToWishlistContext, removeFromWishlist, isProductInWishlist } = useWishlist();
+
+  const toggleWishlist = (product: any) => {
+    if (isProductInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlistContext(product);
+    }
+  };
 
   if (loading) return <div className="text-center py-8">Chargement...</div>;
   if (error) return <div className="text-center py-8 text-red-600">Erreur: {error}</div>;
@@ -28,7 +36,7 @@ const InfiniteProductList: React.FC = () => {
                 <button
                   onClick={() => toggleWishlist(product)}
                   className={`p-2 rounded-full shadow-md ${
-                    isInWishlist(product.id) 
+                    isProductInWishlist(product.id) 
                       ? 'bg-red-500 text-white' 
                       : 'bg-white text-gray-600 hover:text-red-500'
                   }`}

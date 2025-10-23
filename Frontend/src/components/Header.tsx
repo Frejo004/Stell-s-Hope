@@ -1,4 +1,4 @@
-import React, { useState, memo, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../contexts/WishlistContext';
@@ -16,7 +16,7 @@ interface HeaderProps {
   onProductClick: (product: Product) => void;
 }
 
-const Header = memo(({ onCategoryChange, currentCategory, products, onProductClick }: HeaderProps) => {
+const Header = ({ onCategoryChange, currentCategory, products, onProductClick }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -25,6 +25,11 @@ const Header = memo(({ onCategoryChange, currentCategory, products, onProductCli
   const { cartItemsCount, setIsOpen } = useCart();
   const { wishlist } = useWishlist();
   const { user, isAuthenticated, logout } = useAuth();
+
+  // Force re-render when wishlist changes
+  useEffect(() => {
+    // This effect will run whenever wishlist changes
+  }, [wishlist]);
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
@@ -236,7 +241,7 @@ const Header = memo(({ onCategoryChange, currentCategory, products, onProductCli
       )}
     </header>
   );
-});
+};
 
 Header.displayName = 'Header';
 
