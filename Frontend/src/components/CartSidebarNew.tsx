@@ -1,10 +1,10 @@
 import React from 'react';
-import { X, ShoppingBag } from 'lucide-react';
+import { X, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCartContext } from '../contexts/CartContext';
 import { useAuth } from '../hooks/useAuth';
 
 export default function CartSidebarNew() {
-  const { cartItemsCount, isOpen, setIsOpen } = useCartContext();
+  const { cartItemsCount, guestCart, isOpen, setIsOpen, removeFromCart } = useCartContext();
   const { isAuthenticated } = useAuth();
 
   if (!isOpen) return null;
@@ -47,16 +47,33 @@ export default function CartSidebarNew() {
                 </button>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <ShoppingBag className="w-16 h-16 text-rose-300 mx-auto mb-4" />
-                <p className="font-medium mb-2">
-                  {cartItemsCount} article{cartItemsCount > 1 ? 's' : ''} dans votre panier
-                </p>
-                {!isAuthenticated && (
-                  <p className="text-sm text-gray-500 mb-4">
-                    Connectez-vous pour voir les détails
-                  </p>
-                )}
+              <div className="space-y-4">
+                {guestCart.map((item, index) => (
+                  <div key={index} className="flex space-x-3 border-b pb-4">
+                    <div className="w-16 h-16 bg-gray-200 rounded overflow-hidden">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ShoppingBag className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-sm">{item.name || `Produit #${item.productId}`}</h3>
+                      <p className="text-sm text-gray-500">Quantité: {item.quantity}</p>
+                      {item.price && (
+                        <p className="text-sm font-semibold">{item.price.toFixed(2)} €</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => removeFromCart(item.productId)}
+                      className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

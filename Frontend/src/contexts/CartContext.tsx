@@ -4,13 +4,18 @@ import { useAuth } from '../hooks/useAuth';
 interface GuestCartItem {
   productId: number;
   quantity: number;
+  name?: string;
+  price?: number;
+  image?: string;
 }
 
 interface CartContextType {
   cartItemsCount: number;
+  guestCart: GuestCartItem[];
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   addToCart: (data: { productId: number; quantity: number }) => void;
+  removeFromCart: (productId: number) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -30,13 +35,16 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isAuthenticated]);
 
-  const addToCart = (data: { productId: number; quantity: number }) => {
+  const addToCart = (data: { productId: number; quantity: number; name?: string; price?: number; image?: string }) => {
     console.log('🛒 CartContext.addToCart called with:', data);
     
     if (!isAuthenticated) {
       const newItem = {
         productId: data.productId,
-        quantity: data.quantity
+        quantity: data.quantity,
+        name: data.name,
+        price: data.price,
+        image: data.image
       };
       
       const existingIndex = guestCart.findIndex(item => item.productId === newItem.productId);
@@ -55,14 +63,22 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const removeFromCart = (productId: number) => {
+    const updatedCart = guestCart.filter(item => item.productId !== productId);
+    setGuestCart(updatedCart);
+    localStorage.setItem('guestCart', JSON.stringify(updatedCart));
+  };
+
   const cartItemsCount = guestCart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <CartContext.Provider value={{
       cartItemsCount,
+      guestCart,
       isOpen,
       setIsOpen,
-      addToCart
+      addToCart,
+      removeFromCart
     }}>
       {children}
     </CartContext.Provider>

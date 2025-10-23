@@ -40,7 +40,13 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
     
     try {
       console.log('📦 Calling addToCart with:', { productId: product.id, quantity });
-      addToCart({ productId: product.id, quantity });
+      addToCart({ 
+        productId: product.id, 
+        quantity,
+        name: product.name,
+        price: product.price,
+        image: product.images && Array.isArray(product.images) ? product.images[0] : undefined
+      });
       console.log('✅ addToCart called successfully');
     } catch (error) {
       console.error('❌ Error in addToCart:', error);
