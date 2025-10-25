@@ -67,6 +67,29 @@ function OrderDetailsPageWrapper({ onClose }: { onClose: () => void }) {
   return <OrderDetailsPage orderId={orderId || ''} onClose={onClose} />;
 }
 
+function ProductDetailWrapper({ products }: { products: Product[] }) {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const product = products.find(p => p.id.toString() === id);
+
+  if (!product) {
+    // Redirect to a 404 page or show a not found message
+    return <NotFoundPage 
+      products={products} 
+      onProductClick={(p) => navigate(`/product/${p.id}`)} 
+      onNavigateHome={() => navigate('/')} 
+      onCategoryChange={(c) => navigate(`/category/${c}`)} 
+    />;
+  }
+
+  return (
+    <ProductDetail
+      product={product}
+      onClose={() => window.history.back()}
+    />
+  );
+}
+
 function AppContent({ onOrderComplete }: AppRouterProps) {
   const { isAuthenticated } = useAuth();
   const { getOrderById } = useOrders();
@@ -188,12 +211,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
 
             <Route 
               path="/product/:id" 
-              element={
-                <ProductDetail
-                  product={products[0]}
-                  onClose={() => window.history.back()}
-                />
-              } 
+              element={<ProductDetailWrapper products={products} />} 
             />
 
             <Route 

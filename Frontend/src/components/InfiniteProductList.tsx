@@ -1,13 +1,13 @@
 import React from 'react';
 import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
-import { useCart } from '../hooks/useCart';
+import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useProductFilters } from '../hooks/useProductFilters';
 
 const InfiniteProductList: React.FC = () => {
   const { getFilters } = useProductFilters();
   const { products, loading, error, isFetching, hasMore } = useInfiniteProducts(getFilters());
-  const { addToCart } = useCart();
+  const { addToCart } = useCartContext();
   const { addToWishlist: addToWishlistContext, removeFromWishlist, isProductInWishlist } = useWishlist();
 
   const toggleWishlist = (product: any) => {
@@ -53,7 +53,7 @@ const InfiniteProductList: React.FC = () => {
                   </svg>
                 </button>
                 <button
-                  onClick={() => addToCart({ productId: product.id, quantity: 1 })}
+                  onClick={() => addToCart({ productId: product.id, quantity: 1, name: product.name, price: product.price, image: product.images?.[0] })}
                   className="p-2 bg-white text-gray-600 rounded-full shadow-md hover:bg-blue-600 hover:text-white transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

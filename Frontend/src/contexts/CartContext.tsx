@@ -11,11 +11,13 @@ interface GuestCartItem {
 
 interface CartContextType {
   cartItemsCount: number;
+  cartTotal: number;
   guestCart: GuestCartItem[];
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   addToCart: (data: { productId: number; quantity: number; name?: string; price?: number; image?: string }) => void;
   removeFromCart: (productId: number) => void;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -73,7 +75,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, []);
 
+  const clearCart = useCallback(() => {
+    setGuestCart([]);
+    localStorage.removeItem('guestCart');
+  }, []);
+
   const cartItemsCount = guestCart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartTotal = guestCart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
 
   const contextValue = useMemo(() => ({
     cartItemsCount,
@@ -81,8 +89,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     isOpen,
     setIsOpen,
     addToCart,
-    removeFromCart
-  }), [cartItemsCount, guestCart, isOpen, addToCart, removeFromCart]);
+    removeFromCart,
+    cartTotal,
+    clearCart
+  }), [cartItemsCount, guestCart, isOpen, cartTotal, addToCart, removeFromCart, clearCart]);
 
   return (
     <CartContext.Provider value={contextValue}>

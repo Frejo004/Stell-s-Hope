@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
 import { useWishlist } from '../contexts/WishlistContext';
-import { useCart } from '../hooks/useCart';
+import { useCartContext } from '../contexts/CartContext';
 import { Product } from '../types';
 
 interface WishlistPageProps {
@@ -11,13 +11,16 @@ interface WishlistPageProps {
 
 export default function WishlistPage({ onClose, onProductClick }: WishlistPageProps) {
   const { wishlist, removeFromWishlist } = useWishlist();
-  const { addToCart } = useCart();
+  const { addToCart } = useCartContext();
 
   const handleAddToCart = (product: Product) => {
-    // Assurez-vous que les tailles et couleurs existent avant de les utiliser
-    const size = product.sizes?.[0] || '';
-    const color = product.colors?.[0] || '';
-    addToCart(product, size, color, 1);
+    addToCart({
+      productId: product.id,
+      quantity: 1,
+      name: product.name,
+      price: product.price,
+      image: product.images?.[0]
+    });
   };
 
   return (
