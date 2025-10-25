@@ -137,15 +137,17 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
 
   if (!isAuthenticated) {
     return (
-      <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Vous devez être connecté</h2>
-          <p className="text-gray-600 mb-6">Veuillez vous connecter pour finaliser votre commande</p>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-50 to-rose-100">
+        <div className="text-center bg-white p-12 rounded-xl shadow-2xl max-w-md mx-auto">
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Vous devez être connecté</h2>
+          <p className="text-gray-600 mb-8">Veuillez vous connecter pour finaliser votre commande.</p>
           <div className="flex justify-center space-x-4">
-            <button onClick={() => navigate('/login', { state: { from: '/cart' } })} className="bg-black text-white px-6 py-2 rounded">
+            <button onClick={() => navigate('/login', { state: { from: '/cart' } })} className="bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
               Se connecter
             </button>
-            <button onClick={onClose} className="border border-gray-300 px-6 py-2 rounded">Retour</button>
+            <button onClick={onClose} className="border border-gray-300 px-8 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+              Retour
+            </button>
           </div>
         </div>
       </div>
