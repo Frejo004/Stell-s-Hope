@@ -63,7 +63,7 @@ export default function CartSidebarNew() {
                       <h3 className="font-medium text-sm">{item.name || `Produit #${item.productId}`}</h3>
                       <p className="text-sm text-gray-500">Quantité: {item.quantity}</p>
                       {item.price && (
-                        <p className="text-sm font-semibold">{item.price.toFixed(2)} €</p>
+                        <p className="text-sm font-semibold">{Number(item.price).toFixed(2)} €</p>
                       )}
                     </div>
                     <button
