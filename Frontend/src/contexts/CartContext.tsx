@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 interface GuestCartItem {
@@ -14,7 +14,7 @@ interface CartContextType {
   guestCart: GuestCartItem[];
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  addToCart: (data: { productId: number; quantity: number }) => void;
+  addToCart: (data: { productId: number; quantity: number; name?: string; price?: number; image?: string }) => void;
   removeFromCart: (productId: number) => void;
 }
 
@@ -35,51 +35,57 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isAuthenticated]);
 
-  const addToCart = (data: { productId: number; quantity: number; name?: string; price?: number; image?: string }) => {
+  const addToCart = useCallback((data: { productId: number; quantity: number; name?: string; price?: number; image?: string }) => {
     console.log('🛒 CartContext.addToCart called with:', data);
     
     if (!isAuthenticated) {
-      const newItem = {
-        productId: data.productId,
-        quantity: data.quantity,
-        name: data.name,
-        price: data.price,
-        image: data.image
-      };
-      
-      const existingIndex = guestCart.findIndex(item => item.productId === newItem.productId);
-      let updatedCart;
-      
-      if (existingIndex >= 0) {
-        updatedCart = [...guestCart];
-        updatedCart[existingIndex].quantity += newItem.quantity;
-      } else {
-        updatedCart = [...guestCart, newItem];
-      }
-      
-      setGuestCart(updatedCart);
-      localStorage.setItem('guestCart', JSON.stringify(updatedCart));
-      console.log('✅ Guest cart updated:', updatedCart);
+      setGuestCart(prevCart => {
+        const newItem = {
+          productId: data.productId,
+          quantity: data.quantity,
+          name: data.name,
+          price: data.price,
+          image: data.image
+        };
+        
+        const existingIndex = prevCart.findIndex(item => item.productId === newItem.productId);
+        let updatedCart;
+        
+        if (existingIndex >= 0) {
+          updatedCart = [...prevCart];
+          updatedCart[existingIndex].quantity += newItem.quantity;
+        } else {
+          updatedCart = [...prevCart, newItem];
+        }
+        
+        localStorage.setItem('guestCart', JSON.stringify(updatedCart));
+        console.log('✅ Guest cart updated:', updatedCart);
+        return updatedCart;
+      });
     }
-  };
+  }, [isAuthenticated]);
 
-  const removeFromCart = (productId: number) => {
-    const updatedCart = guestCart.filter(item => item.productId !== productId);
-    setGuestCart(updatedCart);
-    localStorage.setItem('guestCart', JSON.stringify(updatedCart));
-  };
+  const removeFromCart = useCallback((productId: number) => {
+    setGuestCart(prevCart => {
+      const updatedCart = prevCart.filter(item => item.productId !== productId);
+      localStorage.setItem('guestCart', JSON.stringify(updatedCart));
+      return updatedCart;
+    });
+  }, []);
 
   const cartItemsCount = guestCart.reduce((sum, item) => sum + item.quantity, 0);
 
+  const contextValue = useMemo(() => ({
+    cartItemsCount,
+    guestCart,
+    isOpen,
+    setIsOpen,
+    addToCart,
+    removeFromCart
+  }), [cartItemsCount, guestCart, isOpen, addToCart, removeFromCart]);
+
   return (
-    <CartContext.Provider value={{
-      cartItemsCount,
-      guestCart,
-      isOpen,
-      setIsOpen,
-      addToCart,
-      removeFromCart
-    }}>
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );
