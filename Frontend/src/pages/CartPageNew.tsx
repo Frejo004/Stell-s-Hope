@@ -44,7 +44,7 @@ export default function CartPageNew({ onClose }: CartPageProps) {
 
 
   return (
-    <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+    <div className="bg-white">
       <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
         <button onClick={onClose} className="mb-6 flex items-center text-gray-600 hover:text-black">
           <ArrowLeft className="w-5 h-5 mr-2" />
