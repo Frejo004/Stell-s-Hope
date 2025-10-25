@@ -46,10 +46,7 @@ export default function CartPageNew({ onClose }: CartPageProps) {
   return (
     <div className="bg-white">
       <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
-        <button onClick={onClose} className="mb-6 flex items-center text-gray-600 hover:text-black">
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Continuer mes achats
-        </button>
+
 
         {cartItemsCount === 0 ? (
           <div className="text-center py-16">
@@ -100,7 +97,7 @@ export default function CartPageNew({ onClose }: CartPageProps) {
                 </div>
               </div>
               <div className="lg:col-span-1">
-                <div className="bg-gray-50 p-6 rounded-lg">
+                <div className="lg:sticky lg:top-24 bg-gray-50 p-6 rounded-lg">
                   <h2 className="text-xl font-bold mb-4">Résumé de la commande</h2>
                   <div className="space-y-2">
                     <div className="flex justify-between">
