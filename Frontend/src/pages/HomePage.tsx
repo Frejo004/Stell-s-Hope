@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 import { productService } from '../services/productService';
@@ -13,35 +13,31 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [bestsellers, setBestsellers] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        // Utiliser les méthodes corrigées du service
         const [featured, best] = await Promise.all([
           productService.getFeaturedProducts(),
           productService.getBestsellers()
         ]);
         
-        // Vérifier si les données sont valides avant de les utiliser
         if (featured && featured.length > 0) {
           setFeaturedProducts(featured);
         } else {
-          // Fallback aux données locales pour featured
-          setFeaturedProducts(products.filter(p => p.isFeatured || p.isNew).slice(0, 8));
+          setFeaturedProducts(products.filter(p => p.is_featured || p.is_bestseller).slice(0, 12));
         }
         
         if (best && best.length > 0) {
           setBestsellers(best);
         } else {
-          // Fallback aux données locales pour bestsellers
-          setBestsellers(products.filter(p => p.isBestSeller).slice(0, 8));
+          setBestsellers(products.filter(p => p.is_bestseller).slice(0, 12));
         }
       } catch (error) {
         console.error('Error loading products:', error);
-        // Fallback aux données locales en cas d'erreur
-        setFeaturedProducts(products.filter(p => p.isFeatured || p.isNew).slice(0, 8));
-        setBestsellers(products.filter(p => p.isBestSeller).slice(0, 8));
+        setFeaturedProducts(products.filter(p => p.is_featured || p.is_bestseller).slice(0, 12));
+        setBestsellers(products.filter(p => p.is_bestseller).slice(0, 12));
       } finally {
         setLoading(false);
       }
@@ -50,8 +46,32 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
     loadProducts();
   }, [products]);
 
-  const bestSellers = bestsellers.length > 0 ? bestsellers : products.filter(product => product.isBestSeller).slice(0, 8);
-  const newProducts = featuredProducts.length > 0 ? featuredProducts : products.filter(product => product.isNew).slice(0, 4);
+  const bestSellers = bestsellers.length > 0 ? bestsellers : products.filter(product => product.is_bestseller).slice(0, 12);
+  const newProducts = featuredProducts.length > 0 ? featuredProducts : products.filter(product => product.is_featured);
+
+  const topCategories = useMemo(() => {
+    const categoryCounts = products.reduce((acc, product) => {
+      const categoryName = product.category.name;
+      acc[categoryName] = (acc[categoryName] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const sortedCategories = Object.keys(categoryCounts).sort((a, b) => categoryCounts[b] - categoryCounts[a]);
+    
+    return ['All', ...sortedCategories.slice(0, 6)];
+  }, [products]);
+
+  const filteredNewProducts = useMemo(() => {
+    const sortableProducts = [...products];
+
+    sortableProducts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    if (selectedCategory === 'All') {
+      return sortableProducts.slice(0, 12);
+    }
+    
+    return sortableProducts.filter(p => p.category.name === selectedCategory).slice(0, 12);
+  }, [products, selectedCategory]);
 
   return (
     <div>
@@ -166,11 +186,12 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             
             {/* Filter Tabs */}
             <div className="flex flex-wrap justify-center gap-4 md:space-x-8 mb-12">
-              {['All', 'Women\'s', 'Men\'s', 'Kid\'s', 'Accessories', 'Cosmetics'].map((tab, index) => (
+              {topCategories.map((tab) => (
                 <button
                   key={tab}
+                  onClick={() => setSelectedCategory(tab)}
                   className={`text-xs md:text-sm font-medium pb-2 ${
-                    index === 0 
+                    selectedCategory === tab
                       ? 'text-red-500 border-b-2 border-red-500' 
                       : 'text-gray-600 hover:text-gray-800'
                   }`}
@@ -183,7 +204,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
 
           {/* Products Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {bestSellers.map((product) => (
+            {filteredNewProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
