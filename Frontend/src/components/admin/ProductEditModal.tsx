@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { adminService } from '../../services/adminService';
+import ProductVariantManager from './ProductVariantManager';
 
 interface ProductEditModalProps {
   isOpen: boolean;
@@ -13,15 +14,19 @@ export default function ProductEditModal({ isOpen, productId, onClose, onSuccess
   const [product, setProduct] = useState({
     name: '',
     description: '',
+    type: 'simple' as 'simple' | 'variable',
     price: '',
     stock_quantity: '',
     category_id: '',
     is_active: true,
     is_featured: false,
-    images: [] as string[]
+    images: [] as string[],
+    variants: [] as any[]
   });
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [attributes, setAttributes] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'general' | 'variants' | 'images'>('general');
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -49,10 +54,36 @@ export default function ProductEditModal({ isOpen, productId, onClose, onSuccess
   };
 
   useEffect(() => {
-    if (isOpen && productId) {
-      fetchProduct();
+    if (isOpen) {
+      fetchAttributes();
+      if (productId) {
+        fetchProduct();
+      } else {
+        // Réinitialiser le formulaire pour un nouveau produit
+        setProduct({
+          name: '',
+          description: '',
+          type: 'simple',
+          price: '',
+          stock_quantity: '',
+          category_id: '',
+          is_active: true,
+          is_featured: false,
+          images: [],
+          variants: []
+        });
+      }
     }
   }, [isOpen, productId]);
+
+  const fetchAttributes = async () => {
+    try {
+      const data = await adminService.getAttributes();
+      setAttributes(data);
+    } catch (error) {
+      console.error('Erreur chargement attributs:', error);
+    }
+  };
 
   const fetchProduct = async () => {
     try {
@@ -61,12 +92,14 @@ export default function ProductEditModal({ isOpen, productId, onClose, onSuccess
       setProduct({
         name: data.name || '',
         description: data.description || '',
+        type: data.type || 'simple',
         price: data.price?.toString() || '',
         stock_quantity: data.stock_quantity?.toString() || '',
         category_id: data.category_id?.toString() || '',
         is_active: data.is_active || false,
         is_featured: data.is_featured || false,
-        images: Array.isArray(data.images) ? data.images : []
+        images: Array.isArray(data.images) ? data.images : [],
+        variants: data.variants || []
       });
     } catch (error) {
       console.error('Erreur chargement produit:', error);
@@ -79,17 +112,42 @@ export default function ProductEditModal({ isOpen, productId, onClose, onSuccess
     e.preventDefault();
     try {
       setLoading(true);
-      await adminService.updateProduct(productId!, {
-        ...product,
-        price: parseFloat(product.price),
-        stock_quantity: parseInt(product.stock_quantity),
+      
+      const payload: any = {
+        name: product.name,
+        description: product.description,
+        type: product.type,
         category_id: parseInt(product.category_id),
+        is_active: product.is_active,
+        is_featured: product.is_featured,
         images: product.images
-      });
+      };
+
+      if (product.type === 'simple') {
+        payload.price = parseFloat(product.price);
+        payload.stock_quantity = parseInt(product.stock_quantity);
+      } else if (product.type === 'variable') {
+        payload.variants = product.variants.map((v: any) => ({
+          id: v.id,
+          sku: v.sku,
+          price: parseFloat(v.price),
+          stock_quantity: parseInt(v.stock_quantity),
+          attributes: v.attributes
+        }));
+      }
+
+      // Mode création ou mise à jour
+      if (productId) {
+        await adminService.updateProduct(productId, payload);
+      } else {
+        await adminService.createProduct(payload);
+      }
+      
       onSuccess();
       onClose();
     } catch (error) {
       console.error('Erreur mise à jour:', error);
+      alert('Erreur lors de la mise à jour du produit');
     } finally {
       setLoading(false);
     }
@@ -101,108 +159,170 @@ export default function ProductEditModal({ isOpen, productId, onClose, onSuccess
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
-          <h3 className="text-lg font-semibold text-gray-900">Modifier le produit</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {productId ? 'Modifier le produit' : 'Créer un nouveau produit'}
+          </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="w-5 h-5" />
           </button>
         </div>
         
+        {/* Onglets */}
+        <div className="border-b border-gray-200">
+          <nav className="flex -mb-px">
+            {['general', 'variants', 'images'].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab as any)}
+                className={`px-6 py-3 text-sm font-medium border-b-2 ${
+                  activeTab === tab
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                {tab === 'general' && 'Général'}
+                {tab === 'variants' && 'Variantes'}
+                {tab === 'images' && 'Images'}
+              </button>
+            ))}
+          </nav>
+        </div>
+
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-            <input
-              type="text"
-              value={product.name}
-              onChange={(e) => setProduct({...product, name: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              value={product.description}
-              onChange={(e) => setProduct({...product, description: e.target.value})}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={product.price}
-                onChange={(e) => setProduct({...product, price: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-              <input
-                type="number"
-                value={product.stock_quantity}
-                onChange={(e) => setProduct({...product, stock_quantity: e.target.value})}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                required
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-            <select
-              value={product.category_id}
-              onChange={(e) => setProduct({...product, category_id: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Sélectionner une catégorie</option>
-              <option value="1">Homme</option>
-              <option value="2">Femme</option>
-              <option value="3">Unisexe</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
-            <div className="space-y-2">
-              {(product.images || []).map((image, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <img src={image} alt="Aperçu" className="w-16 h-16 object-cover rounded border" />
-                  <span className="flex-1 text-sm text-gray-600 truncate">{image}</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newImages = product.images.filter((_, i) => i !== index);
-                      setProduct({...product, images: newImages});
-                    }}
-                    className="px-3 py-2 text-red-600 hover:text-red-800"
-                  >
-                    Supprimer
-                  </button>
-                </div>
-              ))}
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+          {/* Onglet Général */}
+          {activeTab === 'general' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="w-full"
+                  type="text"
+                  value={product.name}
+                  onChange={(e) => setProduct({...product, name: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  required
                 />
-                <p className="text-sm text-gray-500 mt-2">
-                  {uploading ? 'Upload en cours...' : 'Sélectionnez une ou plusieurs images'}
-                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  value={product.description}
+                  onChange={(e) => setProduct({...product, description: e.target.value})}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Type de produit</label>
+                <select
+                  value={product.type}
+                  onChange={(e) => setProduct({...product, type: e.target.value as 'simple' | 'variable'})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="simple">Produit simple</option>
+                  <option value="variable">Produit variable</option>
+                </select>
+              </div>
+
+              {product.type === 'simple' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={product.price}
+                      onChange={(e) => setProduct({...product, price: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      required={product.type === 'simple'}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                    <input
+                      type="number"
+                      value={product.stock_quantity}
+                      onChange={(e) => setProduct({...product, stock_quantity: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                      required={product.type === 'simple'}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                <select
+                  value={product.category_id}
+                  onChange={(e) => setProduct({...product, category_id: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">Sélectionner une catégorie</option>
+                  <option value="1">Homme</option>
+                  <option value="2">Femme</option>
+                  <option value="3">Unisexe</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {/* Onglet Variantes */}
+          {activeTab === 'variants' && product.type === 'variable' && (
+            <ProductVariantManager
+              attributes={attributes}
+              initialVariants={product.variants}
+              onChange={(variants) => setProduct({...product, variants})}
+            />
+          )}
+
+          {activeTab === 'variants' && product.type === 'simple' && (
+            <div className="text-center py-8 text-gray-500">
+              Les variantes ne sont disponibles que pour les produits variables.
+              Changez le type de produit pour gérer les variantes.
+            </div>
+          )}
+
+          {/* Onglet Images */}
+          {activeTab === 'images' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Images</label>
+              <div className="space-y-2">
+                {(product.images || []).map((image, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <img src={image} alt="Aperçu" className="w-16 h-16 object-cover rounded border" />
+                    <span className="flex-1 text-sm text-gray-600 truncate">{image}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newImages = product.images.filter((_, i) => i !== index);
+                        setProduct({...product, images: newImages});
+                      }}
+                      className="px-3 py-2 text-red-600 hover:text-red-800"
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                ))}
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="w-full"
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    {uploading ? 'Upload en cours...' : 'Sélectionnez une ou plusieurs images'}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
           
           <div className="flex space-x-4">
             <label className="flex items-center">

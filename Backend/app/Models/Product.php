@@ -12,6 +12,7 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
+        'type',
         'price',
         'stock_quantity',
         'category_id',
@@ -52,5 +53,35 @@ class Product extends Model
     public function cart()
     {
         return $this->hasMany(Cart::class);
+    }
+
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    public function getAvailableAttributesAttribute()
+    {
+        if ($this->type !== 'variable') {
+            return [];
+        }
+
+        $attributes = [];
+        foreach ($this->variants as $variant) {
+            foreach ($variant->attributes as $attribute) {
+                if (!isset($attributes[$attribute->id])) {
+                    $attributes[$attribute->id] = [
+                        'id' => $attribute->id,
+                        'name' => $attribute->name,
+                        'values' => []
+                    ];
+                }
+                if (!in_array($attribute->pivot->value, $attributes[$attribute->id]['values'])) {
+                    $attributes[$attribute->id]['values'][] = $attribute->pivot->value;
+                }
+            }
+        }
+
+        return array_values($attributes);
     }
 }

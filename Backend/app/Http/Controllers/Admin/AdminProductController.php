@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AdminProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with(['category', 'variants.attributes']);
         
         if ($request->has('search') && $request->search) {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -77,43 +79,141 @@ class AdminProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
+            'type' => 'required|in:simple,variable',
+            'price' => 'required_if:type,simple|numeric|min:0|nullable',
+            'stock_quantity' => 'required_if:type,simple|integer|min:0|nullable',
             'category_id' => 'required|exists:categories,id',
             'is_active' => 'boolean',
-            'is_featured' => 'boolean'
+            'is_featured' => 'boolean',
+            'variants' => 'required_if:type,variable|array',
+            'variants.*.sku' => 'required|string|unique:product_variants,sku',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.stock_quantity' => 'required|integer|min:0',
+            'variants.*.attributes' => 'required|array',
         ]);
 
-        $product = Product::create($validated);
-        return response()->json($product, 201);
+        DB::beginTransaction();
+
+        try {
+            $product = Product::create($validated);
+
+            if ($request->type === 'variable' && !empty($request->variants)) {
+                foreach ($request->variants as $variantData) {
+                    $variant = $product->variants()->create([
+                        'sku' => $variantData['sku'],
+                        'price' => $variantData['price'],
+                        'stock_quantity' => $variantData['stock_quantity'],
+                    ]);
+
+                    foreach ($variantData['attributes'] as $attributeId => $value) {
+                        $variant->attributes()->attach($attributeId, ['value' => $value]);
+                    }
+                }
+            }
+
+            DB::commit();
+            return response()->json($product->load('variants.attributes'), 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function show(Product $product)
     {
-        $product->load('category');
+        $product->load(['category', 'variants.attributes']);
         return response()->json($product);
     }
 
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
+            'name' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'type' => 'sometimes|in:simple,variable',
+            'price' => 'sometimes|numeric|min:0|nullable',
+            'stock_quantity' => 'sometimes|integer|min:0|nullable',
+            'category_id' => 'sometimes|exists:categories,id',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
-            'images' => 'array'
+            'images' => 'array',
+            'variants' => 'sometimes|array',
+            'variants.*.id' => 'sometimes|exists:product_variants,id',
+            'variants.*.sku' => 'sometimes|string',
+            'variants.*.price' => 'sometimes|numeric|min:0',
+            'variants.*.stock_quantity' => 'sometimes|integer|min:0',
+            'variants.*.attributes' => 'sometimes|array',
         ]);
 
-        $product->update($validated);
-        return response()->json($product);
+        DB::beginTransaction();
+
+        try {
+            $product->update($validated);
+
+            if ($request->has('variants') && $product->type === 'variable') {
+                $existingVariantIds = $product->variants->pluck('id')->toArray();
+                $updatedVariantIds = [];
+
+                foreach ($request->variants as $variantData) {
+                    if (isset($variantData['id'])) {
+                        // Mettre à jour la variante existante
+                        $variant = $product->variants()->findOrFail($variantData['id']);
+                        $variant->update([
+                            'sku' => $variantData['sku'],
+                            'price' => $variantData['price'],
+                            'stock_quantity' => $variantData['stock_quantity'],
+                        ]);
+
+                        // Mettre à jour les attributs
+                        $variant->attributes()->detach();
+                        foreach ($variantData['attributes'] as $attributeId => $value) {
+                            $variant->attributes()->attach($attributeId, ['value' => $value]);
+                        }
+
+                        $updatedVariantIds[] = $variant->id;
+                    } else {
+                        // Créer une nouvelle variante
+                        $variant = $product->variants()->create([
+                            'sku' => $variantData['sku'],
+                            'price' => $variantData['price'],
+                            'stock_quantity' => $variantData['stock_quantity'],
+                        ]);
+
+                        foreach ($variantData['attributes'] as $attributeId => $value) {
+                            $variant->attributes()->attach($attributeId, ['value' => $value]);
+                        }
+
+                        $updatedVariantIds[] = $variant->id;
+                    }
+                }
+
+                // Supprimer les variantes qui ne sont plus présentes
+                $product->variants()
+                    ->whereNotIn('id', $updatedVariantIds)
+                    ->delete();
+            }
+
+            DB::commit();
+            return response()->json($product->load('variants.attributes'));
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy(Product $product)
     {
-        $product->delete();
-        return response()->json(['message' => 'Produit supprimé']);
+        DB::beginTransaction();
+
+        try {
+            $product->variants()->delete();
+            $product->delete();
+            
+            DB::commit();
+            return response()->json(['message' => 'Produit supprimé']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Erreur lors de la suppression du produit'], 500);
+        }
     }
 }

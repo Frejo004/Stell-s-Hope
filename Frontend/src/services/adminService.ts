@@ -196,5 +196,26 @@ export const adminService = {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
+  },
+
+  // Product Attributes
+  getAttributes: async () => {
+    const response = await api.get('/admin/attributes');
+    return response.data;
+  },
+
+  createAttribute: async (attributeData: any) => {
+    const response = await api.post('/admin/attributes', attributeData);
+    return response.data;
+  },
+
+  updateAttribute: async (id: number, attributeData: any) => {
+    const response = await api.put(`/admin/attributes/${id}`, attributeData);
+    return response.data;
+  },
+
+  deleteAttribute: async (id: number) => {
+    const response = await api.delete(`/admin/attributes/${id}`);
+    return response.data;
   }
 };

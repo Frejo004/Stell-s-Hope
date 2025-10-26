@@ -57,7 +57,8 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
   };
 
   const handleEditSuccess = () => {
-    setToast({ type: 'success', message: 'Produit modifié avec succès' });
+    const message = editModal.productId ? 'Produit modifié avec succès' : 'Produit créé avec succès';
+    setToast({ type: 'success', message });
     refetch(pagination.current_page, searchTerm, selectedCategory, priceFilter, stockFilter, statusFilter, false);
   };
 
@@ -73,7 +74,10 @@ export default function AdminProducts({ onNavigate }: AdminProductsProps) {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Gestion des Produits</h1>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2">
+        <button 
+          onClick={() => setEditModal({ isOpen: true, productId: null })}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+        >
           <Plus className="w-4 h-4" />
           <span>Nouveau Produit</span>
         </button>

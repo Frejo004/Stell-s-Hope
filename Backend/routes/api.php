@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\AdminSidebarController;
 use App\Http\Controllers\Admin\AdminInventoryController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminAnalyticsController;
+use App\Http\Controllers\Admin\AdminAttributeController;
 use App\Http\Controllers\Api\WishlistController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TicketController;
@@ -109,6 +110,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/products/{product}', [AdminProductController::class, 'destroy']);
         Route::put('/products/{product}/status', [AdminProductController::class, 'updateStatus']);
         Route::post('/products/bulk-update', [AdminProductController::class, 'bulkUpdate']);
+
+        // Product Attributes management
+        Route::get('/attributes', [AdminAttributeController::class, 'index']);
+        Route::post('/attributes', [AdminAttributeController::class, 'store']);
+        Route::get('/attributes/{attribute}', [AdminAttributeController::class, 'show']);
+        Route::put('/attributes/{attribute}', [AdminAttributeController::class, 'update']);
+        Route::delete('/attributes/{attribute}', [AdminAttributeController::class, 'destroy']);
 
         // Orders management
         Route::get('/orders', [AdminOrderController::class, 'index']);
