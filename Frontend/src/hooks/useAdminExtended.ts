@@ -13,8 +13,14 @@ export const useAdminAnalytics = (period = '7d') => {
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const data = await adminService.getAnalytics(period);
-        setAnalytics(data);
+        const rawData = await adminService.getDashboardStats();
+        const transformedData = {
+          metrics: rawData.stats || { revenue: 0, orders: 0, customers: 0, conversion: 0 },
+          topProducts: rawData.top_products || [],
+          salesChart: rawData.salesChart || [],
+          trafficSources: rawData.trafficSources || []
+        };
+        setAnalytics(transformedData);
       } catch (error) {
         console.error('Erreur analytics:', error);
       } finally {
