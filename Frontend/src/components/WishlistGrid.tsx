@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import { useWishlist } from '../hooks/useWishlist';
 import { useCart } from '../hooks/useCart';
 import { useQueryState, parseAsInteger } from 'nuqs';

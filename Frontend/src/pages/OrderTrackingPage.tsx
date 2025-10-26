@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect  } from 'react';
 import { ArrowLeft, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 import { adminService } from '../services/adminService';
+import { Order, OrderItem } from '../types/order';
 
 interface OrderTrackingPageProps {
   orderId: string;
@@ -8,7 +9,7 @@ interface OrderTrackingPageProps {
 }
 
 export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPageProps) {
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,10 +66,11 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    const labels = {
+  const getStatusLabel = (status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'): string => {
+    const labels: Record<typeof status, string> = {
       pending: 'En attente',
       confirmed: 'Confirmée',
+      processing: 'En préparation',
       shipped: 'Expédiée',
       delivered: 'Livrée',
       cancelled: 'Annulée'
@@ -118,7 +120,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
         <div className="mb-8">
           <h3 className="text-lg font-semibold mb-4">Progression</h3>
           <div className="space-y-4">
-            {trackingSteps.map((step, index) => (
+            {trackingSteps.map((step) => (
               <div key={step.key} className="flex items-center space-x-4">
                 <div className={`w-4 h-4 rounded-full ${
                   step.completed ? 'bg-green-500' : 'bg-gray-300'
@@ -135,8 +137,8 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
         <div className="border rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-4">Détails de la commande</h3>
           <div className="space-y-4">
-            {(order.order_items || []).map((item, index) => (
-              <div key={index} className="flex items-center space-x-4">
+            {(order.order_items || []).map((item: OrderItem) => (
+              <div key={item.id} className="flex items-center space-x-4">
                 <img
                   src={item.product?.images?.[0] || '/placeholder.jpg'}
                   alt={item.product?.name || 'Produit'}

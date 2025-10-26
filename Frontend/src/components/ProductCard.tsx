@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import { Heart, Star } from 'lucide-react';
 import { Product } from '../types';
 import { useWishlist } from '../contexts/WishlistContext';

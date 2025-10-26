@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 import { productService } from '../services/productService';
@@ -12,7 +12,6 @@ interface HomePageProps {
 export default function HomePage({ products, onProductClick, onCategoryChange }: HomePageProps) {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [bestsellers, setBestsellers] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   useEffect(() => {
@@ -38,8 +37,6 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
         console.error('Error loading products:', error);
         setFeaturedProducts(products.filter(p => p.is_featured || p.is_bestseller).slice(0, 12));
         setBestsellers(products.filter(p => p.is_bestseller).slice(0, 12));
-      } finally {
-        setLoading(false);
       }
     };
 

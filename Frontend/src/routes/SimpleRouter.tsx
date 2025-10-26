@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Product } from '../types';
 import { products } from '../data/products';
 import Header from '../components/Header';
@@ -25,8 +25,6 @@ interface SimpleRouterProps {
 
 export default function SimpleRouter({ onOrderComplete }: SimpleRouterProps) {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isProductDetailOpen, setIsProductDetailOpen] = useState(false);
   const { isAuthenticated } = useAuth();
   const { getOrderById } = useOrders();
 
@@ -44,8 +42,6 @@ export default function SimpleRouter({ onOrderComplete }: SimpleRouterProps) {
   };
 
   const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    setIsProductDetailOpen(true);
     navigate(`/product/${product.id}`);
   };
 
@@ -88,7 +84,7 @@ export default function SimpleRouter({ onOrderComplete }: SimpleRouterProps) {
     }
 
     if (currentPath.startsWith('/product/')) {
-      const productId = currentPath.split('/')[2];
+      const productId = parseInt(currentPath.split('/')[2]);
       const product = products.find(p => p.id === productId);
       if (product) {
         return (

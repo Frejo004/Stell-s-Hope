@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import { useAdminProductFilters } from '../../hooks/useAdminFilters';
 import { adminService } from '../../services/adminService';
 import Pagination from '../Pagination';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Home, ArrowRight, Package, Heart, Sparkles } from 'lucide-react';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
@@ -13,7 +13,7 @@ interface NotFoundPageProps {
 export default function NotFoundPage({ products, onProductClick, onNavigateHome, onCategoryChange }: NotFoundPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const popularProducts = products.filter(p => p.isBestSeller).slice(0, 4);
+  const popularProducts = products.filter(p => p.is_bestseller).slice(0, 4);
   const newProducts = products.filter(p => p.isNew).slice(0, 4);
 
   const handleSearch = () => {

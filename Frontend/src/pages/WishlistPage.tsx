@@ -1,5 +1,4 @@
-import React from 'react';
-import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
+import { Heart, ShoppingBag } from 'lucide-react';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCartContext } from '../contexts/CartContext';
 import { Product } from '../types';

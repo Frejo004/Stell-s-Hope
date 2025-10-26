@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Save, Upload, Globe, Mail, Shield, Bell } from 'lucide-react';
 
 interface AdminSettingsProps {

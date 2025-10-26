@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Search, Filter, MessageCircle, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAdminSupport } from '../../hooks/useAdminExtended';
 

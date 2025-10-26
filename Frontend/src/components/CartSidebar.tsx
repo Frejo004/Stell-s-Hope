@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import { X, ShoppingBag } from 'lucide-react';
 import { useCartContext } from '../contexts/CartContext';
 import { useAuth } from '../hooks/useAuth';

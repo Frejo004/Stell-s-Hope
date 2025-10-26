@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, Percent, Calendar, Users } from 'lucide-react';
 import { useAdminPromotions } from '../../hooks/useAdminExtended';
 import CreatePromotionModal from './CreatePromotionModal';

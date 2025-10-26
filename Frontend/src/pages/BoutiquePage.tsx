@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import ProductFilters from '../components/ProductFilters';
 import InfiniteProductList from '../components/InfiniteProductList';

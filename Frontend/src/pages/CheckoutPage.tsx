@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo  } from 'react';
 import { ArrowLeft, Truck, CreditCard, CheckCircle } from 'lucide-react';
 import { useCartContext } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { CheckoutState, Order } from '../types/order';
+import { Order } from '../types/order';
+import { CheckoutState } from '../types/checkout';
 import OrderConfirmationPage from './OrderConfirmationPage';
 import { useProducts } from '../hooks/useProducts';
 
@@ -15,7 +16,7 @@ interface CheckoutPageProps {
 export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageProps) {
   const { guestCart, cartTotal, clearCart } = useCartContext();
   const { products } = useProducts();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     step: 'shipping',
@@ -41,15 +42,15 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
   const tax = discountedSubtotal * 0.2;
   const total = discountedSubtotal + shipping + tax;
 
-  const handleNextStep = () => {
+  const handleNextStep = (): void => {
     if (checkoutState.step === 'shipping') {
-      setCheckoutState(prev => ({ ...prev, step: 'payment' }));
+      setCheckoutState((prev: CheckoutState) => ({ ...prev, step: 'payment' }));
     } else if (checkoutState.step === 'payment') {
-      setCheckoutState(prev => ({ ...prev, step: 'review' }));
+      setCheckoutState((prev: CheckoutState) => ({ ...prev, step: 'review' }));
     }
   };
 
-  const applyPromoCode = async () => {
+  const applyPromoCode = async (): Promise<void> => {
     if (!promoCode.trim()) return;
     
     try {
@@ -71,15 +72,15 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
     }
   };
 
-  const removePromoCode = () => {
+  const removePromoCode = (): void => {
     setAppliedPromo(null);
     setPromoCode('');
     setPromoError('');
   };
 
-  const handlePlaceOrder = () => {
-    const newOrder: Order = {
-      id: 'CMD' + Date.now().toString().slice(-6),
+  const handlePlaceOrder = (): void => {
+    const order: Order = {
+      id: Date.now(),
       items: hydratedCart.map(item => ({ 
         productId: item.productId, 
         quantity: item.quantity,

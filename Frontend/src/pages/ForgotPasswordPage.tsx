@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Mail } from 'lucide-react';
 import { useToast } from '../hooks/useToast';
 import { Link, useNavigate } from 'react-router-dom';

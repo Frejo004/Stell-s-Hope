@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import { Heart, Leaf, Users, Award } from 'lucide-react';
 
 interface AboutPageProps {
