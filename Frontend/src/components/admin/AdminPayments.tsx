@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Plus, Edit, Search, Filter, CreditCard, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 
 interface AdminPaymentsProps {

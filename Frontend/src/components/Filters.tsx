@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import { ChevronDown, X } from 'lucide-react';
 import { FilterState } from '../types';
 

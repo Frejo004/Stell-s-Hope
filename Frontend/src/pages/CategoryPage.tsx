@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { SlidersHorizontal } from 'lucide-react';
-import { Product, FilterState } from '../types';
-import ProductFilters from '../components/ProductFilters';
-import InfiniteProductList from '../components/InfiniteProductList';
-import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
-import { useProductFilters } from '../hooks/useProductFilters';
+import { Product } from '../types';
+import ProductCard from '../components/ProductCard';
 
-export default function CategoryPage() {
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const { getFilters } = useProductFilters();
-  const { products } = useInfiniteProducts(getFilters());
+interface CategoryPageProps {
+  products: Product[];
+  category: string;
+  onProductClick: (product: Product) => void;
+}
 
-
+export default function CategoryPage({ products, category, onProductClick }: CategoryPageProps) {
+  const filteredProducts = products.filter(p => 
+    category === 'all' || p.category.name.toLowerCase() === category.toLowerCase()
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -21,33 +20,19 @@ export default function CategoryPage() {
           Boutique - Tous nos produits
         </h1>
         <p className="text-gray-600">
-          {products.length} produit{products.length > 1 ? 's' : ''}
+          {filteredProducts.length} produit{filteredProducts.length > 1 ? 's' : ''}
         </p>
       </div>
 
-      <div className="lg:grid lg:grid-cols-4 lg:gap-8">
-        {/* Filters Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="lg:sticky lg:top-24 z-10">
-            {/* Mobile Filter Toggle */}
-            <div className="lg:hidden mb-6">
-              <button
-                onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                className="flex items-center space-x-2 w-full p-3 bg-gray-100 rounded-lg"
-              >
-                <SlidersHorizontal className="w-5 h-5" />
-                <span>Filtres</span>
-              </button>
-            </div>
-
-            <ProductFilters />
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        <div className="lg:col-span-3">
-          <InfiniteProductList />
-        </div>
+      {/* Products Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {filteredProducts.map(product => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onProductClick={onProductClick}
+          />
+        ))}
       </div>
     </div>
   );

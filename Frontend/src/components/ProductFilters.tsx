@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState  } from 'react';
 import { useProductFilters } from '../hooks/useProductFilters';
 import { productService } from '../services/productService';
 

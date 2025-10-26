@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import { useOrders } from '../hooks/useOrders';
 import { useQueryState, parseAsInteger } from 'nuqs';
 import Pagination from './Pagination';

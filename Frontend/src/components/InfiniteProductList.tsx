@@ -1,4 +1,4 @@
-import React from 'react';
+;
 import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
 import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';

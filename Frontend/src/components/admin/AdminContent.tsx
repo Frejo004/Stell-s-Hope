@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Save, Edit, Eye, FileText } from 'lucide-react';
 
 interface AdminContentProps {

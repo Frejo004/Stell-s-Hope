@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { useProductFilters } from '../hooks/useProductFilters';
 import { useNavigate } from 'react-router-dom';
 

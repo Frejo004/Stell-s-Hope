@@ -1,14 +1,12 @@
-import React from 'react';
 import { CheckCircle, Package, Truck, Mail, Phone, Download, ArrowRight } from 'lucide-react';
 import { Order } from '../types/order';
 
 interface OrderConfirmationPageProps {
   order: Order;
-  onClose: () => void;
   onContinueShopping: () => void;
 }
 
-export default function OrderConfirmationPage({ order, onClose, onContinueShopping }: OrderConfirmationPageProps) {
+export default function OrderConfirmationPage({ order, onContinueShopping }: OrderConfirmationPageProps) {
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 3);
 
@@ -35,7 +33,7 @@ export default function OrderConfirmationPage({ order, onClose, onContinueShoppi
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Date de commande</h3>
-              <p className="text-lg">{new Date(order.createdAt).toLocaleDateString('fr-FR')}</p>
+              <p className="text-lg">{new Date(order.created_at).toLocaleDateString('fr-FR')}</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Total payé</h3>
@@ -49,7 +47,7 @@ export default function OrderConfirmationPage({ order, onClose, onContinueShoppi
           <div>
             <h2 className="text-xl font-bold mb-4">Récapitulatif de la commande</h2>
             <div className="border rounded-lg p-4 space-y-4">
-              {order.items.map((item, index) => (
+              {(order.order_items || []).map((item, index) => (
                 <div key={index} className="flex items-center space-x-4">
                   <img
                     src={item.product.images?.[0] || '/placeholder.jpg'}
@@ -68,15 +66,15 @@ export default function OrderConfirmationPage({ order, onClose, onContinueShoppi
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Sous-total</span>
-                  <span>{order.subtotal.toFixed(2)} €</span>
+                  <span>{(order.subtotal || 0).toFixed(2)} €</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Livraison</span>
-                  <span>{order.shipping.toFixed(2)} €</span>
+                  <span>{(order.shipping || 0).toFixed(2)} €</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>TVA</span>
-                  <span>{order.tax.toFixed(2)} €</span>
+                  <span>{(order.tax || 0).toFixed(2)} €</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total</span>
@@ -97,9 +95,9 @@ export default function OrderConfirmationPage({ order, onClose, onContinueShoppi
                   <div>
                     <h3 className="font-semibold">Adresse de livraison</h3>
                     <p className="text-sm text-gray-600">
-                      {order.shippingAddress.firstName} {order.shippingAddress.lastName}<br />
-                      {order.shippingAddress.street}<br />
-                      {order.shippingAddress.postalCode} {order.shippingAddress.city}
+                      {order.shipping_address.first_name} {order.shipping_address.last_name}<br />
+                      {order.shipping_address.street}<br />
+                      {order.shipping_address.postal_code} {order.shipping_address.city}
                     </p>
                   </div>
                 </div>
@@ -207,7 +205,7 @@ export default function OrderConfirmationPage({ order, onClose, onContinueShoppi
             <div>
               <h4 className="font-medium text-blue-800">Confirmation par email</h4>
               <p className="text-sm text-blue-700 mt-1">
-                Un email de confirmation a été envoyé à <strong>{order.shippingAddress.firstName?.toLowerCase()}@example.com</strong>.
+                Un email de confirmation a été envoyé à <strong>{order.shipping_address.first_name?.toLowerCase()}@example.com</strong>.
                 Vérifiez également vos spams si vous ne le recevez pas dans les prochaines minutes.
               </p>
             </div>

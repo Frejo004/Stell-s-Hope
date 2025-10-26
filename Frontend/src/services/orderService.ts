@@ -1,5 +1,4 @@
 import api from './api';
-import { Order } from '../types/order';
 
 export interface CreateOrderData {
   shipping_address: {

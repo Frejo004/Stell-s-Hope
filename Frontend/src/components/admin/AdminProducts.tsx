@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
 import { useAdminProducts } from '../../hooks/useAdminData';
 import { adminService } from '../../services/adminService';

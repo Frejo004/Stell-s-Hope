@@ -3,7 +3,7 @@ import { BUSINESS_CONSTANTS, REGEX_PATTERNS } from '../constants';
 // Utilitaires de formatage
 export const formatters = {
   // Formatage de prix
-  price: (amount: number, currency = BUSINESS_CONSTANTS.CURRENCY_SYMBOL): string => {
+  price: (amount: number): string => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: BUSINESS_CONSTANTS.CURRENCY,

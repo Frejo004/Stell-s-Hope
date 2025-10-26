@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { Search, Filter, AlertTriangle, Package, TrendingDown, TrendingUp } from 'lucide-react';
 import { useAdminInventory } from '../../hooks/useAdminData';
 

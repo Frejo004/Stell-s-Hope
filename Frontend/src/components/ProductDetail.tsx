@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState  } from 'react';
 import { ArrowLeft, Star, Heart, Truck, RotateCcw, Shield, Plus, Minus, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '../types';
 import { useCartContext } from '../contexts/CartContext';

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect  } from 'react';
 import { ArrowLeft, Package, MapPin, CreditCard } from 'lucide-react';
 import { adminService } from '../services/adminService';
+import { Order, OrderItem } from '../types/order';
 
 interface OrderDetailsPageProps {
   orderId: string;
@@ -8,7 +9,7 @@ interface OrderDetailsPageProps {
 }
 
 export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageProps) {
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,10 +55,11 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
     );
   }
 
-  const getStatusLabel = (status: string) => {
-    const labels = {
+  const getStatusLabel = (status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'): string => {
+    const labels: Record<typeof status, string> = {
       pending: 'En attente',
       confirmed: 'Confirmée',
+      processing: 'En préparation',
       shipped: 'Expédiée',
       delivered: 'Livrée',
       cancelled: 'Annulée'
@@ -99,8 +101,8 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
                 Produits commandés
               </h3>
               <div className="space-y-4">
-                {(order.order_items || []).map((item, index) => (
-                  <div key={index} className="flex items-center space-x-4 pb-4 border-b last:border-b-0">
+                {(order.order_items || []).map((item: OrderItem) => (
+                  <div key={item.id} className="flex items-center space-x-4 pb-4 border-b last:border-b-0">
                     <img
                       src={item.product?.images?.[0] || '/placeholder.jpg'}
                       alt={item.product?.name || 'Produit'}

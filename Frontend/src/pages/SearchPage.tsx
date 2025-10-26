@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, X, Filter } from 'lucide-react';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
@@ -25,13 +25,13 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
     let results = products.filter(product => 
       product.name.toLowerCase().includes(query.toLowerCase()) ||
       product.description.toLowerCase().includes(query.toLowerCase()) ||
-      product.category.toLowerCase().includes(query.toLowerCase()) ||
-      product.type.toLowerCase().includes(query.toLowerCase())
+      product.category.name.toLowerCase().includes(query.toLowerCase()) ||
+      (product.type?.toLowerCase().includes(query.toLowerCase()) ?? false)
     );
 
     // Apply filters
     if (filters.category) {
-      results = results.filter(p => p.category === filters.category);
+      results = results.filter(p => p.category.name === filters.category);
     }
 
     results = results.filter(p => 
