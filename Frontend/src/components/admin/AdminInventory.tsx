@@ -11,7 +11,7 @@ export default function AdminInventory({ onNavigate }: AdminInventoryProps) {
   const [stockFilter, setStockFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const { inventory, stats, loading } = useAdminInventory();
+  const { inventory = [], stats = { total: 0, inStock: 0, lowStock: 0, outOfStock: 0, totalUnits: 0 }, loading } = useAdminInventory();
 
   if (loading) {
     return (

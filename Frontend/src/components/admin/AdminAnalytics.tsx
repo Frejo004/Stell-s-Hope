@@ -8,7 +8,7 @@ interface AdminAnalyticsProps {
 
 export default function AdminAnalytics({ onNavigate }: AdminAnalyticsProps) {
   const [period, setPeriod] = useState('7d');
-  const { analytics, loading } = useAdminAnalytics(period);
+  const { analytics = { metrics: { revenue: 0, orders: 0, customers: 0, conversion: 0 }, topProducts: [] }, loading } = useAdminAnalytics(period);
 
   if (loading) {
     return (

@@ -10,7 +10,7 @@ interface AdminOrdersProps {
 }
 
 export default function AdminOrders({ onNavigate }: AdminOrdersProps) {
-  const { orders, loading, pagination, refetch } = useAdminOrders();
+  const { orders = [], loading, pagination, refetch } = useAdminOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [toast, setToast] = useState<{type: 'success' | 'error' | 'warning', message: string} | null>(null);

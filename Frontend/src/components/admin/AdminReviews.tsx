@@ -9,7 +9,7 @@ interface AdminReviewsProps {
 export default function AdminReviews({ onNavigate }: AdminReviewsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const { reviews, stats, loading, updateReviewStatus } = useAdminReviews();
+  const { reviews = [], stats = { total: 0, pending: 0, approved: 0, averageRating: 0 }, loading, updateReviewStatus } = useAdminReviews();
 
   if (loading) {
     return (
