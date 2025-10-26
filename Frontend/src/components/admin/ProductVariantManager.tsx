@@ -126,31 +126,48 @@ export default function ProductVariantManager({
             />
           </div>
           
-          {attributes.map(attr => (
-            <div key={attr.id}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{attr.name}</label>
-              <select
-                value={newVariant.attributes[attr.id] || ''}
-                onChange={(e) => 
-                  setNewVariant({ 
-                    ...newVariant, 
-                    attributes: { 
-                      ...newVariant.attributes, 
-                      [attr.id]: e.target.value 
-                    } 
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Sélectionner {attr.name}</option>
-                {attr.values.map(value => (
-                  <option key={value} value={value}>
-                    {value}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
+          {attributes.map(attr => {
+            // S'assurer que values est un tableau
+            let parsedValues;
+            if (typeof attr.values === 'string') {
+              try {
+                parsedValues = JSON.parse(attr.values);
+              } catch (e) {
+                console.error('Could not parse attribute values string:', attr.values, e);
+                parsedValues = [];
+              }
+            } else {
+              parsedValues = attr.values;
+            }
+
+            const values = Array.isArray(parsedValues) ? parsedValues : [];
+            
+            return (
+              <div key={attr.id}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{attr.name}</label>
+                <select
+                  value={newVariant.attributes[attr.id] || ''}
+                  onChange={(e) => 
+                    setNewVariant({ 
+                      ...newVariant, 
+                      attributes: { 
+                        ...newVariant.attributes, 
+                        [attr.id]: e.target.value 
+                      } 
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Sélectionner {attr.name}</option>
+                  {values.map((value: string) => (
+                    <option key={value} value={value}>
+                      {value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          })}
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>

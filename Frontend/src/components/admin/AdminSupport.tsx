@@ -9,7 +9,7 @@ interface AdminSupportProps {
 export default function AdminSupport({ onNavigate }: AdminSupportProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const { tickets, stats, loading, updateTicketStatus } = useAdminSupport();
+  const { tickets = [], stats = { total: 0, open: 0, pending: 0, resolved: 0 }, loading, updateTicketStatus } = useAdminSupport();
 
   if (loading) {
     return (
