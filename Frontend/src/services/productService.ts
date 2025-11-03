@@ -8,6 +8,8 @@ export interface ProductFilters {
   max_price?: number;
   per_page?: number;
   page?: number;
+  sort_by?: string;
+  sort_direction?: 'asc' | 'desc';
 }
 
 export interface ProductResponse {

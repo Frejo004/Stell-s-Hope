@@ -1,19 +1,69 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Product } from '../types';
+import { Product, Category } from '../types';
 import ProductCard from '../components/ProductCard';
 import { productService } from '../services/productService';
 
 interface HomePageProps {
-  products: Product[];
+  products: Product[]; // Gardé pour les sections existantes comme Trending/Feature
   onProductClick: (product: Product) => void;
   onCategoryChange: (category: string) => void;
 }
 
 export default function HomePage({ products, onProductClick, onCategoryChange }: HomePageProps) {
+  // State pour les sections qui ne changent pas (Trending, etc.)
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [bestsellers, setBestsellers] = useState<Product[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState('All');
 
+  // State pour la nouvelle grille de produits dynamique
+  const [gridProducts, setGridProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [gridLoading, setGridLoading] = useState(true);
+
+  // Chargement initial des catégories
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const fetchedCategories = await productService.getCategories();
+        setCategories(fetchedCategories.data || fetchedCategories);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  // Chargement des produits de la grille en fonction de la catégorie sélectionnée
+  useEffect(() => {
+    const loadGridProducts = async () => {
+      setGridLoading(true);
+      try {
+        const categoryId = selectedCategory === 'All' 
+          ? undefined 
+          : categories.find(c => c.name === selectedCategory)?.id;
+
+        const response = await productService.getProducts({
+          per_page: 12,
+          sort_by: 'created_at',
+          sort_direction: 'desc',
+          ...(selectedCategory !== 'All' && { category: categoryId }),
+        });
+
+        setGridProducts(response.data);
+      } catch (error) {
+        console.error('Error loading grid products:', error);
+      } finally {
+        setGridLoading(false);
+      }
+    };
+
+    // Ne pas charger si les catégories ne sont pas encore là (sauf pour 'All')
+    if (selectedCategory === 'All' || categories.length > 0) {
+      loadGridProducts();
+    }
+  }, [selectedCategory, categories]);
+
+  // Logique pour les sections Trending/Bestsellers (inchangée)
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -21,60 +71,28 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
           productService.getFeaturedProducts(),
           productService.getBestsellers()
         ]);
-        
-        if (featured && featured.length > 0) {
-          setFeaturedProducts(featured);
-        } else {
-          setFeaturedProducts(products.filter(p => p.is_featured || p.is_bestseller).slice(0, 12));
-        }
-        
-        if (best && best.length > 0) {
-          setBestsellers(best);
-        } else {
-          setBestsellers(products.filter(p => p.is_bestseller).slice(0, 12));
-        }
+        setFeaturedProducts(featured);
+        setBestsellers(best);
       } catch (error) {
-        console.error('Error loading products:', error);
-        setFeaturedProducts(products.filter(p => p.is_featured || p.is_bestseller).slice(0, 12));
-        setBestsellers(products.filter(p => p.is_bestseller).slice(0, 12));
+        console.error('Error loading featured/bestseller products:', error);
       }
     };
-
     loadProducts();
-  }, [products]);
+  }, []);
 
-  const bestSellers = bestsellers.length > 0 ? bestsellers : products.filter(product => product.is_bestseller).slice(0, 12);
-  const newProducts = featuredProducts.length > 0 ? featuredProducts : products.filter(product => product.is_featured);
+  const bestSellers = bestsellers.length > 0 ? bestsellers : products.filter(product => product.is_bestseller).slice(0, 3);
+  const newProducts = featuredProducts.length > 0 ? featuredProducts : products.filter(product => product.is_featured).slice(0, 3);
 
+  // Génère les onglets de catégories à partir des catégories chargées
   const topCategories = useMemo(() => {
-    const categoryCounts = products.reduce((acc, product) => {
-      const categoryName = product.category.name;
-      acc[categoryName] = (acc[categoryName] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const sortedCategories = Object.keys(categoryCounts).sort((a, b) => categoryCounts[b] - categoryCounts[a]);
-    
-    return ['All', ...sortedCategories.slice(0, 6)];
-  }, [products]);
-
-  const filteredNewProducts = useMemo(() => {
-    const sortableProducts = [...products];
-
-    sortableProducts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-    if (selectedCategory === 'All') {
-      return sortableProducts.slice(0, 12);
-    }
-    
-    return sortableProducts.filter(p => p.category.name === selectedCategory).slice(0, 12);
-  }, [products, selectedCategory]);
+    // Simplification: on prend les 6 premières catégories de l'API
+    return ['All', ...categories.slice(0, 6).map(c => c.name)];
+  }, [categories]);
 
   return (
     <div>
-      {/* Hero Grid Section */}
+      {/* Hero Grid Section (inchangé) */}
       <section className="grid grid-cols-1 lg:grid-cols-12 min-h-screen">
-        {/* Women's Fashion - Large Left */}
         <div className="lg:col-span-6 relative bg-gradient-to-br from-pink-100 to-orange-100 flex items-center min-h-[50vh] lg:min-h-screen">
           <div className="absolute inset-0">
             <img
@@ -96,10 +114,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             </button>
           </div>
         </div>
-
-        {/* Right Grid */}
         <div className="lg:col-span-6 grid grid-cols-2 grid-rows-2">
-          {/* Men's Fashion */}
           <div 
             className="relative bg-gradient-to-br from-teal-100 to-green-100 flex items-center justify-center cursor-pointer group min-h-[25vh] lg:min-h-[50vh]"
             onClick={() => onCategoryChange('homme')}
@@ -119,8 +134,6 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
               </div>
             </div>
           </div>
-
-          {/* Kid's Fashion */}
           <div className="relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center min-h-[25vh] lg:min-h-[50vh]">
             <div className="absolute inset-0">
               <img
@@ -135,8 +148,6 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
               <div className="border-b border-gray-800 text-xs md:text-sm">SHOP NOW</div>
             </div>
           </div>
-
-          {/* Cosmetics */}
           <div className="relative bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center min-h-[25vh] lg:min-h-[50vh]">
             <div className="absolute inset-0">
               <img
@@ -151,8 +162,6 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
               <div className="border-b border-gray-800 text-xs md:text-sm">SHOP NOW</div>
             </div>
           </div>
-
-          {/* Accessories */}
           <div 
             className="relative bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center cursor-pointer group min-h-[25vh] lg:min-h-[50vh]"
             onClick={() => onCategoryChange('accessoires')}
@@ -175,13 +184,11 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
         </div>
       </section>
 
-      {/* New Products Section */}
+      {/* New Products Section (modifié) */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-light text-gray-800 mb-8">NEW PRODUCT</h2>
-            
-            {/* Filter Tabs */}
             <div className="flex flex-wrap justify-center gap-4 md:space-x-8 mb-12">
               {topCategories.map((tab) => (
                 <button
@@ -199,20 +206,26 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             </div>
           </div>
 
-          {/* Products Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {filteredNewProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onProductClick={onProductClick}
-              />
-            ))}
-          </div>
+          {/* Products Grid (modifié) */}
+          {gridLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-300"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {gridProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onProductClick={onProductClick}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Collection Banner */}
+      {/* Collection Banner (inchangé) */}
       <section className="relative min-h-[300px] md:h-96 bg-gradient-to-r from-pink-50 to-blue-50 overflow-hidden">
         <div className="absolute inset-0 flex flex-col md:flex-row items-center justify-between">
           <div className="w-full md:w-1/3 h-48 md:h-96">
@@ -239,11 +252,10 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
         </div>
       </section>
 
-      {/* Trending Products */}
+      {/* Trending Products (inchangé) */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            {/* Hot Trend */}
             <div>
               <h3 className="text-xl font-medium text-gray-800 mb-6 border-b-2 border-red-500 pb-2 inline-block">
                 HOT TREND
@@ -270,7 +282,6 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
               </div>
             </div>
 
-            {/* Best Seller */}
             <div>
               <h3 className="text-xl font-medium text-gray-800 mb-6">BEST SELLER</h3>
               <div className="space-y-4">
@@ -295,7 +306,6 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
               </div>
             </div>
 
-            {/* Feature */}
             <div>
               <h3 className="text-xl font-medium text-gray-800 mb-6">FEATURE</h3>
               <div className="space-y-4">
@@ -323,7 +333,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
         </div>
       </section>
 
-      {/* Sale Banner */}
+      {/* Sale Banner (inchangé) */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center gap-8">
           <div className="w-full md:w-1/2">
@@ -338,7 +348,6 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             <h2 className="text-3xl md:text-5xl font-light text-red-500 mb-4">Summer 2024</h2>
             <p className="text-xl md:text-2xl font-light text-gray-800 mb-6">SALE 50%</p>
             
-            {/* Countdown */}
             <div className="flex justify-center md:justify-start space-x-4 md:space-x-6 mb-8">
               <div className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-gray-800">30</div>
