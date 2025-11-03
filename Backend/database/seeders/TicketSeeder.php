@@ -43,5 +43,4 @@ class TicketSeeder extends Seeder
             }
         }
     }
-    }
 }
