@@ -154,7 +154,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
         path="/*" 
         element={
           <>
-            <div className="min-h-screen bg-white">
+            <div className="bg-white">
             <Header
               onCategoryChange={handleCategoryChange}
               currentCategory={getCurrentCategory()}
