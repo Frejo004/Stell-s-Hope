@@ -9,11 +9,14 @@ export default defineConfig({
     })
   ],
   server: {
-    port: 5173,
+    port: 3000,
     host: true,
-    hmr: {
+    watch: {
+      usePolling: true,
+    },
+   hmr: {
       overlay: false,
-      port: 5173
+      port: 3000
     }
   },
   define: {
