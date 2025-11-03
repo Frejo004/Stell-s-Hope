@@ -161,7 +161,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
               products={products}
               onProductClick={handleProductClick}
             />
-            <main>
+            <main className="flex-grow">
               <Routes>
             {/* Pages principales */}
             <Route 
@@ -369,4 +369,5 @@ export default function AppRouter({ onOrderComplete }: AppRouterProps) {
       </NuqsAdapter>
     </Router>
   );
+});
 }
