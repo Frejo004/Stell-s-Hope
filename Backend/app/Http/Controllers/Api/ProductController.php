@@ -77,4 +77,20 @@ class ProductController extends Controller
         
         return response()->json($products);
     }
+
+    public function searchSuggestions(Request $request)
+    {
+        $query = $request->get('query', '');
+
+        if (empty($query)) {
+            return response()->json([]);
+        }
+
+        $suggestions = Product::where('is_active', true)
+                              ->where('name', 'like', '%' . $query . '%')
+                              ->limit(10)
+                              ->pluck('name');
+
+        return response()->json($suggestions);
+    }
 }

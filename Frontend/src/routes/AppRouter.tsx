@@ -369,5 +369,4 @@ export default function AppRouter({ onOrderComplete }: AppRouterProps) {
       </NuqsAdapter>
     </Router>
   );
-});
-}
+};

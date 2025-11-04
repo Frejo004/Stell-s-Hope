@@ -1,4 +1,6 @@
-import { useState  } from 'react';
+import { useState, useMemo } from 'react';
+import Zoom from 'react-medium-image-zoom';
+import 'react-medium-image-zoom/dist/styles.css';
 import { ArrowLeft, Star, Heart, Truck, RotateCcw, Shield, Plus, Minus, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '../types';
 import { useCartContext } from '../contexts/CartContext';
@@ -16,8 +18,8 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   const [selectedColor, setSelectedColor] = useState(product.colors && product.colors.length > 0 ? product.colors[0] : '');
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isZooming, setIsZooming] = useState(false);
+  const [sortOrder, setSortOrder] = useState('recent');
+  const [filterRating, setFilterRating] = useState(0);
   
   const { addToCart } = useCartContext();
   const productReviews = reviews.filter(review => review.productId === product.id);
@@ -53,12 +55,24 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setMousePosition({ x, y });
-  };
+  const ratingDistribution = useMemo(() => {
+    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    productReviews.forEach(review => {
+      distribution[review.rating] = (distribution[review.rating] || 0) + 1;
+    });
+    return distribution;
+  }, [productReviews]);
+
+  const filteredAndSortedReviews = useMemo(() => {
+    return productReviews
+      .filter(review => filterRating === 0 || review.rating === filterRating)
+      .sort((a, b) => {
+        if (sortOrder === 'recent') {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        }
+        return b.rating - a.rating;
+      });
+  }, [productReviews, sortOrder, filterRating]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -81,25 +95,14 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images */}
           <div className="space-y-4">
-            <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden group cursor-zoom-in">
-              <div 
-                className="w-full h-full"
-                onMouseMove={handleMouseMove}
-                onMouseEnter={() => setIsZooming(true)}
-                onMouseLeave={() => setIsZooming(false)}
-              >
+            <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden group">
+              <Zoom>
                 <img
                   src={product.images && Array.isArray(product.images) && product.images[selectedImage] ? product.images[selectedImage] : '/placeholder.jpg'}
                   alt={product.name}
-                  className="w-full h-full object-cover transition-transform duration-200"
-                  style={{
-                    transform: isZooming 
-                      ? `scale(1.8)` 
-                      : 'scale(1)',
-                    transformOrigin: `${mousePosition.x}% ${mousePosition.y}%`
-                  }}
+                  className="w-full h-full object-cover"
                 />
-              </div>
+              </Zoom>
               <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Heart className="w-5 h-5 text-gray-600" />
               </button>
@@ -380,28 +383,78 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
 
             {activeTab === 'avis' && (
               <div className="space-y-8">
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="text-4xl font-bold">{product.rating}</div>
+                <div className="bg-gray-50 p-8 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div>
-                      <div className="flex items-center mb-1">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-5 h-5 ${
-                              i < Math.floor(product.rating)
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
+                      <h3 className="text-2xl font-bold mb-2">Avis des clients</h3>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex items-center">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-6 h-6 ${
+                                i < Math.floor(product.rating)
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xl font-semibold">
+                          {product.rating} sur 5
+                        </span>
                       </div>
-                      <p className="text-gray-600">Basé sur {product.reviewCount} avis</p>
+                      <p className="text-gray-600 mt-2">Basé sur {product.reviewCount} avis</p>
+                    </div>
+                    <div className="space-y-2">
+                      {Object.entries(ratingDistribution).reverse().map(([star, count]) => (
+                        <div key={star} className="flex items-center space-x-2">
+                          <span className="w-12 text-sm text-gray-600">{star} étoiles</span>
+                          <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                            <div 
+                              className="bg-yellow-400 h-2.5 rounded-full"
+                              style={{ width: `${(count / product.reviewCount) * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className="w-8 text-sm text-gray-600 text-right">{count}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <label htmlFor="filter" className="font-medium">Filtrer par:</label>
+                    <select 
+                      id="filter"
+                      value={filterRating}
+                      onChange={(e) => setFilterRating(Number(e.target.value))}
+                      className="border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    >
+                      <option value="0">Tous</option>
+                      <option value="5">5 étoiles</option>
+                      <option value="4">4 étoiles</option>
+                      <option value="3">3 étoiles</option>
+                      <option value="2">2 étoiles</option>
+                      <option value="1">1 étoile</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <label htmlFor="sort" className="font-medium">Trier par:</label>
+                    <select 
+                      id="sort"
+                      value={sortOrder}
+                      onChange={(e) => setSortOrder(e.target.value)}
+                      className="border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    >
+                      <option value="recent">Plus récent</option>
+                      <option value="rating">Meilleure note</option>
+                    </select>
+                  </div>
+                </div>
                 
-                {productReviews.map((review) => (
+                {filteredAndSortedReviews.map((review) => (
                   <div key={review.id} className="border-b border-gray-200 pb-8">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
