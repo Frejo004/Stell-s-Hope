@@ -1,7 +1,9 @@
 ;
-import { Heart, Star } from 'lucide-react';
+import { useState } from 'react';
+import { Heart, Star, ShoppingCart, Check } from 'lucide-react';
 import { Product } from '../types';
 import { useWishlist } from '../contexts/WishlistContext';
+import { useCartContext } from '../contexts/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -10,7 +12,12 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, onProductClick }: ProductCardProps) {
   const { addToWishlist, removeFromWishlist, isProductInWishlist } = useWishlist();
+  const { addToCart, guestCart } = useCartContext();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
   const inWishlist = isProductInWishlist(product.id);
+  const isItemInCart = guestCart.some(item => item.productId === product.id);
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -20,8 +27,38 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
       addToWishlist(product);
     }
   };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isAddingToCart) return;
+    
+    setIsAddingToCart(true);
+    try {
+      addToCart({
+        productId: product.id,
+        quantity: 1,
+        name: product.name,
+        price: product.price,
+        image: product.images?.[0]
+      });
+      
+      // Réinitialiser l'état après 2 secondes
+      setTimeout(() => {
+        setIsAddingToCart(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout au panier:', error);
+      setIsAddingToCart(false);
+    }
+  };
+
   return (
-    <div className="group cursor-pointer" onClick={() => onProductClick(product)}>
+    <div 
+      className="group cursor-pointer relative" 
+      onClick={() => onProductClick(product)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className="relative overflow-hidden bg-gray-200 rounded-lg aspect-[3/4]">
         <img
           src={product.images?.[0] || '/placeholder.jpg'}
@@ -41,7 +78,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
               PROMO
             </span>
           )}
-          {product.isBestSeller && (
+          {product.is_bestseller && (
             <span className="bg-gray-800 text-white text-xs px-2 py-1 rounded">
               BEST-SELLER
             </span>
@@ -57,16 +94,50 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
         </button>
 
         {/* Quick view on hover */}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              onProductClick(product);
-            }}
-            className="w-full bg-white text-black py-2 px-4 rounded font-medium hover:bg-gray-100 transition-colors"
-          >
-            Aperçu rapide
-          </button>
+        <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 transition-all duration-300 ${
+          isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+        }`}>
+          <div className="flex flex-col space-y-2">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onProductClick(product);
+              }}
+              className="w-full bg-white text-black py-2 px-4 rounded font-medium hover:bg-gray-100 transition-colors flex items-center justify-center"
+            >
+              <span>Voir les détails</span>
+            </button>
+            
+            <button 
+              onClick={handleAddToCart}
+              disabled={isAddingToCart || isItemInCart}
+              className={`w-full py-2 px-4 rounded font-medium transition-colors flex items-center justify-center space-x-2 ${
+                isItemInCart
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-rose-500 text-white hover:bg-rose-600'
+              }`}
+            >
+              {isAddingToCart ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Ajout en cours...</span>
+                </>
+              ) : isItemInCart ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Ajouté au panier</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Ajouter au panier</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
