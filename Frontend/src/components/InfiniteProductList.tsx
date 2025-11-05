@@ -1,4 +1,4 @@
-;
+import { useRef } from 'react';
 import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
 import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
@@ -6,7 +6,8 @@ import { useProductFilters } from '../hooks/useProductFilters';
 
 const InfiniteProductList: React.FC = () => {
   const { getFilters } = useProductFilters();
-  const { products, loading, error, isFetching, hasMore } = useInfiniteProducts(getFilters());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { products, loading, error, isFetching, hasMore } = useInfiniteProducts(getFilters(), scrollRef);
   const { addToCart } = useCartContext();
   const { addToWishlist: addToWishlistContext, removeFromWishlist, isProductInWishlist } = useWishlist();
 
@@ -22,7 +23,7 @@ const InfiniteProductList: React.FC = () => {
   if (error) return <div className="text-center py-8 text-red-600">Erreur: {error}</div>;
 
   return (
-    <div>
+    <div ref={scrollRef} className="overflow-y-auto h-full">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {products.map((product: any, index: number) => (
           <div key={`product-${product.id}-${index}`} className="group bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-300">

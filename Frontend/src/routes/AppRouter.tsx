@@ -154,14 +154,14 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
         path="/*" 
         element={
           <>
-            <div className="min-h-screen bg-white">
+            <div className="bg-white">
             <Header
               onCategoryChange={handleCategoryChange}
               currentCategory={getCurrentCategory()}
               products={products}
               onProductClick={handleProductClick}
             />
-            <main>
+            <main className="flex-grow">
               <Routes>
             {/* Pages principales */}
             <Route 
@@ -369,4 +369,4 @@ export default function AppRouter({ onOrderComplete }: AppRouterProps) {
       </NuqsAdapter>
     </Router>
   );
-}
+};

@@ -6,6 +6,7 @@ interface LegalPageProps {
 }
 
 const content = {
+  // CGV : Ajout d'une icône pour une identification visuelle rapide.
   cgv: {
     title: 'Conditions Générales de Vente',
     sections: [
@@ -35,6 +36,7 @@ const content = {
       }
     ]
   },
+  // Politique de confidentialité : Ajout d'une icône pour renforcer la confiance.
   privacy: {
     title: 'Politique de Confidentialité',
     sections: [
@@ -60,6 +62,7 @@ const content = {
       }
     ]
   },
+  // Livraison & Retours : Ajout d'une icône pour une meilleure clarté.
   shipping: {
     title: 'Livraison & Retours',
     sections: [
@@ -92,29 +95,39 @@ export default function LegalPage({ onClose, type }: LegalPageProps) {
 
   return (
     <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
-      <div className="max-w-4xl mx-auto p-6">
-        <button onClick={onClose} className="mb-6 text-gray-600 hover:text-black">
+      <div className="max-w-4xl mx-auto p-6 sm:p-8">
+        <button onClick={onClose} className="mb-8 text-gray-600 hover:text-black transition-colors">
           ← Retour
         </button>
 
-        <div className="prose max-w-none">
-          <h1 className="text-3xl font-bold mb-8">{pageContent.title}</h1>
+        <div className="prose max-w-none prose-h1:font-bold prose-h1:text-3xl prose-h2:font-semibold prose-h2:text-xl">
+          <div className="flex items-center mb-8">
+            {type === 'cgv' && <FileText className="w-8 h-8 mr-4 text-rose-400" />}
+            {type === 'privacy' && <Shield className="w-8 h-8 mr-4 text-rose-400" />}
+            {type === 'shipping' && <Truck className="w-8 h-8 mr-4 text-rose-400" />}
+            <h1>{pageContent.title}</h1>
+          </div>
           
-          <div className="space-y-6">
+          <div className="space-y-8">
             {pageContent.sections.map((section, index) => (
               <div key={index}>
-                <h2 className="text-xl font-semibold mb-3">{section.title}</h2>
-                <p className="text-gray-700 leading-relaxed">{section.content}</p>
+                <h2 className="mb-3">{section.title}</h2>
+                <p className="text-gray-700 leading-relaxed mt-0">{section.content}</p>
               </div>
             ))}
           </div>
 
           <div className="mt-12 p-6 bg-gray-50 rounded-lg">
             <h3 className="font-semibold mb-2">Contact</h3>
-            <p className="text-sm text-gray-600">
-              Pour toute question concernant ces conditions, contactez-nous à :<br />
-              <strong>contact@stellshope.fr</strong> ou <strong>+33 1 23 45 67 89</strong>
-            </p>
+            <div className="text-sm text-gray-600 space-y-2">
+              <p>Pour toute question, n'hésitez pas à nous contacter :</p>
+              <div className="flex items-center">
+                <Mail className="w-4 h-4 mr-2 text-gray-500" /> <strong>contact@stellshope.fr</strong>
+              </div>
+              <div className="flex items-center">
+                <Phone className="w-4 h-4 mr-2 text-gray-500" /> <strong>+33 1 23 45 67 89</strong>
+              </div>
+            </div>
             <p className="text-xs text-gray-500 mt-4">
               Dernière mise à jour : {new Date().toLocaleDateString('fr-FR')}
             </p>

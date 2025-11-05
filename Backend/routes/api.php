@@ -46,6 +46,7 @@ Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/bestsellers', [ProductController::class, 'bestsellers']);
 Route::get('/products/search', [ProductController::class, 'search']);
+Route::get('/products/search/suggestions', [ProductController::class, 'searchSuggestions']);
 
 // Categories routes (public)
 Route::get('/categories', [CategoryController::class, 'index']);

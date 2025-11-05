@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, RefObject } from 'react';
 import { productService } from '../services/productService';
 import { useInfiniteScroll } from './useInfiniteScroll';
 
-export const useInfiniteProducts = (filters: any) => {
+export const useInfiniteProducts = (filters: any, scrollRef?: RefObject<HTMLElement>) => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ export const useInfiniteProducts = (filters: any) => {
     }
   }, [filters, currentPage]);
 
-  const [isFetching] = useInfiniteScroll(fetchMoreProducts, hasMore);
+  const [isFetching] = useInfiniteScroll(fetchMoreProducts, hasMore, scrollRef);
 
   // Reset when filters change
   useEffect(() => {
