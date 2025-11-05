@@ -32,7 +32,8 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
       description: "Découvrez notre collection exclusive de mode féminine. Qualité supérieure et style intemporel pour la femme moderne.",
       category: 'femme',
       position: 'left',
-      bgGradient: 'from-pink-100 via-rose-50 to-orange-50'
+      bgGradient: 'from-pink-100 via-rose-50 to-orange-50',
+      mobilePosition: 'object-right' // Personnage à droite
     },
     {
       id: 2,
@@ -41,7 +42,8 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
       description: "Découvrez notre collection exclusive de mode masculine. Qualité supérieure et style intemporel pour l'homme moderne.",
       category: 'homme',
       position: 'right',
-      bgGradient: 'from-teal-100 via-cyan-50 to-blue-50'
+      bgGradient: 'from-teal-100 via-cyan-50 to-blue-50',
+      mobilePosition: 'object-left' // Personnage à gauche
     },
     {
       id: 3,
@@ -50,7 +52,8 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
       description: "Découvrez notre collection exclusive d'accessoires. Qualité supérieure et style intemporel pour l'homme moderne.",
       category: 'accessoires',
       position: 'left',
-      bgGradient: 'from-purple-100 via-pink-50 to-indigo-50'
+      bgGradient: 'from-purple-100 via-pink-50 to-indigo-50',
+      mobilePosition: 'object-right' // Personnage à droite
     }
   ];
 
@@ -149,50 +152,49 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             {/* Background Gradient */}
             <div className={`absolute inset-0 bg-gradient-to-br ${slide.bgGradient}`} />
             
-            {/* Background Image - Hidden on mobile, visible on desktop */}
-            <div className={`hidden lg:block absolute inset-0 transition-all duration-1000 ${
+            {/* Background Image - Desktop: positioned left/right, Mobile: centered background */}
+            <div className={`absolute inset-0 transition-all duration-1000 ${
               index === currentSlide ? 'scale-100 opacity-100' : 'scale-110 opacity-0'
-            } ${slide.position === 'right' ? 'left-0' : 'right-0'}`}>
+            }`}>
+              {/* Desktop Image */}
               <img
                 src={slide.image}
                 alt={slide.title}
-                className={`absolute h-full w-auto object-contain ${
+                className={`hidden lg:block absolute h-full w-auto object-contain ${
                   slide.position === 'right' ? 'left-1/4' : 'right-0'
                 }`}
                 style={{ maxWidth: '65%' }}
               />
+              
+              {/* Mobile Image - Full background */}
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className={`lg:hidden absolute inset-0 w-full h-full object-cover ${slide.mobilePosition} opacity-90`}
+              />
             </div>
             
-            {/* Content Container */}
-            <div className="relative h-full flex items-center">
-              <div className="container mx-auto px-6 md:px-12">
+            {/* Content Container - Desktop: side positioned, Mobile: bottom centered */}
+            <div className="relative h-full flex items-end lg:items-center">
+              <div className="container mx-auto px-6 md:px-12 pb-24 lg:pb-0">
                 {/* Text Content */}
-                <div className={`max-w-2xl ${
-                  slide.position === 'right' ? 'ml-auto text-right' : 'mr-auto text-left'
-                }`}>
+                <div className={`lg:max-w-2xl ${
+                  slide.position === 'right' ? 'lg:ml-auto lg:text-right' : 'lg:mr-auto lg:text-left'
+                } text-center lg:text-left`}>
                   <div className={`transform transition-all duration-1000 delay-300 ${
                     index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
                   }`}>
-                    {/* Mobile Image - Only visible on mobile */}
-                    <div className="lg:hidden mb-8 flex justify-center">
-                      <img
-                        src={slide.image}
-                        alt={slide.title}
-                        className="w-48 h-48 object-contain drop-shadow-xl"
-                      />
-                    </div>
-
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-light mb-6 text-gray-800 leading-tight">
+                    <h1 className="text-4xl md:text-5xl lg:text-7xl font-light mb-4 lg:mb-6 text-gray-800 leading-tight">
                       {slide.title}
                     </h1>
-                    <p className={`text-gray-600 mb-8 max-w-lg text-base md:text-lg leading-relaxed ${
+                    <p className={`hidden lg:block text-gray-600 mb-8 max-w-lg text-base md:text-lg leading-relaxed ${
                       slide.position === 'right' ? 'ml-auto' : 'mr-auto'
                     }`}>
                       {slide.description}
                     </p>
                     <button 
                       onClick={() => onCategoryChange(slide.category)}
-                      className="group relative inline-flex items-center gap-3 border-b-2 border-gray-800 text-gray-800 pb-2 hover:border-rose-500 hover:text-rose-500 transition-all duration-300 text-sm md:text-base font-medium"
+                      className="group relative inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm lg:bg-transparent px-6 py-3 lg:px-0 lg:py-0 rounded-full lg:rounded-none border-b-0 lg:border-b-2 border-gray-800 text-gray-800 hover:bg-rose-500 lg:hover:bg-transparent hover:text-white lg:hover:text-rose-500 lg:hover:border-rose-500 transition-all duration-300 text-sm md:text-base font-medium shadow-lg lg:shadow-none"
                     >
                       SHOP NOW
                       <svg 
@@ -208,6 +210,9 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                 </div>
               </div>
             </div>
+
+            {/* Mobile Gradient Overlay for better text readability */}
+            <div className="lg:hidden absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none" />
           </div>
         ))}
 
