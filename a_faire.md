@@ -1,12 +1,3 @@
-2. Page d'Accueil (Composants principaux dans App.tsx)
-Analyse : La page d'accueil semble centrée sur les "Nouveautés". C'est un bon début, mais elle peut être enrichie pour mieux guider l'utilisateur.
-Recommandations :
-Section "Héros" : Ajoutez une grande bannière visuelle ("Hero banner") en haut de la page avec un appel à l'action (CTA) clair. Exemple : "Découvrez notre collection automne-hiver" avec un bouton "J'en profite".
-Diversifier le contenu : Au-delà des nouveautés, ajoutez des sections comme :
-"Les plus populaires" (Best Sellers) : Met en avant les produits que les autres clients aiment.
-"Catégories en vedette" : De grandes images cliquables pour les catégories phares (par exemple, "Décoration", "Cuisine").
-Preuve Sociale : Intégrez un flux Instagram avec des photos de clients utilisant vos produits, ou affichez des avis clients récents.
-Éléments de confiance (Footer.tsx) : Le pied de page est un bon endroit pour ajouter des logos de partenaires de paiement (Visa, Mastercard, PayPal) et des liens vers les politiques de retour et de confidentialité pour rassurer les clients.
 3. Grille de Produits (ProductGrid.tsx, ProductCard.tsx, Filters.tsx)
 Analyse : Vous avez une grille de produits fonctionnelle. L'expérience peut être optimisée pour faciliter la découverte et la décision d'achat.
 Recommandations :
