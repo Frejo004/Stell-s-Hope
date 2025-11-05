@@ -10,6 +10,9 @@ interface HomePageProps {
 }
 
 export default function HomePage({ products, onProductClick, onCategoryChange }: HomePageProps) {
+  // State pour le slider hero
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
   // State pour les sections qui ne changent pas (Trending, etc.)
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [bestsellers, setBestsellers] = useState<Product[]>([]);
@@ -19,6 +22,46 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [gridLoading, setGridLoading] = useState(true);
+
+  // Configuration des slides du hero
+  const heroSlides = [
+    {
+      id: 1,
+      image: '/hero_section_images/1.png',
+      title: "Femmes",
+      description: "Découvrez notre collection exclusive de mode féminine. Qualité supérieure et style intemporel pour la femme moderne.",
+      category: 'femme',
+      position: 'left',
+      bgGradient: 'from-pink-100 via-rose-50 to-orange-50'
+    },
+    {
+      id: 2,
+      image: '/hero_section_images/2.png',
+      title: "Hommes",
+      description: "Découvrez notre collection exclusive de mode masculine. Qualité supérieure et style intemporel pour l'homme moderne.",
+      category: 'homme',
+      position: 'right',
+      bgGradient: 'from-teal-100 via-cyan-50 to-blue-50'
+    },
+    {
+      id: 3,
+      image: '/hero_section_images/3.png',
+      title: "Accessoires",
+      description: "Découvrez notre collection exclusive d'accessoires. Qualité supérieure et style intemporel pour l'homme moderne.",
+      category: 'accessoires',
+      position: 'left',
+      bgGradient: 'from-purple-100 via-pink-50 to-indigo-50'
+    }
+  ];
+
+  // Auto-rotation du slider toutes les 3 secondes
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    
+    return () => clearInterval(timer);
+  }, []);
 
   // Chargement initial des catégories
   useEffect(() => {
@@ -91,97 +134,118 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
 
   return (
     <div>
-      {/* Hero Grid Section (inchangé) */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 min-h-screen">
-        <div className="lg:col-span-6 relative bg-gradient-to-br from-pink-100 to-orange-100 flex items-center min-h-[50vh] lg:min-h-screen">
-          <div className="absolute inset-0">
-            <img
-              src="https://images.pexels.com/photos/1462637/pexels-photo-1462637.jpeg"
-              alt="Women's Fashion"
-              className="w-full h-full object-cover opacity-80"
+      {/* Hero Slider Section */}
+      <section className="relative min-h-screen overflow-hidden">
+        {/* Slides Container */}
+        {heroSlides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
+              index === currentSlide 
+                ? 'opacity-100' 
+                : 'opacity-0'
+            }`}
+          >
+            {/* Background Gradient */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${slide.bgGradient}`} />
+            
+            {/* Background Image - Hidden on mobile, visible on desktop */}
+            <div className={`hidden lg:block absolute inset-0 transition-all duration-1000 ${
+              index === currentSlide ? 'scale-100 opacity-100' : 'scale-110 opacity-0'
+            } ${slide.position === 'right' ? 'left-0' : 'right-0'}`}>
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className={`absolute h-full w-auto object-contain ${
+                  slide.position === 'right' ? 'left-1/4' : 'right-0'
+                }`}
+                style={{ maxWidth: '65%' }}
+              />
+            </div>
+            
+            {/* Content Container */}
+            <div className="relative h-full flex items-center">
+              <div className="container mx-auto px-6 md:px-12">
+                {/* Text Content */}
+                <div className={`max-w-2xl ${
+                  slide.position === 'right' ? 'ml-auto text-right' : 'mr-auto text-left'
+                }`}>
+                  <div className={`transform transition-all duration-1000 delay-300 ${
+                    index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                  }`}>
+                    {/* Mobile Image - Only visible on mobile */}
+                    <div className="lg:hidden mb-8 flex justify-center">
+                      <img
+                        src={slide.image}
+                        alt={slide.title}
+                        className="w-48 h-48 object-contain drop-shadow-xl"
+                      />
+                    </div>
+
+                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-light mb-6 text-gray-800 leading-tight">
+                      {slide.title}
+                    </h1>
+                    <p className={`text-gray-600 mb-8 max-w-lg text-base md:text-lg leading-relaxed ${
+                      slide.position === 'right' ? 'ml-auto' : 'mr-auto'
+                    }`}>
+                      {slide.description}
+                    </p>
+                    <button 
+                      onClick={() => onCategoryChange(slide.category)}
+                      className="group relative inline-flex items-center gap-3 border-b-2 border-gray-800 text-gray-800 pb-2 hover:border-rose-500 hover:text-rose-500 transition-all duration-300 text-sm md:text-base font-medium"
+                    >
+                      SHOP NOW
+                      <svg 
+                        className="w-5 h-5 transform group-hover:translate-x-2 transition-transform duration-300" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Slide Indicators */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex gap-3">
+          {heroSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`transition-all duration-500 rounded-full ${
+                index === currentSlide 
+                  ? 'w-12 h-3 bg-gray-800' 
+                  : 'w-3 h-3 bg-gray-400 hover:bg-gray-600'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
             />
-          </div>
-          <div className="relative z-10 p-6 md:p-12 text-left">
-            <h2 className="text-3xl md:text-5xl font-light mb-4 text-gray-800">Women's fashion</h2>
-            <p className="text-gray-600 mb-6 max-w-md text-sm md:text-base">
-              Sitamet, consectetur adipiscing elit, sed do eiusmod tempor incididunt labore edolore magna aliquam erat volutpat.
-            </p>
-            <button 
-              onClick={() => onCategoryChange('femme')}
-              className="border-b-2 border-gray-800 text-gray-800 pb-1 hover:border-gray-600 transition-colors text-sm md:text-base"
-            >
-              SHOP NOW
-            </button>
-          </div>
+          ))}
         </div>
-        <div className="lg:col-span-6 grid grid-cols-2 grid-rows-2">
-          <div 
-            className="relative bg-gradient-to-br from-teal-100 to-green-100 flex items-center justify-center cursor-pointer group min-h-[25vh] lg:min-h-[50vh]"
-            onClick={() => onCategoryChange('homme')}
-          >
-            <div className="absolute inset-0">
-              <img
-                src="https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg"
-                alt="Men's Fashion"
-                className="w-full h-full object-cover opacity-70"
-              />
-            </div>
-            <div className="relative z-10 text-center text-gray-800 p-4">
-              <h3 className="text-lg md:text-2xl font-light mb-2">Men's fashion</h3>
-              <p className="text-xs md:text-sm mb-4">358 Items</p>
-              <div className="border-b border-gray-800 group-hover:border-gray-600 transition-colors text-xs md:text-sm">
-                SHOP NOW
-              </div>
-            </div>
-          </div>
-          <div className="relative bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center min-h-[25vh] lg:min-h-[50vh]">
-            <div className="absolute inset-0">
-              <img
-                src="https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg"
-                alt="Kid's Fashion"
-                className="w-full h-full object-cover opacity-70"
-              />
-            </div>
-            <div className="relative z-10 text-center text-gray-800 p-4">
-              <h3 className="text-lg md:text-2xl font-light mb-2">Kid's fashion</h3>
-              <p className="text-xs md:text-sm mb-4">273 Items</p>
-              <div className="border-b border-gray-800 text-xs md:text-sm">SHOP NOW</div>
-            </div>
-          </div>
-          <div className="relative bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center min-h-[25vh] lg:min-h-[50vh]">
-            <div className="absolute inset-0">
-              <img
-                src="https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg"
-                alt="Cosmetics"
-                className="w-full h-full object-cover opacity-70"
-              />
-            </div>
-            <div className="relative z-10 text-center text-gray-800 p-4">
-              <h3 className="text-lg md:text-2xl font-light mb-2">Cosmetics</h3>
-              <p className="text-xs md:text-sm mb-4">159 Items</p>
-              <div className="border-b border-gray-800 text-xs md:text-sm">SHOP NOW</div>
-            </div>
-          </div>
-          <div 
-            className="relative bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center cursor-pointer group min-h-[25vh] lg:min-h-[50vh]"
-            onClick={() => onCategoryChange('accessoires')}
-          >
-            <div className="absolute inset-0">
-              <img
-                src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg"
-                alt="Accessories"
-                className="w-full h-full object-cover opacity-70"
-              />
-            </div>
-            <div className="relative z-10 text-center text-gray-800 p-4">
-              <h3 className="text-lg md:text-2xl font-light mb-2">Accessories</h3>
-              <p className="text-xs md:text-sm mb-4">792 Items</p>
-              <div className="border-b border-gray-800 group-hover:border-gray-600 transition-colors text-xs md:text-sm">
-                SHOP NOW
-              </div>
-            </div>
-          </div>
-        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/80 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+          aria-label="Previous slide"
+        >
+          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev + 1) % heroSlides.length)}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/80 hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+          aria-label="Next slide"
+        >
+          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
       </section>
 
       {/* New Products Section (modifié) */}
