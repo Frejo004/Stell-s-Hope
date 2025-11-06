@@ -28,32 +28,32 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
     {
       id: 1,
       image: '/hero_section_images/1.png',
+      mobileImage: '/hero_section_images/square_1.png',
       title: "Femmes",
       description: "Découvrez notre collection exclusive de mode féminine. Qualité supérieure et style intemporel pour la femme moderne.",
       category: 'femme',
       position: 'left',
-      bgGradient: 'from-pink-100 via-rose-50 to-orange-50',
-      mobilePosition: 'object-right' // Personnage à droite
+      bgGradient: 'from-pink-100 via-rose-50 to-orange-50'
     },
     {
       id: 2,
       image: '/hero_section_images/2.png',
+      mobileImage: '/hero_section_images/square_2.png',
       title: "Hommes",
       description: "Découvrez notre collection exclusive de mode masculine. Qualité supérieure et style intemporel pour l'homme moderne.",
       category: 'homme',
       position: 'right',
-      bgGradient: 'from-teal-100 via-cyan-50 to-blue-50',
-      mobilePosition: 'object-left' // Personnage à gauche
+      bgGradient: 'from-teal-100 via-cyan-50 to-blue-50'
     },
     {
       id: 3,
       image: '/hero_section_images/3.png',
+      mobileImage: '/hero_section_images/square_3.png',
       title: "Accessoires",
       description: "Découvrez notre collection exclusive d'accessoires. Qualité supérieure et style intemporel pour l'homme moderne.",
-      category: 'accessoires',
+      category: 'accessories',
       position: 'left',
-      bgGradient: 'from-purple-100 via-pink-50 to-indigo-50',
-      mobilePosition: 'object-right' // Personnage à droite
+      bgGradient: 'from-purple-100 via-pink-50 to-indigo-50'
     }
   ];
 
@@ -168,14 +168,14 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
               
               {/* Mobile Image - Full background */}
               <img
-                src={slide.image}
+                src={slide.mobileImage}
                 alt={slide.title}
-                className={`lg:hidden absolute inset-0 w-full h-full object-cover ${slide.mobilePosition} opacity-90`}
+                className="lg:hidden absolute inset-0 w-full h-full object-cover object-center opacity-90"
               />
             </div>
             
             {/* Content Container - Desktop: side positioned, Mobile: bottom centered */}
-            <div className="relative h-full flex items-end lg:items-center">
+            <div className="relative h-full flex items-end lg:items-center z-20">
               <div className="container mx-auto px-6 md:px-12 pb-24 lg:pb-0">
                 {/* Text Content */}
                 <div className={`lg:max-w-2xl ${
@@ -212,7 +212,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             </div>
 
             {/* Mobile Gradient Overlay for better text readability */}
-            <div className="lg:hidden absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none" />
+            <div className="lg:hidden absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 via-black/10 to-transparent pointer-events-none z-10" />
           </div>
         ))}
 
