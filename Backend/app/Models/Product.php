@@ -31,9 +31,26 @@ class Product extends Model
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
         'is_bestseller' => 'boolean',
-        'images' => 'array',
         'weight' => 'decimal:2'
     ];
+
+    public function getImagesAttribute($value)
+    {
+        if (is_string($value)) {
+            // Premier décodage
+            $firstDecode = json_decode($value, true);
+            
+            // Si c'est encore une chaîne, décoder à nouveau (double échappement)
+            if (is_string($firstDecode)) {
+                $secondDecode = json_decode($firstDecode, true);
+                return is_array($secondDecode) ? $secondDecode : [];
+            }
+            
+            return is_array($firstDecode) ? $firstDecode : [];
+        }
+        
+        return is_array($value) ? $value : [];
+    }
 
     public function category()
     {

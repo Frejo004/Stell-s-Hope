@@ -13,6 +13,7 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ product, onClose }: ProductDetailProps) {
+  console.log('ProductDetail - Product images:', product.images, 'Type:', typeof product.images);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState(product.colors && product.colors.length > 0 ? product.colors[0] : '');
@@ -98,9 +99,13 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
             <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden group">
               <Zoom>
                 <img
-                  src={product.images && Array.isArray(product.images) && product.images[selectedImage] ? product.images[selectedImage] : '/placeholder.jpg'}
+                  src={product.images && product.images.length > 0 ? product.images[selectedImage] || product.images[0] : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='}
                   alt={product.name}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.log('Image error in ProductDetail:', product.name, 'URL:', e.currentTarget.src, 'Images array:', product.images);
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZmY2NjY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iI2ZmZmZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVycm9yPC90ZXh0Pjwvc3ZnPg==';
+                  }}
                 />
               </Zoom>
               <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
@@ -117,7 +122,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
             </div>
             
             <div className="grid grid-cols-4 gap-3">
-              {product.images && Array.isArray(product.images) && product.images.map((image, index) => (
+              {product.images && product.images.length > 0 ? product.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -129,9 +134,16 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                     src={image}
                     alt={`${product.name} ${index + 1}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/100x100/cccccc/666666?text=Error';
+                    }}
                   />
                 </button>
-              ))}
+              )) : (
+                <div className="col-span-4 text-center text-gray-500">
+                  Aucune image disponible
+                </div>
+              )}
             </div>
           </div>
 
@@ -503,9 +515,12 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               <div key={relatedProduct.id} className="group cursor-pointer">
                 <div className="aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden mb-4">
                   <img
-                    src={relatedProduct.images && Array.isArray(relatedProduct.images) && relatedProduct.images[0] ? relatedProduct.images[0] : '/placeholder.jpg'}
+                    src={relatedProduct.images && relatedProduct.images.length > 0 ? relatedProduct.images[0] : 'https://via.placeholder.com/300x400/cccccc/666666?text=No+Image'}
                     alt={relatedProduct.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/300x400/cccccc/666666?text=Error';
+                    }}
                   />
                 </div>
                 <h3 className="font-medium text-gray-900 mb-2">{relatedProduct.name}</h3>

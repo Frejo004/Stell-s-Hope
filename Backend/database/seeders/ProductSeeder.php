@@ -87,8 +87,8 @@ class ProductSeeder extends Seeder
                     'sku' => strtoupper(substr($category->name, 0, 3)) . '-' . str_pad($productCount + 1, 4, '0', STR_PAD_LEFT),
                     'weight' => rand(100, 2000) / 100,
                     'images' => json_encode([
-                        'https://via.placeholder.com/400x400/000000/FFFFFF?text=' . urlencode($baseProduct[0]),
-                        'https://via.placeholder.com/400x400/333333/FFFFFF?text=' . urlencode($color)
+                        'https://picsum.photos/400/400?random=' . ($productCount + 1),
+                        'https://picsum.photos/400/400?random=' . ($productCount + 1000)
                     ])
                 ]);
                 

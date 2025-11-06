@@ -10,7 +10,8 @@ type SortOption = 'newest' | 'popularity' | 'price-asc' | 'price-desc';
 export default function BoutiquePage() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   // Ajout d'états pour les filtres actifs, le tri et le nombre de produits.
-  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({ Categorie: 'Femme' });
+  // Le filtre initial a été retiré pour afficher tous les produits par défaut.
+  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
   const [sortOption, setSortOption] = useState<SortOption>('newest');
   // Le nombre de produits serait mis à jour par le composant InfiniteProductList.
   const productCount = 128; // Exemple statique

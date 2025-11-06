@@ -93,4 +93,14 @@ class ProductController extends Controller
 
         return response()->json($suggestions);
     }
+
+    public function debug()
+    {
+        $product = Product::first();
+        return response()->json([
+            'raw_images' => $product->getRawOriginal('images'),
+            'processed_images' => $product->images,
+            'product' => $product
+        ]);
+    }
 }
