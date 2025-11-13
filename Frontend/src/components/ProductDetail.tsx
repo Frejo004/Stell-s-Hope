@@ -99,7 +99,11 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
             <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden group">
               <Zoom>
                 <img
-                  src={product.images && product.images.length > 0 ? product.images[selectedImage] || product.images[0] : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='}
+                  src={(() => {
+                    const rawSrc = product.images?.[selectedImage] || product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
+                    const decodedSrc = rawSrc.replace(/&#39;/g, "'");
+                    return decodedSrc;
+                  })()}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -131,7 +135,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   }`}
                 >
                   <img
-                    src={image}
+                    src={image.replace(/&#39;/g, "'")}
                     alt={`${product.name} ${index + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
