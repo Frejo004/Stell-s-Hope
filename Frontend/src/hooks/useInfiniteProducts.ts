@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, RefObject } from 'react';
 import { productService } from '../services/productService';
 import { useInfiniteScroll } from './useInfiniteScroll';
 
-export const useInfiniteProducts = (filters: any, scrollRef?: RefObject<HTMLElement>) => {
+export const useInfiniteProducts = (filters: any) => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,10 +13,11 @@ export const useInfiniteProducts = (filters: any, scrollRef?: RefObject<HTMLElem
     try {
       const data = await productService.getProducts({
         ...filters,
-        page: currentPage + 1
+        page: currentPage + 1,
+        per_page: 20
       });
       
-      const newProducts = data.data || data;
+      const newProducts = data.data || [];
       
       if (newProducts.length === 0) {
         setHasMore(false);
@@ -29,9 +30,8 @@ export const useInfiniteProducts = (filters: any, scrollRef?: RefObject<HTMLElem
     }
   }, [filters, currentPage]);
 
-  const [isFetching] = useInfiniteScroll(fetchMoreProducts, hasMore, scrollRef);
+  const [isFetching] = useInfiniteScroll(fetchMoreProducts, hasMore);
 
-  // Reset when filters change
   useEffect(() => {
     const fetchInitialProducts = async () => {
       try {
@@ -43,13 +43,14 @@ export const useInfiniteProducts = (filters: any, scrollRef?: RefObject<HTMLElem
 
         const data = await productService.getProducts({
           ...filters,
-          page: 1
+          page: 1,
+          per_page: 20
         });
         
-        const initialProducts = data.data || data;
+        const initialProducts = data.data || [];
         setProducts(initialProducts);
         
-        if (initialProducts.length === 0) {
+        if (initialProducts.length < 20) {
           setHasMore(false);
         }
       } catch (err: any) {
@@ -67,11 +68,6 @@ export const useInfiniteProducts = (filters: any, scrollRef?: RefObject<HTMLElem
     loading, 
     error, 
     hasMore, 
-    isFetching,
-    refetch: () => {
-      setProducts([]);
-      setCurrentPage(1);
-      setHasMore(true);
-    }
+    isFetching
   };
 };

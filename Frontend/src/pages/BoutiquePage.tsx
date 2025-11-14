@@ -2,6 +2,8 @@ import { useState  } from 'react';
 import { SlidersHorizontal, ChevronDown, X } from 'lucide-react';
 import ProductFilters from '../components/ProductFilters';
 import InfiniteProductList from '../components/InfiniteProductList';
+import { useProductFilters } from '../hooks/useProductFilters';
+import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
 
 // Ajout de types pour gérer les filtres et le tri, comme recommandé.
 type ActiveFilters = { [key: string]: string | string[] };
@@ -13,8 +15,10 @@ export default function BoutiquePage() {
   // Le filtre initial a été retiré pour afficher tous les produits par défaut.
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
   const [sortOption, setSortOption] = useState<SortOption>('newest');
-  // Le nombre de produits serait mis à jour par le composant InfiniteProductList.
-  const productCount = 128; // Exemple statique
+  
+  const { getFilters } = useProductFilters();
+  const { products } = useInfiniteProducts(getFilters());
+  const productCount = products.length;
 
   const sortOptions: { value: SortOption; label: string }[] = [
     { value: 'newest', label: 'Nouveautés' },

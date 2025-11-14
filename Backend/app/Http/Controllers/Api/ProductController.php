@@ -20,7 +20,11 @@ class ProductController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
         
-        $products = $query->paginate(12);
+        // Gérer le paramètre per_page avec une valeur par défaut de 20
+        $perPage = $request->get('per_page', 20);
+        $perPage = min($perPage, 100); // Limiter à 100 maximum
+        
+        $products = $query->paginate($perPage);
         
         return response()->json($products);
     }

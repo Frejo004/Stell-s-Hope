@@ -31,6 +31,11 @@ export const productService = {
       });
     }
     
+    // Ajouter per_page=20 par défaut pour la pagination
+    if (!params.has('per_page')) {
+      params.append('per_page', '20');
+    }
+    
     const response = await api.get(`/products?${params.toString()}`);
     return response.data;
   },
