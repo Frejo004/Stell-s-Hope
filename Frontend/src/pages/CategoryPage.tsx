@@ -1,21 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { SlidersHorizontal, ChevronDown } from 'lucide-react';
-import { Product } from '../types';
 import ProductFilters from '../components/ProductFilters';
 import InfiniteProductList from '../components/InfiniteProductList';
-
-interface CategoryPageProps {
-  category: string;
-}
+import { useProductFilters } from '../hooks/useProductFilters';
+import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
+import { categoryService } from '../services/categoryService';
 
 type SortOption = 'newest' | 'popularity' | 'price-asc' | 'price-desc';
 
-export default function CategoryPage({ category }: CategoryPageProps) {
+export default function CategoryPage() {
+  const { category: categorySlug } = useParams<{ category: string }>();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  // La catégorie actuelle est maintenant un filtre par défaut.
-  const [activeFilters, setActiveFilters] = useState({ Categorie: category });
   const [sortOption, setSortOption] = useState<SortOption>('newest');
-  const productCount = 85; // Exemple statique
+  const [categoryName, setCategoryName] = useState<string>('');
+  const { setCategory, getFilters } = useProductFilters();
+  
+  // Récupérer l'ID de la catégorie depuis le slug et l'appliquer aux filtres
+  useEffect(() => {
+    const fetchCategory = async () => {
+      if (categorySlug) {
+        try {
+          const categories = await categoryService.getCategories();
+          const category = categories.find(cat => 
+            cat.name.toLowerCase().replace(/\s+/g, '-') === categorySlug
+          );
+          if (category) {
+            setCategory(category.id);
+            setCategoryName(category.name);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la récupération de la catégorie:', error);
+        }
+      }
+    };
+    fetchCategory();
+  }, [categorySlug, setCategory]);
+  
+  const { products } = useInfiniteProducts(getFilters());
+  const productCount = products.length;
 
   const sortOptions: { value: SortOption; label: string }[] = [
     { value: 'newest', label: 'Nouveautés' },
@@ -28,7 +51,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 capitalize">{category}</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{categoryName || 'Catégorie'}</h1>
       </div>
 
       <div className="lg:grid lg:grid-cols-4 lg:gap-8">
@@ -42,7 +65,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
               </button>
             </div>
             <div className={`${isFiltersOpen ? 'block' : 'hidden'} lg:block`}>
-              <ProductFilters onFilterChange={setActiveFilters} initialFilters={activeFilters} />
+              <ProductFilters />
             </div>
           </div>
         </div>
@@ -53,7 +76,7 @@ export default function CategoryPage({ category }: CategoryPageProps) {
             <p className="text-gray-600">{productCount} produit{productCount > 1 ? 's' : ''}</p>
             {/* Options de tri */}
           </div>
-          <InfiniteProductList filters={activeFilters} sortBy={sortOption} />
+          <InfiniteProductList />
         </div>
       </div>
     </div>
