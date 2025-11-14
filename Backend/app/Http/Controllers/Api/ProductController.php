@@ -12,12 +12,45 @@ class ProductController extends Controller
     {
         $query = Product::with('category')->where('is_active', true);
         
+        // Filtre par catégorie
         if ($request->has('category')) {
             $query->where('category_id', $request->category);
         }
         
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+        // Filtre par recherche
+        if ($request->has('search') && !empty($request->search)) {
+            $query->where(function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+        
+        // Filtre par prix
+        if ($request->has('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+        
+        if ($request->has('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+        
+        // Tri
+        $sortBy = $request->get('sort', 'created_at');
+        switch ($sortBy) {
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            case 'popularity':
+                $query->orderBy('created_at', 'desc'); // Temporaire
+                break;
+            case 'rating':
+                $query->orderBy('created_at', 'desc'); // Temporaire
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
         }
         
         // Gérer le paramètre per_page avec une valeur par défaut de 20
