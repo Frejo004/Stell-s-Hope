@@ -15,6 +15,10 @@ interface ProductDetailProps {
 export default function ProductDetail({ product, onClose }: ProductDetailProps) {
   console.log('ProductDetail - Product images:', product.images, 'Type:', typeof product.images);
   const [selectedImage, setSelectedImage] = useState(0);
+  
+  const getImageSrc = (imagePath: string) => {
+    return 'http://localhost:8000' + imagePath.replace(/&#39;/g, "'");
+  };
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState(product.colors && product.colors.length > 0 ? product.colors[0] : '');
   const [quantity, setQuantity] = useState(1);
@@ -41,19 +45,20 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
       return;
     }
     
-    try {
-      console.log('📦 Calling addToCart with:', { productId: product.id, quantity });
-      addToCart({ 
-        productId: product.id, 
-        quantity,
-        name: product.name,
-        price: product.price,
-        image: product.images && Array.isArray(product.images) ? product.images[0] : undefined
-      });
-      console.log('✅ addToCart called successfully');
-    } catch (error) {
-      console.error('❌ Error in addToCart:', error);
-    }
+        try {
+          console.log('📦 Calling addToCart with product object and quantity');
+          // envoyer l'objet produit complet afin que le guest cart possède toutes les données nécessaires
+          addToCart({
+            product_id: product.id,
+            product: product,
+            quantity,
+            size: selectedSize || (product.sizes?.[0] ?? ''),
+            color: selectedColor || (product.colors?.[0] ?? '')
+          });
+          console.log('✅ addToCart called successfully');
+        } catch (error) {
+          console.error('❌ Error in addToCart:', error);
+        }
   };
 
   const ratingDistribution = useMemo(() => {
@@ -99,11 +104,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
             <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden group">
               <Zoom>
                 <img
-                  src={(() => {
-                    const rawSrc = product.images?.[selectedImage] || product.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjY2NjY2NjIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
-                    const decodedSrc = rawSrc.replace(/&#39;/g, "'");
-                    return decodedSrc;
-                  })()}
+                  src={getImageSrc(product.images?.[selectedImage] || product.images?.[0] || '')}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -135,12 +136,9 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   }`}
                 >
                   <img
-                    src={image.replace(/&#39;/g, "'")}
+                    src={getImageSrc(image)}
                     alt={`${product.name} ${index + 1}`}
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/100x100/cccccc/666666?text=Error';
-                    }}
                   />
                 </button>
               )) : (
