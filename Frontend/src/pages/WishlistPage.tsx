@@ -2,6 +2,7 @@ import { Heart, ShoppingBag } from 'lucide-react';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useCartContext } from '../contexts/CartContext';
 import { Product } from '../types';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface WishlistPageProps {
   onClose: () => void;
@@ -13,13 +14,7 @@ export default function WishlistPage({ onClose, onProductClick }: WishlistPagePr
   const { addToCart } = useCartContext();
 
   const handleAddToCart = (product: Product) => {
-    addToCart({
-      productId: product.id,
-      quantity: 1,
-      name: product.name,
-      price: product.price,
-      image: product.images?.[0]
-    });
+    addToCart({ product_id: product.id, product: product, quantity: 1, size: product.sizes?.[0] || '', color: product.colors?.[0] || '' });
   };
 
   return (
@@ -49,7 +44,7 @@ export default function WishlistPage({ onClose, onProductClick }: WishlistPagePr
               <div key={product.id} className="group relative">
                 <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
                   <img
-                    src={product.images[0]}
+                    src={getImageUrl(product.images?.[0])}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform cursor-pointer"
                     onClick={() => onProductClick(product)}

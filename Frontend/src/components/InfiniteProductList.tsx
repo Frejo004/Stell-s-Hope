@@ -4,6 +4,7 @@ import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useProductFilters } from '../hooks/useProductFilters';
 import { useRef } from 'react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const InfiniteProductList: React.FC = () => {
   const { getFilters } = useProductFilters();
@@ -29,7 +30,7 @@ const InfiniteProductList: React.FC = () => {
           <div key={`product-${product.id}-${index}`} className="group bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-300">
             <div className="relative aspect-[3/4] overflow-hidden">
               <img
-                src={product.images?.[0] || '/placeholder.jpg'}
+                src={getImageUrl(product.images?.[0])}
                 alt={product.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -54,7 +55,7 @@ const InfiniteProductList: React.FC = () => {
                   </svg>
                 </button>
                 <button
-                  onClick={() => addToCart({ productId: product.id, quantity: 1, name: product.name, price: product.price, image: product.images?.[0] })}
+                  onClick={() => addToCart({ product_id: product.id, product: product, quantity: 1, size: product.sizes?.[0] || '', color: product.colors?.[0] || '' })}
                   className="p-2 bg-white text-gray-600 rounded-full shadow-md hover:bg-blue-600 hover:text-white transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

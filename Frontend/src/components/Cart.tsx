@@ -4,6 +4,7 @@ import { useCart } from '../hooks/useCart';
 import { useNavigate } from 'react-router-dom';
 import CheckoutPage from '../pages/CheckoutPage';
 import { Order } from '../types/order';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface CartProps {
   onOrderComplete?: (order: Order) => void;
@@ -59,7 +60,7 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
                 {cart.map((item, index) => (
                   <div key={`${item.product.id}-${item.size}-${item.color}-${index}`} className="flex space-x-3 border-b pb-4">
                     <img
-                      src={item.product.images[0]}
+                      src={getImageUrl(item.product.images?.[0])}
                       alt={item.product.name}
                       className="w-16 h-16 object-cover rounded"
                     />

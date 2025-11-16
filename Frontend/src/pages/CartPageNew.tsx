@@ -1,7 +1,7 @@
-;
-import { ArrowLeft, ShoppingBag, Trash2, Plus, Minus } from 'lucide-react';
+import { ShoppingBag, Trash2, Plus, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCartContext } from '../contexts/CartContext';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface CartPageProps {
   onClose: () => void;
@@ -72,7 +72,14 @@ export default function CartPageNew({ onClose }: CartPageProps) {
                   {guestCart.map((item) => (
                     <div key={item.productId} className="flex items-center space-x-4 border-b pb-4">
                       <div className="w-24 h-24 bg-gray-200 rounded-md overflow-hidden">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        <img 
+                          src={getImageUrl(item.product?.images?.[0] || item.image)} 
+                          alt={item.name} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTVlN2ViIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzk3OTdhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+                          }}
+                        />
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold">{item.name}</h3>

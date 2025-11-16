@@ -1,5 +1,6 @@
 import { CheckCircle, Package, Truck, Mail, Phone, Download, ArrowRight } from 'lucide-react';
 import { Order } from '../types/order';
+import { getImageUrl } from '../utils/imageUtils';
 
 interface OrderConfirmationPageProps {
   order: Order;
@@ -50,7 +51,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
               {(order.order_items || []).map((item, index) => (
                 <div key={index} className="flex items-center space-x-4">
                   <img
-                    src={item.product.images?.[0] || '/placeholder.jpg'}
+                    src={getImageUrl(item.product.images?.[0])}
                     alt={item.product.name}
                     className="w-16 h-16 object-cover rounded"
                   />

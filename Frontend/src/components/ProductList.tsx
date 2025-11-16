@@ -1,9 +1,10 @@
-;
+import React from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../hooks/useWishlist';
 import { useProductFilters } from '../hooks/useProductFilters';
 import Pagination from './Pagination';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProductList: React.FC = () => {
   const { getFilters, page, setPage } = useProductFilters();
@@ -23,7 +24,7 @@ const ProductList: React.FC = () => {
         {productsData.map((product: any) => (
           <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <img
-              src={product.images?.[0] || '/placeholder.jpg'}
+              src={getImageUrl(product.images?.[0])}
               alt={product.name}
               className="w-full h-48 object-cover"
             />
@@ -44,7 +45,13 @@ const ProductList: React.FC = () => {
                     ♥
                   </button>
                   <button
-                    onClick={() => addToCart(product.id)}
+                    onClick={() => addToCart({
+                      product_id: product.id,
+                      product: product,
+                      quantity: 1,
+                      size: product.sizes?.[0] || '',
+                      color: product.colors?.[0] || ''
+                    })}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
                     Ajouter
