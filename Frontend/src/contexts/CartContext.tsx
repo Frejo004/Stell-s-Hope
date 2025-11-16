@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback  } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { Product } from '../types';
 
 interface GuestCartItem {
   productId: number;
@@ -7,6 +8,8 @@ interface GuestCartItem {
   name?: string;
   price?: number;
   image?: string;
+  // optional full product object when available
+  product?: Product;
 }
 
 interface CartContextType {
@@ -15,7 +18,7 @@ interface CartContextType {
   guestCart: GuestCartItem[];
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  addToCart: (data: { productId: number; quantity: number; name?: string; price?: number; image?: string }) => void;
+  addToCart: (data: { productId?: number; product_id?: number; product?: Product; quantity: number; name?: string; price?: number; image?: string; size?:string; color?:string }) => void;
   removeFromCart: (productId: number) => void;
   clearCart: () => void;
 }
@@ -37,17 +40,23 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isAuthenticated]);
 
-  const addToCart = useCallback((data: { productId: number; quantity: number; name?: string; price?: number; image?: string }) => {
+  const addToCart = useCallback((data: { productId?: number; product_id?: number; product?: Product; quantity: number; name?: string; price?: number; image?: string; size?:string; color?:string }) => {
     console.log('🛒 CartContext.addToCart called with:', data);
     
     if (!isAuthenticated) {
       setGuestCart(prevCart => {
-        const newItem = {
-          productId: data.productId,
+        const productId = data.product_id || data.productId || data.product?.id;
+        const name = data.name ?? data.product?.name;
+        const price = data.price ?? data.product?.price;
+        const image = data.image ?? (data.product && Array.isArray(data.product.images) ? data.product.images[0] : undefined);
+
+        const newItem: GuestCartItem = {
+          productId: productId as number,
           quantity: data.quantity,
-          name: data.name,
-          price: data.price,
-          image: data.image
+          name,
+          price,
+          image,
+          product: data.product
         };
         
         const existingIndex = prevCart.findIndex(item => item.productId === newItem.productId);

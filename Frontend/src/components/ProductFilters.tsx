@@ -240,24 +240,20 @@ const ProductFilters: React.FC = () => {
       {/* Options de tri */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">Trier par</label>
-        <Select
+        <select
           value={sortBy}
-          onValueChange={(value) => {
-            setSortBy(value);
+          onChange={(e) => {
+            setSortBy(e.target.value);
             setPage(1);
           }}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Trier par" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="created_at">Nouveautés</SelectItem>
-            <SelectItem value="price_asc">Prix croissant</SelectItem>
-            <SelectItem value="price_desc">Prix décroissant</SelectItem>
-            <SelectItem value="popularity">Populaire</SelectItem>
-            <SelectItem value="rating">Mieux notés</SelectItem>
-          </SelectContent>
-        </Select>
+          <option value="created_at">Nouveautés</option>
+          <option value="price_asc">Prix croissant</option>
+          <option value="price_desc">Prix décroissant</option>
+          <option value="popularity">Populaire</option>
+          <option value="rating">Mieux notés</option>
+        </select>
       </div>
 
       {/* Prix avec slider */}
