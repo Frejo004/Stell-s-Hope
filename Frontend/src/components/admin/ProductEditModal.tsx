@@ -2,6 +2,7 @@ import { useState, useEffect  } from 'react';
 import { X } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import ProductVariantManager from './ProductVariantManager';
+import { getImageUrl } from '../../utils/imageUtils';
 
 interface ProductEditModalProps {
   isOpen: boolean;
@@ -294,7 +295,7 @@ export default function ProductEditModal({ isOpen, productId, onClose, onSuccess
               <div className="space-y-2">
                 {(product.images || []).map((image, index) => (
                   <div key={index} className="flex items-center space-x-2">
-                    <img src={image} alt="Aperçu" className="w-16 h-16 object-cover rounded border" />
+                    <img src={getImageUrl(image)} alt="Aperçu" className="w-16 h-16 object-cover rounded border" />
                     <span className="flex-1 text-sm text-gray-600 truncate">{image}</span>
                     <button
                       type="button"

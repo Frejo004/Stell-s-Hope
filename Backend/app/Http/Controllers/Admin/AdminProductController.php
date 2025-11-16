@@ -85,6 +85,7 @@ class AdminProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'images' => 'array',
             'variants' => 'required_if:type,variable|array',
             'variants.*.sku' => 'required|string|unique:product_variants,sku',
             'variants.*.price' => 'required|numeric|min:0',
