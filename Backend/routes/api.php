@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -59,6 +60,10 @@ Route::get('/images/{path}', [FileController::class, 'getImage'])->where('path',
 // Promotion validation (public)
 Route::post('/promotions/validate', [PromotionController::class, 'validate']);
 Route::post('/promotions/apply', [PromotionController::class, 'apply']);
+
+// Payment routes (public)
+Route::post('/payment/webhook', [PaymentController::class, 'webhook']);
+Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -98,6 +103,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // File Management
     Route::post('/files/upload', [FileController::class, 'upload']);
     Route::delete('/files/delete', [FileController::class, 'delete']);
+
+    // Payment
+    Route::post('/payment/initiate', [PaymentController::class, 'initiate']);
 
     // Admin routes
     Route::middleware('admin')->prefix('admin')->group(function () {

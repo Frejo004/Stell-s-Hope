@@ -7,6 +7,7 @@ export interface CheckoutState {
     city: string;
     postalCode: string;
     country: string;
+    email?: string;
   }>;
   billingAddress: Partial<{
     firstName: string;
@@ -15,6 +16,7 @@ export interface CheckoutState {
     city: string;
     postalCode: string;
     country: string;
+    email?: string;
   }>;
   paymentMethod: string | null;
   sameAsShipping: boolean;
