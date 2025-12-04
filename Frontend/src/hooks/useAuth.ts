@@ -1,11 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { User, AuthState } from '../types/auth';
 import { authService, RegisterData } from '../services/authService';
 
 // Utilitaire pour sanitiser les données utilisateur
 const sanitizeUserData = (user: Partial<User>): User => {
   if (!user) {
-    // Retourner un objet User vide mais valide si user est null/undefined
     return {
       id: 0,
       first_name: '',
@@ -17,7 +16,7 @@ const sanitizeUserData = (user: Partial<User>): User => {
       updated_at: ''
     };
   }
-  
+
   return {
     id: user.id || 0,
     first_name: user.first_name?.toString().trim() || '',
@@ -44,41 +43,46 @@ export const useAuth = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
-    if (token) {
-      // Vérifier le token avec l'API
-      authService.getMe()
-        .then((user) => {
-          const sanitizedUser = sanitizeUserData(user);
-          setAuthState({
-            user: sanitizedUser,
-            isAuthenticated: true,
-            isLoading: false
-          });
-        })
-        .catch(() => {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user');
-          setAuthState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false
-          });
+    const storedUser = localStorage.getItem('user');
+    console.log('🔍 useAuth - Vérification du token:', token ? 'Token trouvé' : 'Pas de token');
+
+    if (token && storedUser) {
+      try {
+        const cachedUser = JSON.parse(storedUser);
+        console.log('💾 useAuth - Utilisation du cache utilisateur:', cachedUser);
+        setAuthState({
+          user: sanitizeUserData(cachedUser),
+          isAuthenticated: true,
+          isLoading: false
         });
+      } catch (e) {
+        console.error('❌ Erreur de parsing du cache utilisateur');
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false
+        });
+      }
     } else {
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+      console.log('⚠️ useAuth - Pas de token ou pas de cache, utilisateur non connecté');
+      setAuthState({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      });
     }
   }, []);
 
   const login = async (email: string, password: string) => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
-    
+
     try {
       const response = await authService.login({ email, password });
-      
+
       if (response.token && response.user) {
         localStorage.setItem('auth_token', response.token);
         localStorage.setItem('user', JSON.stringify(sanitizeUserData(response.user)));
-        
+
         setAuthState({
           user: sanitizeUserData(response.user),
           isAuthenticated: true,
@@ -95,9 +99,8 @@ export const useAuth = () => {
 
   const register = async (userData: RegisterData) => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
-    
+
     try {
-      // S'assurer que tous les champs requis sont présents
       const registerData: RegisterData = {
         first_name: userData.first_name || '',
         last_name: userData.last_name || '',
@@ -106,21 +109,20 @@ export const useAuth = () => {
         password_confirmation: userData.password_confirmation || '',
         phone: userData.phone
       };
-      
+
       const response = await authService.register(registerData);
-      
+
       if (response && response.token && response.user) {
-        // Stocker le token et les données utilisateur
         localStorage.setItem('auth_token', response.token);
         const sanitizedUser = sanitizeUserData(response.user);
         localStorage.setItem('user', JSON.stringify(sanitizedUser));
-        
+
         setAuthState({
           user: sanitizedUser,
           isAuthenticated: true,
           isLoading: false
         });
-        
+
         return sanitizedUser;
       } else {
         throw new Error('Réponse d\'inscription invalide');

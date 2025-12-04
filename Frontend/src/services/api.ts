@@ -9,8 +9,7 @@ const api = axios.create({
     'Accept': 'application/json',
     'X-Requested-With': 'XMLHttpRequest'
   },
-  timeout: 15000,
-  withCredentials: true
+  timeout: 15000
 });
 
 // Intercepteur pour ajouter le token
@@ -32,15 +31,15 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
-    
+
     if (error.response?.status === 403) {
       console.error('Accès refusé');
     }
-    
+
     if (error.response?.status >= 500) {
       console.error('Erreur serveur:', error.response.data);
     }
-    
+
     return Promise.reject(error);
   }
 );

@@ -17,7 +17,7 @@ interface CheckoutPageProps {
 export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageProps) {
   const { guestCart, cartTotal, clearCart } = useCartContext();
   const { products } = useProducts();
-  const { isAuthenticated, user: authUser } = useAuth();
+  const { isAuthenticated, user: authUser, isLoading } = useAuth();
   const navigate = useNavigate();
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     step: 'shipping',
@@ -167,6 +167,18 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
         order={completedOrder}
         onContinueShopping={onClose}
       />
+    );
+  }
+
+  // Afficher un loader pendant la vérification de l'authentification
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-gray-50 to-rose-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
     );
   }
 
