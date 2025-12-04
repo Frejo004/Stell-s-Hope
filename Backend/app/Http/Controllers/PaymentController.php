@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Moneroo\MonerooLaravel\Facades\Moneroo;
+use Moneroo\Laravel\Facades\PaymentFacade as MonerooPayment;
 
 class PaymentController extends Controller
 {
@@ -16,22 +16,23 @@ class PaymentController extends Controller
             'customer_name' => 'nullable|string',
         ]);
 
-        $data = [
+        // Simulation de paiement pour les tests
+        $paymentId = 'test_' . uniqid();
+        
+        $mockPayment = [
+            'id' => $paymentId,
             'amount' => $request->amount,
-            'currency' => $request->currency ?? 'XOF',
+            'currency' => $request->currency ?? 'USD',
+            'status' => 'pending',
+            'checkout_url' => 'https://checkout.moneroo.io/pay/' . $paymentId,
             'customer' => [
                 'email' => $request->customer_email,
-                'first_name' => $request->customer_name,
+                'name' => $request->customer_name ?? 'Client',
             ],
-            'return_url' => route('payment.callback'), // Assurez-vous que cette route existe ou ajustez
+            'created_at' => now()->toISOString(),
         ];
 
-        try {
-            $payment = Moneroo::payments()->create($data);
-            return response()->json($payment);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        return response()->json($mockPayment);
     }
 
     public function webhook(Request $request)
