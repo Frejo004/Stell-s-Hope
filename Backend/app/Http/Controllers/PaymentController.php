@@ -24,7 +24,7 @@ class PaymentController extends Controller
             'amount' => $request->amount,
             'currency' => $request->currency ?? 'USD',
             'status' => 'pending',
-            'checkout_url' => 'https://checkout.moneroo.io/pay/' . $paymentId,
+            'checkout_url' => 'http://localhost:3000/payment/success?payment_id=' . $paymentId,
             'customer' => [
                 'email' => $request->customer_email,
                 'name' => $request->customer_name ?? 'Client',
