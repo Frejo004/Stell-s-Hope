@@ -102,7 +102,7 @@ export interface Order {
   id: number;
   user_id: number;
   total: number;
-  total_amount?: number;
+
   subtotal?: number;
   shipping?: number;
   tax?: number;
