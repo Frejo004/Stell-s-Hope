@@ -4,53 +4,81 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Moneroo\Laravel\Facades\PaymentFacade as MonerooPayment;
+use App\Services\PaymentService;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+    protected $paymentService;
+
+    public function __construct(PaymentService $paymentService)
+    {
+        $this->paymentService = $paymentService;
+    }
+
     public function initiate(Request $request)
     {
         $request->validate([
-            'amount' => 'required|numeric',
-            'currency' => 'required|string',
-            'customer_email' => 'required|email',
-            'customer_name' => 'nullable|string',
+            'order_id' => 'required_without:amount|exists:orders,id',
+            // Pour un checkout direct sans order préalable (optionnel)
+            'amount' => 'required_without:order_id|numeric',
+            'email' => 'required_without:order_id|email',
         ]);
 
-        // Simulation de paiement pour les tests
-        $paymentId = 'test_' . uniqid();
-        
-        $mockPayment = [
-            'id' => $paymentId,
-            'amount' => $request->amount,
-            'currency' => $request->currency ?? 'USD',
-            'status' => 'pending',
-            'checkout_url' => 'http://localhost:3000/payment/success?payment_id=' . $paymentId,
-            'customer' => [
-                'email' => $request->customer_email,
-                'name' => $request->customer_name ?? 'Client',
-            ],
-            'created_at' => now()->toISOString(),
-        ];
+        try {
+            if ($request->has('order_id')) {
+                $order = \App\Models\Order::findOrFail($request->order_id);
+                // Vérifier que l'utilisateur est bien le propriétaire de la commande
+                if ($request->user() && $request->user()->id !== $order->user_id) {
+                    return response()->json(['message' => 'Unauthorized'], 403);
+                }
+            } else {
+                // Création d'une commande temporaire ou gestion spécifique
+                // Pour simplifier ici, on exige un order_id
+                return response()->json(['message' => 'Order ID is required'], 400);
+            }
 
-        return response()->json($mockPayment);
+            $paymentData = $this->paymentService->initiatePayment($order);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $paymentData
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function webhook(Request $request)
     {
-        // Vérification de la signature du webhook recommandée ici
-        // Moneroo envoie généralement une signature dans les headers
-
-        $payload = $request->all();
-
-        // Traiter le webhook (ex: mettre à jour le statut de la commande)
-        // Log::info('Moneroo Webhook received', $payload);
-
-        return response()->json(['status' => 'success']);
+        // En prod: $signature = $request->header('X-Moneroo-Signature');
+        $signature = null; // À implémenter si Moneroo fournit une clé secrète pour vérifier
+        
+        try {
+            $this->paymentService->processWebhook($request->all(), $signature);
+            return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            Log::error('Webhook Error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 400);
+        }
     }
     
     public function callback(Request $request)
     {
-        // Page de retour après paiement
-        return response()->json(['message' => 'Payment processed', 'data' => $request->all()]);
+        $orderId = $request->get('order_id');
+        $status = $request->get('status'); // Moneroo renvoie souvent le status en query param
+        
+        // Redirection vers le frontend
+        $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
+        
+        if ($status === 'success' || $status === 'successful') {
+             return redirect("$frontendUrl/order/confirmation/$orderId?status=success");
+        }
+        
+        return redirect("$frontendUrl/checkout?error=payment_failed");
     }
 }
