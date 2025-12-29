@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Moneroo\Laravel\Facades\Moneroo;
+use Moneroo\Laravel\Facades\PaymentFacade as Moneroo;
 use Moneroo\Exceptions\PaymentException;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderConfirmation;
@@ -44,9 +44,8 @@ class PaymentService
             ];
 
             // Appel API Moneroo
-            // Note: En mode dev/simulation, si le package n'est pas parfaitement configuré,
-            // cela peut nécessiter du debug. Utilisation des Facades documentées.
-            $payment = Moneroo::payments()->create($payload);
+            // Facade PaymentFacade expose probablement create() directement
+            $payment = Moneroo::create($payload);
 
             // Mise à jour de la commande avec les infos de paiement
             $order->update([
