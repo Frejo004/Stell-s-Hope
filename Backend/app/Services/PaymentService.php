@@ -7,6 +7,8 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Moneroo\Laravel\Facades\Moneroo;
 use Moneroo\Exceptions\PaymentException;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmation;
 
 class PaymentService
 {
@@ -107,7 +109,14 @@ class PaymentService
                         'payment_id' => $paymentId // S'assurer que l'ID est synchro
                     ]);
                     
-                    // TODO: Envoyer email de confirmation ici
+                    // Envoyer email de confirmation
+                    try {
+                        Mail::to($order->user->email)->send(new OrderConfirmation($order));
+                        Log::info("Order confirmation email sent to {$order->user->email}");
+                    } catch (\Exception $e) {
+                         Log::error("Failed to send order confirmation email: " . $e->getMessage());
+                    }
+
                     Log::info("Order #{$order->id} paid successfully via Moneroo.");
                 }
                 break;

@@ -1,81 +1,75 @@
-import { Component, ErrorInfo, ReactNode  } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { RefreshCw, Home, AlertTriangle } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
 }
 
 interface State {
   hasError: boolean;
-  error?: Error;
+  error: Error | null;
 }
 
-export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
-  }
+class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null
+  };
 
-  static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
-    // Ici on pourrait envoyer l'erreur à un service de monitoring
-    // comme Sentry, LogRocket, etc.
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Uncaught error:', error, errorInfo);
   }
 
-  handleRetry = () => {
-    this.setState({ hasError: false, error: undefined });
-  };
-
-  render() {
+  public render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="flex justify-center mb-4">
-              <AlertTriangle className="w-12 h-12 text-red-500" />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+              <AlertTriangle className="w-10 h-10 text-red-500" />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Oups ! Une erreur s'est produite
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Nous sommes désolés, quelque chose s'est mal passé. 
-              Veuillez réessayer ou rafraîchir la page.
+
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              Une erreur inattendue est survenue
+            </h1>
+
+            <p className="text-gray-500 mb-8">
+              Nous sommes désolés pour ce désagrément. Notre équipe a été notifiée.
+              Veuillez essayer de rafraîchir la page.
             </p>
-            <div className="space-y-3">
-              <button
-                onClick={this.handleRetry}
-                className="w-full flex items-center justify-center px-4 py-2 bg-rose-300 text-white rounded-lg hover:bg-rose-400 transition-colors"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Réessayer
-              </button>
+
+            {import.meta.env.MODE === 'development' && this.state.error && (
+              <div className="bg-gray-100 p-4 rounded text-left text-xs font-mono text-red-600 mb-6 overflow-auto max-h-40">
+                {this.state.error.toString()}
+              </div>
+            )}
+
+            <div className="flex flex-col space-y-3">
               <button
                 onClick={() => window.location.reload()}
-                className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-900 flex items-center justify-center transition-colors"
               >
+                <RefreshCw className="w-5 h-5 mr-2" />
                 Rafraîchir la page
               </button>
+
+              <button
+                onClick={() => window.location.href = '/'}
+                className="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 flex items-center justify-center transition-colors"
+              >
+                <Home className="w-5 h-5 mr-2" />
+                Retour à l'accueil
+              </button>
             </div>
-            {process.env.NODE_ENV === 'development' && this.state.error && (
-              <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500">
-                  Détails de l'erreur (dev)
-                </summary>
-                <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
-                  {this.state.error.stack}
-                </pre>
-              </details>
-            )}
+
+            <p className="mt-8 text-xs text-gray-400">
+              Code d'erreur : {this.state.error?.name || 'UNKNOWN'}
+            </p>
           </div>
         </div>
       );
