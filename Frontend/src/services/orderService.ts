@@ -18,6 +18,11 @@ export interface CreateOrderData {
     country: string;
   };
   payment_method: string;
+  items?: {
+    product_id: number;
+    quantity: number;
+    price: number;
+  }[];
 }
 
 export const orderService = {

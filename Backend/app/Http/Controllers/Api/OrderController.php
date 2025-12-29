@@ -22,21 +22,55 @@ class OrderController extends Controller
         $request->validate([
             'shipping_address' => 'required|array',
             'billing_address' => 'required|array',
-            'payment_method' => 'required|string'
+            'payment_method' => 'required|string',
+            'items' => 'sometimes|array',
+            'items.*.product_id' => 'required_with:items|exists:products,id',
+            'items.*.quantity' => 'required_with:items|integer|min:1'
         ]);
 
         $user = $request->user();
-        $cartItems = Cart::where('user_id', $user->id)->with('product')->get();
+        $itemsData = [];
 
-        if ($cartItems->isEmpty()) {
+        // 1. Récupération des items (Soit depuis Request, soit depuis DB Cart)
+        if ($request->has('items') && !empty($request->items)) {
+            // Mode "Items envoyés par le client" (ex: Guest ou Checkout direct)
+            foreach ($request->items as $item) {
+                $product = \App\Models\Product::find($item['product_id']);
+                if ($product) {
+                    $itemsData[] = [
+                        'product_id' => $product->id,
+                        'quantity' => $item['quantity'],
+                        'price' => $product->price, // Toujours utiliser le prix DB
+                        'product' => $product // Pour simplifier le calcul total plus bas si besoin
+                    ];
+                }
+            }
+        } else {
+            // Mode "Panier synchronisé en BDD"
+            $dbCartItems = Cart::where('user_id', $user->id)->with('product')->get();
+            foreach ($dbCartItems as $item) {
+                $itemsData[] = [
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'price' => $item->product->price,
+                    'product' => $item->product
+                ];
+            }
+        }
+
+        if (empty($itemsData)) {
             return response()->json(['message' => 'Cart is empty'], 400);
         }
 
-        $total = $cartItems->sum(function ($item) {
-            return $item->product->price * $item->quantity;
+        // 2. Calcul du total
+        $total = collect($itemsData)->sum(function ($item) {
+            return $item['price'] * $item['quantity'];
         });
 
-        DB::transaction(function () use ($request, $user, $cartItems, $total) {
+        // 3. Création de la commande
+        $order = null;
+        
+        DB::transaction(function () use ($request, $user, $itemsData, $total, &$order) {
             $order = Order::create([
                 'user_id' => $user->id,
                 'total' => $total,
@@ -46,19 +80,22 @@ class OrderController extends Controller
                 'payment_method' => $request->payment_method
             ]);
 
-            foreach ($cartItems as $item) {
+            foreach ($itemsData as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->product->price
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price']
                 ]);
             }
 
-            Cart::where('user_id', $user->id)->delete();
+            // Si on utilisait le panier DB, on le vide
+            if (!$request->has('items')) {
+                Cart::where('user_id', $user->id)->delete();
+            }
         });
 
-        return response()->json(['message' => 'Order created successfully'], 201);
+        return response()->json(['message' => 'Order created successfully', 'id' => $order->id, 'order' => $order], 201);
     }
 
     public function show(Order $order)

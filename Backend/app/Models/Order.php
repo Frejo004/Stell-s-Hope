@@ -11,14 +11,25 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'order_number',
         'total',
         'status',
         'shipping_address',
         'billing_address',
+        'payment_method',
         'payment_id',
         'payment_url',
         'payment_status'
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($order) {
+            if (empty($order->order_number)) {
+                $order->order_number = 'CMD-' . date('Ymd') . '-' . strtoupper(uniqid());
+            }
+        });
+    }
 
     protected $casts = [
         'total' => 'decimal:2',

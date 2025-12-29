@@ -1,9 +1,10 @@
 import api from './api';
 
 export interface PaymentInitiateData {
-    amount: number;
-    currency: string;
-    customer_email: string;
+    amount?: number;
+    order_id?: number | string;
+    currency?: string;
+    customer_email?: string;
     customer_name?: string;
 }
 
