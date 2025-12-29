@@ -44,14 +44,10 @@ interface AppRouterProps {
   onOrderComplete: (order: Order) => void;
 }
 
-function CategoryPageWrapper({ products, onProductClick }: { products: Product[], onProductClick: (product: Product) => void }) {
-  const { category } = useParams<{ category: string }>();
+function CategoryPageWrapper() {
+  useParams<{ category: string }>();
   return (
-    <CategoryPage
-      products={products}
-      category={category || 'all'}
-      onProductClick={onProductClick}
-    />
+    <CategoryPage />
   );
 }
 
@@ -179,11 +175,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                       <Route
                         path="/boutique"
                         element={
-                          <CategoryPage
-                            products={products}
-                            category="all"
-                            onProductClick={handleProductClick}
-                          />
+                          <CategoryPage />
                         }
                       />
 
@@ -201,10 +193,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                       <Route
                         path="/category/:category"
                         element={
-                          <CategoryPageWrapper
-                            products={products}
-                            onProductClick={handleProductClick}
-                          />
+                          <CategoryPageWrapper />
                         }
                       />
 
@@ -288,7 +277,6 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                         element={
                           <OrderConfirmationPage
                             order={getOrderById('CMD123') || {} as Order}
-                            onClose={() => window.location.href = '/'}
                             onContinueShopping={() => window.location.href = '/'}
                           />
                         }
