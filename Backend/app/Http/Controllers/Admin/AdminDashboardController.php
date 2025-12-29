@@ -21,10 +21,10 @@ class AdminDashboardController extends Controller
         
         $currentRevenue = Order::where('status', 'delivered')
             ->where('created_at', '>=', $currentMonth)
-            ->sum('total_amount');
+            ->sum('total');
         $previousRevenue = Order::where('status', 'delivered')
             ->whereBetween('created_at', [$previousMonth, $currentMonth])
-            ->sum('total_amount');
+            ->sum('total');
         $revenueChange = $previousRevenue > 0 ? round((($currentRevenue - $previousRevenue) / $previousRevenue) * 100, 1) : 0;
         
         $currentOrders = Order::where('created_at', '>=', $currentMonth)->count();
@@ -35,8 +35,8 @@ class AdminDashboardController extends Controller
         $previousCustomers = User::where('is_admin', false)->whereBetween('created_at', [$previousMonth, $currentMonth])->count();
         $customersChange = $previousCustomers > 0 ? round((($currentCustomers - $previousCustomers) / $previousCustomers) * 100, 1) : 0;
         
-        $currentAvgOrder = Order::where('created_at', '>=', $currentMonth)->avg('total_amount') ?? 0;
-        $previousAvgOrder = Order::whereBetween('created_at', [$previousMonth, $currentMonth])->avg('total_amount') ?? 0;
+        $currentAvgOrder = Order::where('created_at', '>=', $currentMonth)->avg('total') ?? 0;
+        $previousAvgOrder = Order::whereBetween('created_at', [$previousMonth, $currentMonth])->avg('total') ?? 0;
         $avgOrderChange = $previousAvgOrder > 0 ? round((($currentAvgOrder - $previousAvgOrder) / $previousAvgOrder) * 100, 1) : 0;
         
         // Données mensuelles pour le graphique
@@ -46,7 +46,7 @@ class AdminDashboardController extends Controller
             $revenue = Order::where('status', 'delivered')
                 ->whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
-                ->sum('total_amount');
+                ->sum('total');
             $orders = Order::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
                 ->count();
@@ -54,7 +54,7 @@ class AdminDashboardController extends Controller
             $prevRevenue = Order::where('status', 'delivered')
                 ->whereYear('created_at', $prevMonth->year)
                 ->whereMonth('created_at', $prevMonth->month)
-                ->sum('total_amount');
+                ->sum('total');
             $growth = $prevRevenue > 0 ? round((($revenue - $prevRevenue) / $prevRevenue) * 100) : 0;
             
             $monthlyRevenue[] = [
@@ -137,7 +137,7 @@ class AdminDashboardController extends Controller
             'orders_per_hour' => Order::where('created_at', '>=', Carbon::now()->subHour())->count(),
             'today_revenue' => Order::where('status', 'delivered')
                 ->whereDate('created_at', Carbon::today())
-                ->sum('total_amount')
+                ->sum('total')
         ];
         
         $recentActivity = [
@@ -171,7 +171,7 @@ class AdminDashboardController extends Controller
     {
         $monthlyRevenue = Order::where('status', 'delivered')
                               ->where('created_at', '>=', Carbon::now()->subMonths(12))
-                              ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as revenue')
+                              ->selectRaw('MONTH(created_at) as month, SUM(total) as revenue')
                               ->groupBy('month')
                               ->get();
 

@@ -12,12 +12,12 @@ class AdminCustomerController extends Controller
     {
         $customers = User::where('is_admin', false)
                         ->withCount('orders')
-                        ->withSum('orders', 'total_amount')
+                        ->withSum('orders', 'total')
                         ->orderBy('created_at', 'desc')
                         ->paginate(20);
         
         $customers->getCollection()->transform(function ($customer) {
-            $customer->total_spent = $customer->orders_sum_total_amount ?? 0;
+            $customer->total_spent = $customer->orders_sum_total ?? 0;
             return $customer;
         });
         

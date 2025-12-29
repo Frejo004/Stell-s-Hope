@@ -26,7 +26,7 @@ class OrderSeeder extends Seeder
                 'user_id' => $user->id,
                 'order_number' => 'ORD-' . (time() + $i),
                 'status' => $statuses[array_rand($statuses)],
-                'total_amount' => 0,
+                'total' => 0,
                 'shipping_address' => $user->address . ', ' . $user->city . ' ' . $user->postal_code,
                 'billing_address' => $user->address . ', ' . $user->city . ' ' . $user->postal_code,
                 'payment_method' => ['card', 'paypal', 'bank_transfer'][rand(0, 2)],
@@ -46,7 +46,7 @@ class OrderSeeder extends Seeder
                 ]);
             }
 
-            $order->update(['total_amount' => $total]);
+            $order->update(['total' => $total]);
         }
     }
 }

@@ -87,16 +87,16 @@ class MetricsService
 
     private function getRevenueMetrics($today, $thisMonth, $lastMonth)
     {
-        $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total_amount');
+        $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total');
         $revenueToday = Order::where('status', '!=', 'cancelled')
             ->whereDate('created_at', $today)
-            ->sum('total_amount');
+            ->sum('total');
         $revenueThisMonth = Order::where('status', '!=', 'cancelled')
             ->where('created_at', '>=', $thisMonth)
-            ->sum('total_amount');
+            ->sum('total');
         $revenueLastMonth = Order::where('status', '!=', 'cancelled')
             ->whereBetween('created_at', [$lastMonth, $thisMonth])
-            ->sum('total_amount');
+            ->sum('total');
 
         $growthRate = $revenueLastMonth > 0 
             ? (($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth) * 100 
@@ -132,7 +132,7 @@ class MetricsService
             $date = Carbon::now()->subDays($i);
             $revenue = Order::where('status', '!=', 'cancelled')
                 ->whereDate('created_at', $date)
-                ->sum('total_amount');
+                ->sum('total');
             
             $data[] = [
                 'date' => $date->format('Y-m-d'),
@@ -168,7 +168,7 @@ class MetricsService
                 $q->where('created_at', '>=', Carbon::now()->subDays(90));
             })->count(),
             'vip_customers' => User::whereHas('orders', function($q) {
-                $q->where('total_amount', '>', 500);
+                $q->where('total', '>', 500);
             })->count(),
             'inactive_customers' => User::whereDoesntHave('orders', function($q) {
                 $q->where('created_at', '>=', Carbon::now()->subDays(90));
