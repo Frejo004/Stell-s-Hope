@@ -1,5 +1,9 @@
-import { useState, useEffect  } from 'react';
-import { BarChart3, Package, Users, ShoppingCart, TrendingUp, AlertCircle, DollarSign, Percent, Truck, CreditCard, Star, HelpCircle, TrendingDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import {
+  BarChart3, Users, ShoppingCart, TrendingUp, AlertCircle,
+  DollarSign, CreditCard, Star, HelpCircle,
+  TrendingDown, ArrowRight, Activity, Calendar, Clock, Tag
+} from 'lucide-react';
 import { adminService } from '../../services/adminService';
 
 interface AdminDashboardProps {
@@ -27,581 +31,361 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-rose-100 border-t-rose-500 rounded-full animate-spin"></div>
+          <Activity className="absolute inset-0 m-auto w-6 h-6 text-rose-500 animate-pulse" />
+        </div>
       </div>
     );
   }
 
   const stats = [
-    { 
-      title: 'Chiffre d\'Affaires', 
-      value: `${dashboardData?.stats?.revenue || 0}€`, 
-      change: dashboardData?.stats?.revenue_change || '+0%', 
-      icon: DollarSign, 
-      color: 'bg-green-500', 
-      trend: (dashboardData?.stats?.revenue_change || '').startsWith('-') ? 'down' : 'up' 
+    {
+      title: 'Chiffre d\'Affaires',
+      value: `${dashboardData?.stats?.revenue || 0} €`,
+      change: dashboardData?.stats?.revenue_change || '+0%',
+      icon: DollarSign,
+      color: 'bg-emerald-500',
+      trend: (dashboardData?.stats?.revenue_change || '').startsWith('-') ? 'down' : 'up'
     },
-    { 
-      title: 'Commandes', 
-      value: dashboardData?.stats?.orders || 0, 
-      change: dashboardData?.stats?.orders_change || '+0%', 
-      icon: ShoppingCart, 
-      color: 'bg-blue-500', 
-      trend: (dashboardData?.stats?.orders_change || '').startsWith('-') ? 'down' : 'up' 
+    {
+      title: 'Commandes',
+      value: dashboardData?.stats?.orders || 0,
+      change: dashboardData?.stats?.orders_change || '+0%',
+      icon: ShoppingCart,
+      color: 'bg-rose-500',
+      trend: (dashboardData?.stats?.orders_change || '').startsWith('-') ? 'down' : 'up'
     },
-    { 
-      title: 'Clients', 
-      value: dashboardData?.stats?.customers || 0, 
-      change: dashboardData?.stats?.customers_change || '+0%', 
-      icon: Users, 
-      color: 'bg-purple-500', 
-      trend: (dashboardData?.stats?.customers_change || '').startsWith('-') ? 'down' : 'up' 
+    {
+      title: 'Clients Actifs',
+      value: dashboardData?.stats?.customers || 0,
+      change: dashboardData?.stats?.customers_change || '+0%',
+      icon: Users,
+      color: 'bg-indigo-500',
+      trend: (dashboardData?.stats?.customers_change || '').startsWith('-') ? 'down' : 'up'
     },
-    { 
-      title: 'Panier Moyen', 
-      value: `${Math.round(dashboardData?.stats?.average_order || 0)}€`, 
-      change: dashboardData?.stats?.average_order_change || '+0%', 
-      icon: Package, 
-      color: 'bg-orange-500', 
-      trend: (dashboardData?.stats?.average_order_change || '').startsWith('-') ? 'down' : 'up' 
+    {
+      title: 'Panier Moyen',
+      value: `${Math.round(dashboardData?.stats?.average_order || 0)} €`,
+      change: dashboardData?.stats?.average_order_change || '+0%',
+      icon: CreditCard,
+      color: 'bg-amber-500',
+      trend: (dashboardData?.stats?.average_order_change || '').startsWith('-') ? 'down' : 'up'
     }
   ];
 
   const recentOrders = dashboardData?.recent_orders?.map((order: any) => ({
-    id: `CMD${order.id.toString().padStart(3, '0')}`,
-    customer: `${order.user?.first_name || 'Client'} ${order.user?.last_name || ''}`,
-    amount: `${order.total}€`,
+    id: `CMD${order.id.toString().padStart(3, '0')} `,
+    customer: `${order.user?.first_name || 'Client'} ${order.user?.last_name || ''} `,
+    amount: `${order.total} €`,
     status: order.status || 'pending',
-    time: new Date(order.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+    date: new Date(order.created_at).toLocaleDateString('fr-FR')
   })) || [];
 
-  const quickStats = [
-    { label: 'Promotions Actives', value: dashboardData?.quick_stats?.active_promotions || '0', icon: Percent, color: 'text-green-600', bg: 'bg-green-100' },
-    { label: 'Modes Livraison', value: dashboardData?.quick_stats?.shipping_methods || '0', icon: Truck, color: 'text-blue-600', bg: 'bg-blue-100' },
-    { label: 'Moyens Paiement', value: dashboardData?.quick_stats?.payment_methods || '0', icon: CreditCard, color: 'text-purple-600', bg: 'bg-purple-100' },
-    { label: 'Avis en Attente', value: dashboardData?.quick_stats?.pending_reviews || '0', icon: Star, color: 'text-yellow-600', bg: 'bg-yellow-100' },
-    { label: 'Tickets Support', value: dashboardData?.quick_stats?.support_tickets || '0', icon: HelpCircle, color: 'text-red-600', bg: 'bg-red-100' },
-    { label: 'Stock Faible', value: dashboardData?.quick_stats?.low_stock || '0', icon: AlertCircle, color: 'text-orange-600', bg: 'bg-orange-100' }
-  ];
-
   const topProducts = dashboardData?.top_products || [];
-
-  const monthlyRevenue = dashboardData?.monthly_revenue || [
-    { month: 'Jan', revenue: 0, orders: 0, growth: 0 },
-    { month: 'Fév', revenue: 0, orders: 0, growth: 0 },
-    { month: 'Mar', revenue: 0, orders: 0, growth: 0 },
-    { month: 'Avr', revenue: 0, orders: 0, growth: 0 }
-  ];
-
+  const monthlyRevenue = dashboardData?.monthly_revenue || [];
   const categoryStats = dashboardData?.category_stats || [];
 
-  const recentActivity = dashboardData?.recent_activity || [];
-
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <div className="text-sm text-gray-500">
-          Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')}
+    <div className="space-y-8 animate-in fade-in duration-700">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Vue d'ensemble</h1>
+          <p className="text-slate-500 mt-1 font-medium">Bienvenue sur votre centre de contrôle Stell's Hope.</p>
+        </div>
+        <div className="flex items-center space-x-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="bg-rose-50 p-2 rounded-xl">
+            <Calendar className="w-5 h-5 text-rose-500" />
+          </div>
+          <div className="pr-4 border-r border-slate-200">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-0.5">Date</p>
+            <p className="text-xs font-bold text-slate-700">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+          </div>
+          <div className="bg-indigo-50 p-2 rounded-xl ml-2">
+            <Clock className="w-5 h-5 text-indigo-500" />
+          </div>
+          <div className="pr-2">
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-none mb-0.5">Mise à jour</p>
+            <p className="text-xs font-bold text-slate-700">Il y a quelques secondes</p>
+          </div>
         </div>
       </div>
 
       {/* Main Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <div key={stat.title} className="bg-white rounded-xl shadow-sm border p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-500">{stat.title}</p>
-                <div className="flex items-center mt-2">
-                  <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                  <div className="flex items-center ml-2">
-                    {stat.trend === 'up' ? (
-                      <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
-                    )}
-                    <span className={`text-sm font-medium ${
-                      stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                    }`}>{stat.change}</span>
-                  </div>
-                </div>
-              </div>
-              <div className={`${stat.color} p-3 rounded-xl`}>
+        {stats.map((stat, index) => (
+          <div key={index} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+            <div className="flex items-start justify-between">
+              <div className={`${stat.color} p - 4 rounded - 2xl shadow - lg shadow - ${stat.color.split('-')[1]} -500 / 20 group - hover: scale - 110 transition - transform`}>
                 <stat.icon className="w-6 h-6 text-white" />
+              </div>
+              <div className={`flex items - center space - x - 1 px - 2.5 py - 1 rounded - full text - xs font - bold ${stat.trend === 'up' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
+                } `}>
+                {stat.trend === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                <span>{stat.change}</span>
+              </div>
+            </div>
+            <div className="mt-6">
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{stat.title}</p>
+              <h3 className="text-3xl font-black text-slate-900 mt-1">{stat.value}</h3>
+            </div>
+            <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between">
+              <span className="text-xs text-slate-400 font-medium italic">Vs mois dernier</span>
+              <div className="w-16 h-1 bg-slate-100 rounded-full overflow-hidden">
+                <div className={`h - full ${stat.color} rounded - full`} style={{ width: '65%' }}></div>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-
-
-      {/* Revenue Chart - Compact */}
-      <div className="bg-white rounded-xl shadow-sm border">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Évolution CA</h2>
-            <div className="flex items-center space-x-3 text-xs">
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-1"></div>
-                <span className="text-gray-600">Revenus</span>
+      {/* Main Grid Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Revenue Chart & Activity */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Revenue Evolution - Premium Card */}
+          <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Analyse de Performance</h2>
+                <p className="text-sm text-slate-500 font-medium">Suivez l'évolution de vos revenus mensuels</p>
               </div>
-              <div className="flex items-center">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                <span className="text-gray-600">Commandes</span>
+              <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">
+                <BarChart3 className="w-4 h-4 text-rose-500" />
+                <span>Rapport complet</span>
+              </div>
+            </div>
+            <div className="p-8">
+              <div className="relative h-[280px] flex items-end justify-between space-x-4">
+                {monthlyRevenue.map((data: any, idx: number) => {
+                  const maxRevenue = Math.max(...monthlyRevenue.map((d: any) => d.revenue));
+                  const height = maxRevenue > 0 ? (data.revenue / maxRevenue) * 100 : 0;
+                  return (
+                    <div key={idx} className="flex-1 flex flex-col items-center group">
+                      <div className="relative w-full flex flex-col items-center">
+                        {/* Tooltip on hover */}
+                        <div className="absolute -top-12 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                          {data.revenue} €
+                        </div>
+                        {/* Gradient Bar */}
+                        <div
+                          className="w-full max-w-[40px] bg-gradient-to-t from-rose-500 to-rose-400 rounded-t-xl group-hover:from-indigo-600 group-hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-rose-500/10 group-hover:shadow-indigo-500/20"
+                          style={{ height: `${Math.max(height, 5)}% ` }}
+                        ></div>
+                      </div>
+                      <span className="mt-4 text-xs font-bold text-slate-400 uppercase tracking-tighter group-hover:text-slate-900 transition-colors">{data.month}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-slate-50 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div className="text-center p-4 rounded-2xl bg-rose-50/50">
+                  <p className="text-[10px] text-rose-400 font-bold uppercase tracking-widest mb-1">Croissance</p>
+                  <p className="text-lg font-black text-rose-600">+12.5%</p>
+                </div>
+                <div className="text-center p-4 rounded-2xl bg-indigo-50/50">
+                  <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest mb-1">Taux Reconversion</p>
+                  <p className="text-lg font-black text-indigo-600">42%</p>
+                </div>
+                <div className="text-center p-4 rounded-2xl bg-emerald-50/50">
+                  <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mb-1">Satisfaction</p>
+                  <p className="text-lg font-black text-emerald-600">4.8/5</p>
+                </div>
+                <div className="text-center p-4 rounded-2xl bg-amber-50/50">
+                  <p className="text-[10px] text-amber-400 font-bold uppercase tracking-widest mb-1">Paniers Abandonnés</p>
+                  <p className="text-lg font-black text-amber-600">18.2%</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="p-4">
-          <div className="space-y-2">
-            {monthlyRevenue.slice(-4).map((data, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 flex-1">
-                  <div className="w-8 text-xs font-medium text-gray-600">{data.month}</div>
-                  <div className="flex-1">
-                    <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
-                      <div 
-                        className="bg-blue-500 h-1.5 rounded-full" 
-                        style={{ width: `${(data.revenue / Math.max(...monthlyRevenue.map(d => d.revenue))) * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-1">
-                      <div 
-                        className="bg-green-500 h-1 rounded-full" 
-                        style={{ width: `${(data.orders / Math.max(...monthlyRevenue.map(d => d.orders))) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right ml-3">
-                  <div className="text-xs font-semibold text-gray-900">{(data.revenue/1000).toFixed(0)}k€</div>
-                  <div className={`text-xs font-medium ${
-                    data.growth > 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {data.growth > 0 ? '+' : ''}{data.growth}%
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Performance Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Category Performance - Compact */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Catégories</h2>
-          </div>
-          <div className="p-4">
-            <div className="space-y-3">
-              {categoryStats.map((category, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 ${category.color} rounded-full`}></div>
-                    <span className="text-sm font-medium text-gray-900">{category.name}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                      <div 
-                        className={`${category.color} h-1.5 rounded-full`}
-                        style={{ width: `${category.percentage}%` }}
-                      ></div>
-                    </div>
-                    <div className="text-right w-8">
-                      <div className="text-xs font-semibold text-gray-900">{category.percentage}%</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* Recent Orders Table */}
+          <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-900">Dernières Commandes</h2>
+              <button
+                onClick={() => onNavigate('orders')}
+                className="text-indigo-600 hover:text-indigo-700 text-sm font-bold flex items-center"
+              >
+                Tout voir <ArrowRight className="w-4 h-4 ml-1" />
+              </button>
             </div>
-          </div>
-        </div>
-
-        {/* Recent Activity - Compact */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Activité</h2>
-          </div>
-          <div className="p-4">
-            <div className="space-y-3">
-              {recentActivity.slice(0, 4).map((activity, index) => {
-                const getIcon = (type: string) => {
-                  switch(type) {
-                    case 'order': return ShoppingCart;
-                    case 'customer': return Users;
-                    case 'review': return Star;
-                    case 'stock': return AlertCircle;
-                    default: return ShoppingCart;
-                  }
-                };
-                const IconComponent = getIcon(activity.type);
-                return (
-                  <div key={index} className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
-                      <IconComponent className={`w-3 h-3 ${activity.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-900 truncate">{activity.message}</p>
-                      <p className="text-xs text-gray-500">{activity.time}</p>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50/50">
+                  <tr>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Client</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Montant</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Statut</th>
+                    <th className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {recentOrders.map((order: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-8 py-5">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600 border border-slate-200">
+                            {order.customer[0]}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-900">{order.customer}</p>
+                            <p className="text-[10px] font-bold text-rose-500 uppercase tracking-tighter">{order.id}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-5 text-sm font-black text-slate-900">{order.amount}</td>
+                      <td className="px-8 py-5">
+                        <span className={`px - 3 py - 1 rounded - full text - [10px] font - bold uppercase tracking - widest ${order.status === 'delivered' ? 'bg-emerald-100 text-emerald-600' :
+                            order.status === 'shipped' ? 'bg-blue-100 text-blue-600' :
+                              'bg-amber-100 text-amber-600'
+                          } `}>
+                          {order.status === 'delivered' ? 'Livré' :
+                            order.status === 'shipped' ? 'Expédié' : 'En attente'}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5 text-sm font-medium text-slate-500">{order.date}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        {/* Live Metrics */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Temps Réel</h2>
-          </div>
-          <div className="p-4">
-            <div className="space-y-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{dashboardData?.live_metrics?.online_visitors || 0}</div>
-                <div className="text-xs text-gray-600">Visiteurs en ligne</div>
-                <div className="flex justify-center mt-2">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                    <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
-                  </div>
+        {/* Right Column: Live, Categories, Top Prods */}
+        <div className="space-y-8">
+          {/* Live Metrics Premium Widget */}
+          <div className="bg-slate-900 rounded-[2rem] p-8 text-white shadow-2xl shadow-indigo-500/10 relative overflow-hidden group">
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-rose-500/20 rounded-full blur-[60px] group-hover:bg-rose-500/30 transition-all"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></div>
+                  <h2 className="text-lg font-bold">En Direct</h2>
                 </div>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dernière heure</span>
               </div>
-              
-              <div className="border-t pt-3">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-600">Paniers actifs</span>
-                  <span className="text-sm font-semibold text-blue-600">{dashboardData?.live_metrics?.active_carts || 0}</span>
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-600">Commandes/h</span>
-                  <span className="text-sm font-semibold text-purple-600">{dashboardData?.live_metrics?.orders_per_hour || 0}</span>
+
+              <div className="text-center mb-8">
+                <p className="text-5xl font-black text-white">{dashboardData?.live_metrics?.online_visitors || 0}</p>
+                <p className="text-xs text-emerald-400 font-bold uppercase tracking-widest mt-2 flex items-center justify-center">
+                  <Activity className="w-3 h-3 mr-1" /> Visiteurs actifs
+                </p>
+              </div>
+
+              <div className="space-y-4 pt-6 border-t border-slate-800">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Paniers en cours</span>
+                  <span className="text-sm font-black text-indigo-400">{dashboardData?.live_metrics?.active_carts || 0}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-600">CA aujourd'hui</span>
-                  <span className="text-sm font-semibold text-green-600">{dashboardData?.live_metrics?.today_revenue || 0}€</span>
+                  <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Commandes /h</span>
+                  <span className="text-sm font-black text-rose-400">{dashboardData?.live_metrics?.orders_per_hour || 0}</span>
+                </div>
+                <div className="mt-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-slate-200 font-bold uppercase tracking-wider">Objectif journalier</span>
+                    <span className="text-xs font-bold text-emerald-400">75%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-indigo-500 to-rose-500 rounded-full" style={{ width: '75%' }}></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Recent Orders - Compact */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-4 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Commandes</h2>
-              <button 
-                onClick={() => onNavigate('orders')}
-                className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-              >
-                Tout
-              </button>
+          {/* Top Categories - Modern Progress bars */}
+          <div className="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold text-slate-900">Catégories</h2>
+              <Tag className="w-5 h-5 text-rose-500" />
             </div>
-          </div>
-          <div className="p-4">
-            <div className="space-y-3">
-              {recentOrders.slice(0, 3).map((order) => (
-                <div key={order.id} className="flex items-center justify-between py-1">
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">{order.id}</p>
-                    <p className="text-xs text-gray-500">{order.customer.split(' ')[0]}</p>
+            <div className="space-y-6">
+              {categoryStats.map((cat: any, idx: number) => (
+                <div key={idx} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">{cat.name}</span>
+                    <span className="text-xs font-black text-slate-900">{cat.percentage}%</span>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900 text-sm">{order.amount}</p>
-                    <span className={`text-xs px-1 py-0.5 rounded font-medium ${
-                      order.status === 'delivered' ? 'bg-green-100 text-green-700' :
-                      order.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
-                      'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {order.status === 'delivered' ? 'OK' :
-                       order.status === 'shipped' ? 'EXP' : 'ATT'}
-                    </span>
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h - full ${cat.color} rounded - full transition - all duration - 1000`}
+                      style={{ width: `${cat.percentage}% ` }}
+                    ></div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* Top Products - Compact */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-4 border-b border-gray-100">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900">Top Produits</h2>
-              <button 
-                onClick={() => onNavigate('products')}
-                className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-              >
-                Tout
+          {/* Top Selling Products */}
+          <div className="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold text-slate-900">Top Ventes</h2>
+              <button onClick={() => onNavigate('products')} className="p-2 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-xl transition-all">
+                <ArrowRight className="w-5 h-5" />
               </button>
             </div>
-          </div>
-          <div className="p-4">
-            <div className="space-y-2">
-              {topProducts.slice(0, 3).map((product, index) => (
-                <div key={index} className="flex items-center justify-between py-1">
-                  <div className="flex items-center">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center mr-2 text-xs font-bold text-white ${
-                      index === 0 ? 'bg-yellow-500' : 
-                      index === 1 ? 'bg-gray-400' : 'bg-orange-600'
-                    }`}>
-                      {index + 1}
+            <div className="space-y-4">
+              {topProducts.slice(0, 3).map((product: any, idx: number) => (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w - 8 h - 8 rounded - lg flex items - center justify - center font - bold text - xs text - white ${idx === 0 ? 'bg-amber-400' : idx === 1 ? 'bg-slate-300' : 'bg-rose-400'
+                      } `}>
+                      #{idx + 1}
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900 text-xs truncate">{product.name?.split(' ').slice(0, 2).join(' ')}</p>
-                      <p className="text-xs text-gray-500">{product.sales || 0} ventes</p>
+                      <p className="text-xs font-bold text-slate-900 leading-none mb-0.5 truncate max-w-[120px]">{product.name}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{product.sales || 0} ventes</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900 text-xs">{product.revenue || '0€'}</p>
+                    <p className="text-xs font-black text-slate-900">{product.revenue || '0 €'}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        {/* Performance Metrics - Ultra Compact */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Performance</h2>
-          </div>
-          <div className="p-4">
-            <div className="space-y-3">
-              <div className="text-center">
-                <div className="relative w-12 h-12 mx-auto mb-1">
-                  <svg className="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
-                    <path className="text-gray-200" stroke="currentColor" strokeWidth="2" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className="text-green-500" stroke="currentColor" strokeWidth="2" fill="none" strokeDasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-bold text-gray-900">75%</span>
-                  </div>
-                </div>
-                <p className="text-xs font-medium text-gray-900">Conversion</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="relative w-12 h-12 mx-auto mb-1">
-                  <svg className="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
-                    <path className="text-gray-200" stroke="currentColor" strokeWidth="2" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className="text-blue-500" stroke="currentColor" strokeWidth="2" fill="none" strokeDasharray="88, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-bold text-gray-900">88%</span>
-                  </div>
-                </div>
-                <p className="text-xs font-medium text-gray-900">Satisfaction</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-4 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Actions</h2>
-          </div>
-          <div className="p-4">
-            <div className="grid grid-cols-2 gap-2">
-              <button 
-                onClick={() => onNavigate('products')}
-                className="p-2 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all group text-center"
-              >
-                <Package className="w-4 h-4 mx-auto mb-1 text-gray-400 group-hover:text-blue-600" />
-                <p className="text-xs font-medium text-gray-700 group-hover:text-blue-700">Produits</p>
-              </button>
-              <button 
-                onClick={() => onNavigate('orders')}
-                className="p-2 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-all group text-center"
-              >
-                <ShoppingCart className="w-4 h-4 mx-auto mb-1 text-gray-400 group-hover:text-green-600" />
-                <p className="text-xs font-medium text-gray-700 group-hover:text-green-700">Commandes</p>
-              </button>
-              <button 
-                onClick={() => onNavigate('promotions')}
-                className="p-2 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all group text-center"
-              >
-                <Percent className="w-4 h-4 mx-auto mb-1 text-gray-400 group-hover:text-purple-600" />
-                <p className="text-xs font-medium text-gray-700 group-hover:text-purple-700">Promos</p>
-              </button>
-              <button 
-                onClick={() => onNavigate('analytics')}
-                className="p-2 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-all group text-center"
-              >
-                <BarChart3 className="w-4 h-4 mx-auto mb-1 text-gray-400 group-hover:text-orange-600" />
-                <p className="text-xs font-medium text-gray-700 group-hover:text-orange-700">Analytics</p>
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Advanced Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sales Funnel */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Entonnoir de Vente</h2>
+      {/* Alerts Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white border-l-4 border-l-rose-500 rounded-2xl p-6 shadow-sm flex items-start space-x-4">
+          <div className="bg-rose-50 p-3 rounded-xl">
+            <AlertCircle className="w-6 h-6 text-rose-500" />
           </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {(dashboardData?.sales_funnel || []).map((step, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-4 h-4 ${step.color} rounded`}></div>
-                    <span className="text-sm font-medium">{step.name}</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-32 bg-gray-200 rounded-full h-2">
-                      <div className={`${step.color} h-2 rounded-full`} style={{ width: `${step.percentage}%` }}></div>
-                    </div>
-                    <span className="text-sm font-semibold text-gray-900 w-12">{step.value}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Taux de conversion global</span>
-                <span className="font-semibold text-green-600">{dashboardData?.sales_funnel_conversion || '0%'}</span>
-              </div>
-            </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Stock Faible</h3>
+            <p className="text-xs text-slate-500 mt-1 font-medium">3 produits nécessitent réapprovisionnement.</p>
+            <button onClick={() => onNavigate('inventory')} className="text-xs font-bold text-rose-500 hover:text-rose-600 mt-3 inline-block uppercase tracking-wider">Gérer stock →</button>
           </div>
         </div>
 
-        {/* Payment Methods Performance */}
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-900">Moyens de Paiement</h2>
+        <div className="bg-white border-l-4 border-l-indigo-500 rounded-2xl p-6 shadow-sm flex items-start space-x-4">
+          <div className="bg-indigo-50 p-3 rounded-xl">
+            <HelpCircle className="w-6 h-6 text-indigo-500" />
           </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {(dashboardData?.payment_methods || []).map((method, index) => {
-                const icons = [CreditCard, DollarSign, Truck, Percent];
-                const colors = ['text-blue-600', 'text-purple-600', 'text-green-600', 'text-gray-600'];
-                const Icon = icons[index % icons.length];
-                return (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Icon className={`w-5 h-5 ${colors[index % colors.length]}`} />
-                      <span className="text-sm font-medium">{method.name}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-gray-900">{method.percentage}%</div>
-                      <div className="text-xs text-gray-500">{method.transactions} trans.</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Taux de succès moyen</span>
-                <span className="font-semibold text-green-600">{dashboardData?.payment_success_rate || '0%'}</span>
-              </div>
-            </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Support Client</h3>
+            <p className="text-xs text-slate-500 mt-1 font-medium">1 nouveau ticket priorité haute.</p>
+            <button onClick={() => onNavigate('support')} className="text-xs font-bold text-indigo-500 hover:text-indigo-600 mt-3 inline-block uppercase tracking-wider">Répondre →</button>
           </div>
         </div>
-      </div>
 
-      {/* Alerts & Notifications */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
-          <div className="flex">
-            <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-            <div className="ml-3">
-              <h3 className="text-sm font-semibold text-yellow-800">Stock Critique</h3>
-              <p className="text-sm text-yellow-700 mt-1">
-                3 produits en rupture imminente
-              </p>
-              <button onClick={() => onNavigate('inventory')} className="text-xs text-yellow-800 underline font-medium hover:no-underline mt-2">
-                Gérer les stocks →
-              </button>
-            </div>
+        <div className="bg-white border-l-4 border-l-amber-500 rounded-2xl p-6 shadow-sm flex items-start space-x-4">
+          <div className="bg-amber-50 p-3 rounded-xl">
+            <Star className="w-6 h-6 text-amber-500" />
           </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex">
-            <HelpCircle className="w-5 h-5 text-blue-500 flex-shrink-0" />
-            <div className="ml-3">
-              <h3 className="text-sm font-semibold text-blue-800">Support Urgent</h3>
-              <p className="text-sm text-blue-700 mt-1">
-                1 ticket priorité haute
-              </p>
-              <button onClick={() => onNavigate('support')} className="text-xs text-blue-800 underline font-medium hover:no-underline mt-2">
-                Répondre maintenant →
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
-          <div className="flex">
-            <Star className="w-5 h-5 text-green-500 flex-shrink-0" />
-            <div className="ml-3">
-              <h3 className="text-sm font-semibold text-green-800">Nouveaux Avis</h3>
-              <p className="text-sm text-green-700 mt-1">
-                2 avis 5★ à modérer
-              </p>
-              <button onClick={() => onNavigate('reviews')} className="text-xs text-green-800 underline font-medium hover:no-underline mt-2">
-                Modérer les avis →
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Stats Grid */}
-      <div className="bg-white rounded-xl shadow-sm border">
-        <div className="p-6 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">Aperçu Rapide</h2>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div className="text-center p-3 bg-blue-50 rounded-lg">
-              <Percent className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-900">3</div>
-              <div className="text-xs text-gray-600">Promotions</div>
-            </div>
-            <div className="text-center p-3 bg-green-50 rounded-lg">
-              <Truck className="w-6 h-6 text-green-600 mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-900">4</div>
-              <div className="text-xs text-gray-600">Livraisons</div>
-            </div>
-            <div className="text-center p-3 bg-purple-50 rounded-lg">
-              <CreditCard className="w-6 h-6 text-purple-600 mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-900">4</div>
-              <div className="text-xs text-gray-600">Paiements</div>
-            </div>
-            <div className="text-center p-3 bg-yellow-50 rounded-lg">
-              <Star className="w-6 h-6 text-yellow-600 mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-900">2</div>
-              <div className="text-xs text-gray-600">Avis</div>
-            </div>
-            <div className="text-center p-3 bg-red-50 rounded-lg">
-              <HelpCircle className="w-6 h-6 text-red-600 mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-900">1</div>
-              <div className="text-xs text-gray-600">Support</div>
-            </div>
-            <div className="text-center p-3 bg-orange-50 rounded-lg">
-              <AlertCircle className="w-6 h-6 text-orange-600 mx-auto mb-2" />
-              <div className="text-lg font-bold text-gray-900">3</div>
-              <div className="text-xs text-gray-600">Alertes</div>
-            </div>
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">Nouveaux Avis</h3>
+            <p className="text-xs text-slate-500 mt-1 font-medium">2 témoignages clients à valider.</p>
+            <button onClick={() => onNavigate('reviews')} className="text-xs font-bold text-amber-500 hover:text-amber-600 mt-3 inline-block uppercase tracking-wider">Valider →</button>
           </div>
         </div>
       </div>
