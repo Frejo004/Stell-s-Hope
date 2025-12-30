@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { eventBus } from '../utils/eventBus';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
@@ -36,6 +37,20 @@ api.interceptors.response.use(
   },
   async (error) => {
     const { response } = error;
+    const message = response?.data?.message || 'Une erreur est survenue';
+
+    if (import.meta.env.DEV) {
+      console.error(`❌ ${error.config?.method?.toUpperCase()} ${error.config?.url}`, response?.data || error.message);
+    }
+
+    // Afficher un toast pour les erreurs (sauf si redirection 401)
+    if (response?.status !== 401) {
+      eventBus.emit('show-toast', {
+        message,
+        type: 'error',
+        duration: 5000
+      });
+    }
 
     if (response?.status === 401 && !error.config?._retry) {
       error.config._retry = true;
@@ -46,10 +61,6 @@ api.interceptors.response.use(
       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
         window.location.href = '/login';
       }
-    }
-
-    if (import.meta.env.DEV) {
-      console.error(`❌ ${error.config?.method?.toUpperCase()} ${error.config?.url}`, error.response?.data || error.message);
     }
 
     return Promise.reject(error);

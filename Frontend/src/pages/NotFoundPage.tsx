@@ -4,7 +4,7 @@ import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 
 interface NotFoundPageProps {
-  products: Product[];
+  products?: Product[];
   onProductClick: (product: Product) => void;
   onNavigateHome: () => void;
   onCategoryChange: (category: string) => void;
@@ -13,8 +13,8 @@ interface NotFoundPageProps {
 export default function NotFoundPage({ products, onProductClick, onNavigateHome, onCategoryChange }: NotFoundPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const popularProducts = products.filter(p => p.is_bestseller).slice(0, 4);
-  const newProducts = products.filter(p => p.isNew).slice(0, 4);
+  const popularProducts = (products || []).filter(p => p.is_bestseller).slice(0, 4);
+  const newProducts = (products || []).filter(p => p.isNew).slice(0, 4);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -82,7 +82,7 @@ export default function NotFoundPage({ products, onProductClick, onNavigateHome,
               <Home className="w-5 h-5" />
               <span>Retour à l'accueil</span>
             </button>
-            
+
             <button
               onClick={() => onCategoryChange('all')}
               className="flex items-center justify-center space-x-2 border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50"
@@ -166,7 +166,7 @@ export default function NotFoundPage({ products, onProductClick, onNavigateHome,
           <p className="text-gray-300 mb-6">
             Notre équipe est là pour vous accompagner dans votre shopping
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-4">
               <div className="w-12 h-12 bg-rose-300 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -177,7 +177,7 @@ export default function NotFoundPage({ products, onProductClick, onNavigateHome,
                 Trouvez des réponses à vos questions
               </p>
             </div>
-            
+
             <div className="p-4">
               <div className="w-12 h-12 bg-rose-300 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Heart className="w-6 h-6 text-white" />
@@ -187,7 +187,7 @@ export default function NotFoundPage({ products, onProductClick, onNavigateHome,
                 Contactez-nous du lundi au vendredi
               </p>
             </div>
-            
+
             <div className="p-4">
               <div className="w-12 h-12 bg-rose-300 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Package className="w-6 h-6 text-white" />

@@ -4,7 +4,7 @@ import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 
 interface SearchPageProps {
-  products: Product[];
+  products?: Product[];
   onClose: () => void;
   onProductClick: (product: Product) => void;
   initialQuery?: string;
@@ -22,7 +22,7 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
   const searchResults = useMemo(() => {
     if (!query.trim()) return [];
 
-    let results = products.filter(product => 
+    let results = (products || []).filter(product =>
       product.name.toLowerCase().includes(query.toLowerCase()) ||
       product.description.toLowerCase().includes(query.toLowerCase()) ||
       product.category.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -34,7 +34,7 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
       results = results.filter(p => p.category.name === filters.category);
     }
 
-    results = results.filter(p => 
+    results = results.filter(p =>
       p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1]
     );
 
@@ -67,7 +67,7 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded">
             <X className="w-6 h-6" />
           </button>
-          
+
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
             <input
@@ -114,8 +114,8 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
                   min="0"
                   max="500"
                   value={filters.priceRange[1]}
-                  onChange={(e) => setFilters(prev => ({ 
-                    ...prev, 
+                  onChange={(e) => setFilters(prev => ({
+                    ...prev,
                     priceRange: [prev.priceRange[0], parseInt(e.target.value)]
                   }))}
                   className="w-full"
@@ -127,8 +127,8 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
                 <label className="block text-sm font-medium mb-2">Trier par</label>
                 <select
                   value={filters.sortBy}
-                  onChange={(e) => setFilters(prev => ({ 
-                    ...prev, 
+                  onChange={(e) => setFilters(prev => ({
+                    ...prev,
                     sortBy: e.target.value as typeof filters.sortBy
                   }))}
                   className="w-full border rounded px-3 py-2"

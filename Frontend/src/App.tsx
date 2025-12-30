@@ -1,12 +1,11 @@
-;
 import AppRouter from './routes/AppRouter';
-import ToastContainer from './components/ToastContainer';
 import { useToast } from './hooks/useToast';
 import { useOrders } from './hooks/useOrders';
 import { Order } from './types/order';
+import { ToastProvider } from './contexts/ToastContext';
 
-function App() {
-  const { toasts, removeToast, addToast } = useToast();
+function AppContent() {
+  const { addToast } = useToast();
   const { addOrder } = useOrders();
 
   const handleOrderComplete = (order: Order) => {
@@ -18,11 +17,14 @@ function App() {
     });
   };
 
+  return <AppRouter onOrderComplete={handleOrderComplete} />;
+}
+
+function App() {
   return (
-    <>
-      <AppRouter onOrderComplete={handleOrderComplete} />
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
-    </>
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
   );
 }
 

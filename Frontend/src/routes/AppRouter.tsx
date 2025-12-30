@@ -1,8 +1,8 @@
-import { Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { NuqsAdapter } from 'nuqs/adapters/react-router';
 import { Product } from '../types';
-import { useProducts } from '../hooks/useProducts';
+import { productService } from '../services/productService';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
@@ -61,17 +61,33 @@ function OrderDetailsPageWrapper({ onClose }: { onClose: () => void }) {
   return <OrderDetailsPage orderId={orderId || ''} onClose={onClose} />;
 }
 
-function ProductDetailWrapper({ products }: { products: Product[] }) {
+function ProductDetailWrapper() {
   const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const product = products.find(p => p.id.toString() === id);
+
+  useEffect(() => {
+    if (id) {
+      setLoading(true);
+      productService.getProduct(parseInt(id))
+        .then(data => {
+          setProduct(data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    }
+  }, [id]);
+
+  if (loading) return <PageLoader />;
 
   if (!product) {
     return <NotFoundPage
-      products={products}
-      onProductClick={(p) => navigate(`/product/${p.id}`)}
       onNavigateHome={() => navigate('/')}
       onCategoryChange={(c) => navigate(`/category/${c}`)}
+      onProductClick={(p) => navigate(`/product/${p.id}`)}
     />;
   }
 
@@ -86,13 +102,8 @@ function ProductDetailWrapper({ products }: { products: Product[] }) {
 function AppContent({ onOrderComplete }: AppRouterProps) {
   const { isAuthenticated } = useAuth();
   const { getOrderById } = useOrders();
-  const { products, loading } = useProducts();
   const location = useLocation();
   const navigate = useNavigate();
-
-  if (loading) {
-    return <PageLoader />;
-  }
 
   const getCurrentCategory = () => {
     const path = location.pathname;
@@ -154,7 +165,6 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                 <Header
                   onCategoryChange={handleCategoryChange}
                   currentCategory={getCurrentCategory()}
-                  products={products}
                   onProductClick={handleProductClick}
                 />
                 <main className="flex-grow">
@@ -165,7 +175,6 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                         path="/"
                         element={
                           <HomePage
-                            products={products}
                             onProductClick={handleProductClick}
                             onCategoryChange={handleCategoryChange}
                           />
@@ -183,7 +192,6 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                         path="/category/home"
                         element={
                           <HomePage
-                            products={products}
                             onProductClick={handleProductClick}
                             onCategoryChange={handleCategoryChange}
                           />
@@ -199,14 +207,13 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
 
                       <Route
                         path="/product/:id"
-                        element={<ProductDetailWrapper products={products} />}
+                        element={<ProductDetailWrapper />}
                       />
 
                       <Route
                         path="/search"
                         element={
                           <SearchPage
-                            products={products}
                             onClose={() => window.history.back()}
                             onProductClick={handleProductClick}
                           />
@@ -325,7 +332,6 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                         path="*"
                         element={
                           <NotFoundPage
-                            products={products}
                             onProductClick={handleProductClick}
                             onNavigateHome={() => navigate('/')}
                             onCategoryChange={handleCategoryChange}

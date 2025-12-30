@@ -5,7 +5,7 @@ import { getImageUrl } from '../utils/imageUtils';
 import { productService } from '../services/productService';
 
 interface HomePageProps {
-  products: Product[]; // Gardé pour les sections existantes comme Trending/Feature
+  products?: Product[]; // Gardé pour les sections existantes comme Trending/Feature
   onProductClick: (product: Product) => void;
   onCategoryChange: (category: string) => void;
 }
@@ -13,7 +13,7 @@ interface HomePageProps {
 export default function HomePage({ products, onProductClick, onCategoryChange }: HomePageProps) {
   // State pour le slider hero
   const [currentSlide, setCurrentSlide] = useState(0);
-  
+
   // State pour les sections qui ne changent pas (Trending, etc.)
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [bestsellers, setBestsellers] = useState<Product[]>([]);
@@ -63,7 +63,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
-    
+
     return () => clearInterval(timer);
   }, []);
 
@@ -85,8 +85,8 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
     const loadGridProducts = async () => {
       setGridLoading(true);
       try {
-        const categoryId = selectedCategory === 'All' 
-          ? undefined 
+        const categoryId = selectedCategory === 'All'
+          ? undefined
           : categories.find(c => c.name === selectedCategory)?.id;
 
         const response = await productService.getProducts({
@@ -127,8 +127,8 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
     loadProducts();
   }, []);
 
-  const bestSellers = bestsellers.length > 0 ? bestsellers : products.filter(product => product.is_bestseller).slice(0, 3);
-  const newProducts = featuredProducts.length > 0 ? featuredProducts : products.filter(product => product.is_featured).slice(0, 3);
+  const bestSellers = bestsellers.length > 0 ? bestsellers : (products || []).filter(product => product.is_bestseller).slice(0, 3);
+  const newProducts = featuredProducts.length > 0 ? featuredProducts : (products || []).filter(product => product.is_featured).slice(0, 3);
 
   // Génère les onglets de catégories à partir des catégories chargées
   const topCategories = useMemo(() => {
@@ -144,29 +144,26 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
         {heroSlides.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-              index === currentSlide 
-                ? 'opacity-100' 
-                : 'opacity-0'
-            }`}
+            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentSlide
+              ? 'opacity-100'
+              : 'opacity-0'
+              }`}
           >
             {/* Background Gradient */}
             <div className={`absolute inset-0 bg-gradient-to-br ${slide.bgGradient}`} />
-            
+
             {/* Background Image - Desktop: positioned left/right, Mobile: centered background */}
-            <div className={`absolute inset-0 transition-all duration-1000 ${
-              index === currentSlide ? 'scale-100 opacity-100' : 'scale-110 opacity-0'
-            }`}>
+            <div className={`absolute inset-0 transition-all duration-1000 ${index === currentSlide ? 'scale-100 opacity-100' : 'scale-110 opacity-0'
+              }`}>
               {/* Desktop Image */}
               <img
                 src={slide.image}
                 alt={slide.title}
-                className={`hidden lg:block absolute h-full w-auto object-contain ${
-                  slide.position === 'right' ? 'left-1/4' : 'right-0'
-                }`}
+                className={`hidden lg:block absolute h-full w-auto object-contain ${slide.position === 'right' ? 'left-1/4' : 'right-0'
+                  }`}
                 style={{ maxWidth: '65%' }}
               />
-              
+
               {/* Mobile Image - Full background */}
               <img
                 src={slide.mobileImage}
@@ -174,34 +171,31 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                 className="lg:hidden absolute inset-0 w-full h-full object-cover object-center opacity-90"
               />
             </div>
-            
+
             {/* Content Container - Desktop: side positioned, Mobile: bottom centered */}
             <div className="relative h-full flex items-end lg:items-center z-20">
               <div className="container mx-auto px-6 md:px-12 pb-24 lg:pb-0">
                 {/* Text Content */}
-                <div className={`lg:max-w-2xl ${
-                  slide.position === 'right' ? 'lg:ml-auto lg:text-right' : 'lg:mr-auto lg:text-left'
-                } text-center lg:text-left`}>
-                  <div className={`transform transition-all duration-1000 delay-300 ${
-                    index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-                  }`}>
+                <div className={`lg:max-w-2xl ${slide.position === 'right' ? 'lg:ml-auto lg:text-right' : 'lg:mr-auto lg:text-left'
+                  } text-center lg:text-left`}>
+                  <div className={`transform transition-all duration-1000 delay-300 ${index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+                    }`}>
                     <h1 className="text-4xl md:text-5xl lg:text-7xl font-light mb-4 lg:mb-6 text-gray-800 leading-tight">
                       {slide.title}
                     </h1>
-                    <p className={`hidden lg:block text-gray-600 mb-8 max-w-lg text-base md:text-lg leading-relaxed ${
-                      slide.position === 'right' ? 'ml-auto' : 'mr-auto'
-                    }`}>
+                    <p className={`hidden lg:block text-gray-600 mb-8 max-w-lg text-base md:text-lg leading-relaxed ${slide.position === 'right' ? 'ml-auto' : 'mr-auto'
+                      }`}>
                       {slide.description}
                     </p>
-                    <button 
+                    <button
                       onClick={() => onCategoryChange(slide.category)}
                       className="group relative inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm lg:bg-transparent px-6 py-3 lg:px-0 lg:py-0 rounded-full lg:rounded-none border-b-0 lg:border-b-2 border-gray-800 text-gray-800 hover:bg-rose-500 lg:hover:bg-transparent hover:text-white lg:hover:text-rose-500 lg:hover:border-rose-500 transition-all duration-300 text-sm md:text-base font-medium shadow-lg lg:shadow-none"
                     >
                       SHOP NOW
-                      <svg 
-                        className="w-5 h-5 transform group-hover:translate-x-2 transition-transform duration-300" 
-                        fill="none" 
-                        stroke="currentColor" 
+                      <svg
+                        className="w-5 h-5 transform group-hover:translate-x-2 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -223,11 +217,10 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`transition-all duration-500 rounded-full ${
-                index === currentSlide 
-                  ? 'w-12 h-3 bg-gray-800' 
-                  : 'w-3 h-3 bg-gray-400 hover:bg-gray-600'
-              }`}
+              className={`transition-all duration-500 rounded-full ${index === currentSlide
+                ? 'w-12 h-3 bg-gray-800'
+                : 'w-3 h-3 bg-gray-400 hover:bg-gray-600'
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
@@ -264,11 +257,10 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                 <button
                   key={tab}
                   onClick={() => setSelectedCategory(tab)}
-                  className={`text-xs md:text-sm font-medium pb-2 ${
-                    selectedCategory === tab
-                      ? 'text-red-500 border-b-2 border-red-500' 
-                      : 'text-gray-600 hover:text-gray-800'
-                  }`}
+                  className={`text-xs md:text-sm font-medium pb-2 ${selectedCategory === tab
+                    ? 'text-red-500 border-b-2 border-red-500'
+                    : 'text-gray-600 hover:text-gray-800'
+                    }`}
                 >
                   {tab}
                 </button>
@@ -379,7 +371,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             <div>
               <h3 className="text-xl font-medium text-gray-800 mb-6">FEATURE</h3>
               <div className="space-y-4">
-                {products.slice(0, 3).map((product) => (
+                {(products || []).slice(0, 3).map((product) => (
                   <div key={product.id} className="flex items-center space-x-4">
                     <img
                       src={getImageUrl(product.images?.[0])}
@@ -417,7 +409,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
             <p className="text-red-500 text-xs md:text-sm font-medium mb-2">DISCOUNT</p>
             <h2 className="text-3xl md:text-5xl font-light text-red-500 mb-4">Summer 2024</h2>
             <p className="text-xl md:text-2xl font-light text-gray-800 mb-6">SALE 50%</p>
-            
+
             <div className="flex justify-center md:justify-start space-x-4 md:space-x-6 mb-8">
               <div className="text-center">
                 <div className="text-2xl md:text-3xl font-bold text-gray-800">30</div>
@@ -436,7 +428,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                 <div className="text-xs md:text-sm text-gray-600">Sec</div>
               </div>
             </div>
-            
+
             <button className="border-b-2 border-gray-800 text-gray-800 pb-1 hover:border-gray-600 transition-colors text-sm md:text-base">
               SHOP NOW
             </button>

@@ -14,7 +14,7 @@ import { Product } from '../types';
 interface HeaderProps {
   onCategoryChange: (category: string) => void;
   currentCategory: string;
-  products: Product[];
+  products?: Product[];
   onProductClick: (product: Product) => void;
 }
 
@@ -338,7 +338,7 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
 
       {isSearchOpen && (
         <SearchPage
-          products={products}
+          products={products || []}
           onClose={() => setIsSearchOpen(false)}
           onProductClick={onProductClick}
           initialQuery={searchQuery}

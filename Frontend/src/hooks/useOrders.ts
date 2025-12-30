@@ -10,7 +10,7 @@ export const useOrders = () => {
 
   const fetchOrders = async () => {
     if (!isAuthenticated) return;
-    
+
     try {
       setLoading(true);
       // Mock data for now
@@ -35,12 +35,16 @@ export const useOrders = () => {
   };
 
   const getOrderById = (orderId: string): Order | undefined => {
-    return orders.find(order => order.id === orderId);
+    return orders.find(order => order.id.toString() === orderId);
+  };
+
+  const addOrder = (order: Order) => {
+    setOrders(prev => [order, ...prev]);
   };
 
   useEffect(() => {
     fetchOrders();
   }, [isAuthenticated]);
 
-  return { orders, loading, error, createOrder, getOrderById, refetch: fetchOrders };
+  return { orders, loading, error, createOrder, getOrderById, addOrder, refetch: fetchOrders };
 };

@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
-import { ArrowLeft, Star, Heart, Truck, RotateCcw, Shield, Plus, Minus, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, Heart, Truck, RotateCcw, Shield, Plus, Minus, Share2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '../types';
 import { useCartContext } from '../contexts/CartContext';
+import { getImageUrl } from '../utils/imageUtils';
 import { reviews } from '../data/reviews';
 import { products } from '../data/products';
 
@@ -15,9 +16,9 @@ interface ProductDetailProps {
 export default function ProductDetail({ product, onClose }: ProductDetailProps) {
   console.log('ProductDetail - Product images:', product.images, 'Type:', typeof product.images);
   const [selectedImage, setSelectedImage] = useState(0);
-  
+
   const getImageSrc = (imagePath: string) => {
-    return 'http://localhost:8000' + imagePath.replace(/&#39;/g, "'");
+    return getImageUrl(imagePath);
   };
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState(product.colors && product.colors.length > 0 ? product.colors[0] : '');
@@ -25,11 +26,11 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   const [activeTab, setActiveTab] = useState('description');
   const [sortOrder, setSortOrder] = useState('recent');
   const [filterRating, setFilterRating] = useState(0);
-  
+
   const { addToCart } = useCartContext();
-  const productReviews = reviews.filter(review => review.productId === product.id);
-  const relatedProducts = products.filter(p => 
-    p.category === product.category && p.id !== product.id
+  const productReviews = reviews.filter(review => review.product_id === product.id);
+  const relatedProducts = products.filter(p =>
+    p.category_id === product.category_id && p.id !== product.id
   ).slice(0, 4);
 
   const handleAddToCart = () => {
@@ -37,32 +38,32 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
     console.log('Product ID:', product.id);
     console.log('Quantity:', quantity);
     console.log('addToCart function:', addToCart);
-    
+
     // Vérifier si product.sizes existe et a des éléments
     if (!selectedSize && product.sizes && product.sizes.length > 1) {
       console.log('❌ Taille non sélectionnée');
       alert('Veuillez sélectionner une taille');
       return;
     }
-    
-        try {
-          console.log('📦 Calling addToCart with product object and quantity');
-          // envoyer l'objet produit complet afin que le guest cart possède toutes les données nécessaires
-          addToCart({
-            product_id: product.id,
-            product: product,
-            quantity,
-            size: selectedSize || (product.sizes?.[0] ?? ''),
-            color: selectedColor || (product.colors?.[0] ?? '')
-          });
-          console.log('✅ addToCart called successfully');
-        } catch (error) {
-          console.error('❌ Error in addToCart:', error);
-        }
+
+    try {
+      console.log('📦 Calling addToCart with product object and quantity');
+      // envoyer l'objet produit complet afin que le guest cart possède toutes les données nécessaires
+      addToCart({
+        product_id: product.id,
+        product: product,
+        quantity,
+        size: selectedSize || (product.sizes?.[0] ?? ''),
+        color: selectedColor || (product.colors?.[0] ?? '')
+      });
+      console.log('✅ addToCart called successfully');
+    } catch (error) {
+      console.error('❌ Error in addToCart:', error);
+    }
   };
 
   const ratingDistribution = useMemo(() => {
-    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+    const distribution: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     productReviews.forEach(review => {
       distribution[review.rating] = (distribution[review.rating] || 0) + 1;
     });
@@ -74,7 +75,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
       .filter(review => filterRating === 0 || review.rating === filterRating)
       .sort((a, b) => {
         if (sortOrder === 'recent') {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
+          return new Date(b.date || b.created_at).getTime() - new Date(a.date || a.created_at).getTime();
         }
         return b.rating - a.rating;
       });
@@ -116,7 +117,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               <button className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <Heart className="w-5 h-5 text-gray-600" />
               </button>
-              
+
               {/* Navigation arrows */}
               <button className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
                 <ChevronLeft className="w-5 h-5" />
@@ -125,15 +126,14 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="grid grid-cols-4 gap-3">
               {product.images && product.images.length > 0 ? product.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${
-                    selectedImage === index ? 'border-black' : 'border-transparent hover:border-gray-300'
-                  }`}
+                  className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index ? 'border-black' : 'border-transparent hover:border-gray-300'
+                    }`}
                 >
                   <img
                     src={getImageSrc(image)}
@@ -153,30 +153,29 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
           <div className="space-y-8">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
-              
+
               <div className="flex items-center space-x-4 mb-6">
                 <div className="flex items-center space-x-2">
                   <div className="flex items-center">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-5 h-5 ${
-                          i < Math.floor(product.rating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : 'text-gray-300'
-                        }`}
+                        className={`w-5 h-5 ${i < Math.floor(product.rating || 0)
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-300'
+                          }`}
                       />
                     ))}
                   </div>
                   <span className="text-sm text-gray-600">
-                    {product.rating} ({product.reviewCount} avis)
+                    {product.rating || 0} ({product.reviewCount || 0} avis)
                   </span>
                 </div>
                 <button className="text-sm text-gray-600 hover:text-gray-900 underline">
                   Voir tous les avis
                 </button>
               </div>
-              
+
               <div className="flex items-baseline space-x-4 mb-6">
                 <span className="text-4xl font-bold text-gray-900">
                   {Number(product.price || 0).toFixed(2)} €
@@ -192,7 +191,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   </>
                 )}
               </div>
-              
+
               <p className="text-gray-700 leading-relaxed text-lg mb-6">
                 {product.description}
               </p>
@@ -211,11 +210,10 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`py-3 px-4 border-2 rounded-lg text-center font-medium transition-all ${
-                      selectedSize === size
-                        ? 'border-black bg-black text-white'
-                        : 'border-gray-200 hover:border-gray-400'
-                    }`}
+                    className={`py-3 px-4 border-2 rounded-lg text-center font-medium transition-all ${selectedSize === size
+                      ? 'border-black bg-black text-white'
+                      : 'border-gray-200 hover:border-gray-400'
+                      }`}
                   >
                     {size}
                   </button>
@@ -231,18 +229,17 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
-                    className={`relative w-12 h-12 rounded-full border-4 transition-all ${
-                      selectedColor === color ? 'border-gray-800 scale-110' : 'border-gray-200 hover:border-gray-400'
-                    }`}
+                    className={`relative w-12 h-12 rounded-full border-4 transition-all ${selectedColor === color ? 'border-gray-800 scale-110' : 'border-gray-200 hover:border-gray-400'
+                      }`}
                     style={{
                       backgroundColor: color.toLowerCase() === 'blanc' ? '#ffffff' :
-                                     color.toLowerCase() === 'noir' ? '#000000' :
-                                     color.toLowerCase() === 'bleu marine' ? '#1e3a8a' :
-                                     color.toLowerCase() === 'rose poudré' ? '#f9a8d4' :
-                                     color.toLowerCase() === 'gris' ? '#6b7280' :
-                                     color.toLowerCase() === 'camel' ? '#d2b48c' :
-                                     color.toLowerCase() === 'bordeaux' ? '#7f1d1d' :
-                                     '#e5e7eb'
+                        color.toLowerCase() === 'noir' ? '#000000' :
+                          color.toLowerCase() === 'bleu marine' ? '#1e3a8a' :
+                            color.toLowerCase() === 'rose poudré' ? '#f9a8d4' :
+                              color.toLowerCase() === 'gris' ? '#6b7280' :
+                                color.toLowerCase() === 'camel' ? '#d2b48c' :
+                                  color.toLowerCase() === 'bordeaux' ? '#7f1d1d' :
+                                    '#e5e7eb'
                     }}
                     title={color}
                   >
@@ -275,7 +272,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                     <Plus className="w-5 h-5" />
                   </button>
                 </div>
-                
+
                 <button
                   onClick={handleAddToCart}
                   className="flex-1 bg-black text-white py-4 px-8 rounded-lg font-semibold text-lg hover:bg-gray-900 transition-colors"
@@ -283,7 +280,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   Ajouter au panier
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <button className="border-2 border-gray-200 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
                   <Heart className="w-5 h-5" />
@@ -339,11 +336,10 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`py-4 px-1 border-b-2 font-medium text-lg transition-colors ${
-                    activeTab === tab
-                      ? 'border-black text-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`py-4 px-1 border-b-2 font-medium text-lg transition-colors ${activeTab === tab
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   {tab === 'description' && 'Description'}
                   {tab === 'composition' && 'Composition'}
@@ -359,7 +355,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
               <div className="prose prose-lg max-w-none">
                 <p className="text-gray-700 leading-relaxed">{product.description}</p>
                 <p className="text-gray-700 leading-relaxed mt-4">
-                  Plongez dans l'élégance avec cette pièce exceptionnelle qui allie sophistication et confort. 
+                  Plongez dans l'élégance avec cette pièce exceptionnelle qui allie sophistication et confort.
                   Conçue avec attention aux détails, elle s'adapte parfaitement à toutes les occasions spéciales.
                 </p>
               </div>
@@ -406,11 +402,10 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                           {Array.from({ length: 5 }).map((_, i) => (
                             <Star
                               key={i}
-                              className={`w-6 h-6 ${
-                                i < Math.floor(product.rating)
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-gray-300'
-                              }`}
+                              className={`w-6 h-6 ${i < Math.floor(product.rating || 0)
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-gray-300'
+                                }`}
                             />
                           ))}
                         </div>
@@ -418,16 +413,16 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                           {product.rating} sur 5
                         </span>
                       </div>
-                      <p className="text-gray-600 mt-2">Basé sur {product.reviewCount} avis</p>
+                      <p className="text-gray-600 mt-2">Basé sur {product.reviewCount || 0} avis</p>
                     </div>
                     <div className="space-y-2">
                       {Object.entries(ratingDistribution).reverse().map(([star, count]) => (
                         <div key={star} className="flex items-center space-x-2">
                           <span className="w-12 text-sm text-gray-600">{star} étoiles</span>
                           <div className="flex-1 bg-gray-200 rounded-full h-2.5">
-                            <div 
+                            <div
                               className="bg-yellow-400 h-2.5 rounded-full"
-                              style={{ width: `${(count / product.reviewCount) * 100}%` }}
+                              style={{ width: `${(count / (product.reviewCount || 1)) * 100}%` }}
                             ></div>
                           </div>
                           <span className="w-8 text-sm text-gray-600 text-right">{count}</span>
@@ -440,7 +435,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <label htmlFor="filter" className="font-medium">Filtrer par:</label>
-                    <select 
+                    <select
                       id="filter"
                       value={filterRating}
                       onChange={(e) => setFilterRating(Number(e.target.value))}
@@ -456,7 +451,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   </div>
                   <div className="flex items-center space-x-4">
                     <label htmlFor="sort" className="font-medium">Trier par:</label>
-                    <select 
+                    <select
                       id="sort"
                       value={sortOrder}
                       onChange={(e) => setSortOrder(e.target.value)}
@@ -467,39 +462,38 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                     </select>
                   </div>
                 </div>
-                
+
                 {filteredAndSortedReviews.map((review) => (
                   <div key={review.id} className="border-b border-gray-200 pb-8">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                           <span className="font-semibold text-gray-600">
-                            {review.customerName.charAt(0)}
+                            {(review.customerName || 'U').charAt(0)}
                           </span>
                         </div>
                         <div>
-                          <span className="font-semibold">{review.customerName}</span>
+                          <span className="font-semibold">{review.customerName || 'Client'}</span>
                           <div className="flex items-center mt-1">
                             {Array.from({ length: 5 }).map((_, i) => (
                               <Star
                                 key={i}
-                                className={`w-4 h-4 ${
-                                  i < review.rating
-                                    ? 'fill-yellow-400 text-yellow-400'
-                                    : 'text-gray-300'
-                                }`}
+                                className={`w-4 h-4 ${i < review.rating
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-300'
+                                  }`}
                               />
                             ))}
                           </div>
                         </div>
                       </div>
                       <span className="text-sm text-gray-500">
-                        {new Date(review.date).toLocaleDateString('fr-FR')}
+                        {new Date(review.date || review.created_at || '').toLocaleDateString('fr-FR')}
                       </span>
                     </div>
                     <p className="text-gray-700 mb-3 leading-relaxed">{review.comment}</p>
                     <div className="text-sm text-gray-500 bg-gray-50 p-3 rounded">
-                      Taille commandée: <span className="font-medium">{review.customerSize}</span> • 
+                      Taille commandée: <span className="font-medium">{review.customerSize}</span> •
                       Taille client: <span className="font-medium">{review.customerHeight}</span>
                     </div>
                   </div>
