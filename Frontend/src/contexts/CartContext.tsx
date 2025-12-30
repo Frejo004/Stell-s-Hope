@@ -80,7 +80,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           message: 'Produit ajouté au panier !',
           type: 'success'
         });
-        setIsOpen(true);
       } catch (error) {
         console.error('Erreur lors de l\'ajout au panier (DB):', error);
       }
@@ -116,7 +115,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           message: 'Produit ajouté au panier (invité) !',
           type: 'success'
         });
-        setIsOpen(true);
         return updatedCart;
       });
     }

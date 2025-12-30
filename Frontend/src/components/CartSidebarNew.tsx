@@ -3,6 +3,7 @@ import { X, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCartContext } from '../contexts/CartContext';
 import { useAuth } from '../hooks/useAuth';
 import { useEffect, useRef } from 'react';
+import { getImageUrl } from '../utils/imageUtils';
 
 export default function CartSidebarNew() {
   const { cartItemsCount, guestCart, isOpen, setIsOpen, removeFromCart } = useCartContext();
@@ -96,12 +97,15 @@ export default function CartSidebarNew() {
               <div className="space-y-6">
                 {guestCart.map((item, index) => (
                   <div key={`${item.productId}-${index}`} className="flex space-x-4 group">
-                    <div className="w-24 h-32 bg-gray-100 rounded-lg overflow-hidden shrink-0 relaitve">
+                    <div className="w-24 h-32 bg-gray-100 rounded-lg overflow-hidden shrink-0 relative">
                       {item.image ? (
                         <img
-                          src={typeof item.image === 'string' ? item.image : ''}
+                          src={getImageUrl(item.product?.images?.[0] || item.image)}
                           alt={item.name}
                           className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTVlN2ViIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzk3OTdhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-gray-50">
