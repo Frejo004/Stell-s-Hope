@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { Order } from '../types/order';
+import { orderService } from '../services/orderService';
 
 export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -13,8 +14,10 @@ export const useOrders = () => {
 
     try {
       setLoading(true);
-      // Mock data for now
-      setOrders([]);
+      const response = await orderService.getOrders();
+      // Handle Laravel pagination if necessary
+      const ordersData = Array.isArray(response) ? response : (response as any).data || [];
+      setOrders(ordersData);
     } catch (err: any) {
       setError(err.message);
     } finally {
