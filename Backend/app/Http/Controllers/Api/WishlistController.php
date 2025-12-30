@@ -10,11 +10,10 @@ class WishlistController extends Controller
 {
     public function index(Request $request)
     {
-        $products = $request->user()
-            ->wishlist()
-            ->with('product.category')
-            ->get()
-            ->pluck('product');
+        $productIds = $request->user()->wishlist()->pluck('product_id');
+        $products = Product::whereIn('id', $productIds)
+                           ->with('category')
+                           ->get();
             
         return response()->json($products);
     }

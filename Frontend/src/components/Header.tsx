@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../hooks/useAuth';
@@ -33,6 +33,14 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
   console.log('📊 Header cartItemsCount:', cartItemsCount);
   const { wishlist } = useWishlist();
   const { user, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
+
+  // Close overlays on navigation
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsSearchOpen(false);
+    setIsAccountOpen(false);
+  }, [location.pathname]);
 
   // Force re-render when wishlist or cart changes
   useEffect(() => {
