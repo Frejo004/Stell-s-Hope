@@ -2,10 +2,12 @@
 import { X, ShoppingBag } from 'lucide-react';
 import { useCartContext } from '../contexts/CartContext';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function CartSidebar() {
   const { cartItemsCount, isOpen, setIsOpen } = useCartContext();
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   console.log('🛒 CartSidebar render - isOpen:', isOpen, 'cartItemsCount:', cartItemsCount);
 
@@ -13,21 +15,21 @@ export default function CartSidebar() {
     console.log('❌ CartSidebar not rendering because isOpen is false');
     return null;
   }
-  
+
   console.log('✅ CartSidebar rendering!');
 
   const handleCheckout = () => {
+    setIsOpen(false);
     if (!isAuthenticated) {
-      // Rediriger vers la connexion seulement au moment du paiement
-      window.location.href = '/login?redirect=checkout';
+      navigate('/login?redirect=checkout');
     } else {
-      window.location.href = '/checkout';
+      navigate('/checkout');
     }
   };
 
   const handleViewCart = () => {
     setIsOpen(false);
-    window.location.href = '/cart';
+    navigate('/cart');
   };
 
   return (
@@ -36,7 +38,7 @@ export default function CartSidebar() {
         console.log('Background clicked, closing cart');
         setIsOpen(false);
       }} />
-      
+
       <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl">
         <div className="flex h-full flex-col">
           {/* Header */}
@@ -89,7 +91,7 @@ export default function CartSidebar() {
                 <span className="font-semibold">Articles:</span>
                 <span className="font-bold text-lg">{cartItemsCount}</span>
               </div>
-              
+
               <div className="space-y-2">
                 <button
                   onClick={handleCheckout}
@@ -104,7 +106,7 @@ export default function CartSidebar() {
                   Voir le panier
                 </button>
               </div>
-              
+
               <p className="text-xs text-gray-500 text-center">
                 Livraison gratuite dès 100€
               </p>

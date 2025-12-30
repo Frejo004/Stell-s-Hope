@@ -25,7 +25,10 @@ export const cartService = {
   },
 
   addToCart: async (data: AddToCartData) => {
-    const response = await api.post('/cart/add', data);
+    const response = await api.post('/cart/add', {
+      product_id: data.product_id || data.productId,
+      quantity: data.quantity
+    });
     return response.data;
   },
 
