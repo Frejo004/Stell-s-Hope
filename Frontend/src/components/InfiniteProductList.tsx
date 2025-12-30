@@ -2,13 +2,14 @@ import { useNavigate } from 'react-router-dom';
 import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
 import { useProductFilters } from '../hooks/useProductFilters';
 import ProductCard from './ProductCard';
+import { Product } from '../types';
 
 const InfiniteProductList: React.FC = () => {
   const navigate = useNavigate();
   const { getFilters } = useProductFilters();
   const { products, loading, error, isFetching, hasMore } = useInfiniteProducts(getFilters());
 
-  const handleProductClick = (product: any) => {
+  const handleProductClick = (product: Product) => {
     navigate(`/product/${product.id}`);
   };
 
@@ -23,7 +24,7 @@ const InfiniteProductList: React.FC = () => {
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-        {products.map((product: any, index: number) => (
+        {products.map((product: Product, index: number) => (
           <ProductCard
             key={`product-${product.id}-${index}`}
             product={product}

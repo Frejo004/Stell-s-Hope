@@ -28,7 +28,7 @@ class PaymentService
             
             // Préparation des données de paiement
             $payload = [
-                'amount' => $order->total,
+                'amount' => $order->total_amount,
                 'currency' => $currency,
                 'customer' => [
                     'email' => $customerInfo['email'] ?? $order->user->email,
@@ -75,10 +75,20 @@ class PaymentService
     public function processWebhook(array $payload, ?string $signature = null)
     {
         // 1. Vérification de la signature (Crucial pour la sécurité)
-        // Dans une implémentation réelle, vérifier la signature X-Moneroo-Signature
-        // if (!Moneroo::verifyWebhookSignature($payload, $signature)) {
-        //    throw new Exception('Invalid webhook signature');
-        // }
+        $secret = config('moneroo.secretKey');
+        
+        if ($signature) {
+            $computedSignature = hash_hmac('sha512', json_encode($payload), $secret);
+            if (!hash_equals($signature, $computedSignature)) {
+                Log::error('Invalid Moneroo webhook signature received.');
+                // En mode debug on peut logger les signatures pour comparer
+                // Log::debug("Received: $signature, Computed: $computedSignature");
+                throw new Exception('Invalid webhook signature');
+            }
+        } elseif (config('app.env') === 'production') {
+            // En production, la signature est obligatoire
+            throw new Exception('Missing webhook signature');
+        }
 
         $paymentId = $payload['id'] ?? null;
         $status = $payload['status'] ?? null;

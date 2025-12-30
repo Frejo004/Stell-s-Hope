@@ -19,7 +19,7 @@ class AdminAnalyticsController extends Controller
         $startDate = Carbon::now()->subDays($days);
         
         $metrics = [
-            'revenue' => Order::where('created_at', '>=', $startDate)->sum('total'),
+            'revenue' => Order::where('created_at', '>=', $startDate)->sum('total_amount'),
             'orders' => Order::where('created_at', '>=', $startDate)->count(),
             'customers' => User::where('created_at', '>=', $startDate)->where('is_admin', false)->count(),
             'conversion' => 3.2
@@ -56,7 +56,7 @@ class AdminAnalyticsController extends Controller
         $chart = [];
         for ($i = $days - 1; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
-            $revenue = Order::whereDate('created_at', $date)->sum('total');
+            $revenue = Order::whereDate('created_at', $date)->sum('total_amount');
             $chart[] = [
                 'date' => $date->format('Y-m-d'),
                 'revenue' => $revenue ?: rand(120, 200)

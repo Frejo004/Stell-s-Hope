@@ -55,8 +55,7 @@ class PaymentController extends Controller
 
     public function webhook(Request $request)
     {
-        // En prod: $signature = $request->header('X-Moneroo-Signature');
-        $signature = null; // À implémenter si Moneroo fournit une clé secrète pour vérifier
+        $signature = $request->header('X-Moneroo-Signature');
         
         try {
             $this->paymentService->processWebhook($request->all(), $signature);

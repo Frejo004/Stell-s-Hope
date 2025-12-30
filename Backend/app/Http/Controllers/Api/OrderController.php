@@ -63,17 +63,17 @@ class OrderController extends Controller
         }
 
         // 2. Calcul du total
-        $total = collect($itemsData)->sum(function ($item) {
+        $totalAmount = collect($itemsData)->sum(function ($item) {
             return $item['price'] * $item['quantity'];
         });
 
         // 3. Création de la commande
         $order = null;
         
-        DB::transaction(function () use ($request, $user, $itemsData, $total, &$order) {
+        DB::transaction(function () use ($request, $user, $itemsData, $totalAmount, &$order) {
             $order = Order::create([
                 'user_id' => $user->id,
-                'total' => $total,
+                'total_amount' => $totalAmount,
                 'status' => 'pending',
                 'shipping_address' => $request->shipping_address,
                 'billing_address' => $request->billing_address,

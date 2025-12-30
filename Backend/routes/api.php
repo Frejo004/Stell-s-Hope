@@ -36,10 +36,14 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Public routes
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+// Email Verification
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
+Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])->middleware(['auth:sanctum', 'throttle:6,1'])->name('verification.resend');
 
 // Products routes (public)
 Route::get('/products', [ProductController::class, 'index']);
@@ -137,18 +141,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders/export', [AdminOrderController::class, 'export']);
 
         // Customers management
-        Route::get('/customers', [AdminDashboardController::class, 'getCustomers']);
-        Route::get('/customers/detailed', [AdminCustomerController::class, 'index']);
+        Route::get('/customers', [AdminCustomerController::class, 'index']);
         Route::get('/customers/stats', [AdminCustomerController::class, 'stats']);
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show']);
         Route::get('/customers/{customer}/orders', [AdminCustomerController::class, 'orders']);
         Route::put('/customers/{customer}/status', [AdminCustomerController::class, 'updateStatus']);
         Route::get('/customers/export', [AdminCustomerController::class, 'export']);
 
-        // Analytics
-        Route::get('/analytics/revenue', [AdminDashboardController::class, 'revenueAnalytics']);
-        Route::get('/analytics/products', [AdminDashboardController::class, 'productAnalytics']);
-        Route::get('/analytics/customers', [AdminDashboardController::class, 'customerAnalytics']);
+
 
         // Categories management
         Route::get('/categories', [CategoryController::class, 'adminIndex']);
@@ -156,24 +156,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/categories/{category}', [CategoryController::class, 'update']);
         Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
 
-        // Inventory management
-        Route::get('/inventory', [AdminProductController::class, 'inventory']);
-        Route::put('/inventory/{product}', [AdminProductController::class, 'updateStock']);
 
-        // Reviews management
-        Route::get('/reviews', [AdminProductController::class, 'reviews']);
-        Route::put('/reviews/{review}/approve', [AdminProductController::class, 'approveReview']);
-        Route::delete('/reviews/{review}', [AdminProductController::class, 'deleteReview']);
 
-        // Support tickets
-        Route::get('/support', [AdminDashboardController::class, 'supportTickets']);
-        Route::put('/support/{ticket}', [AdminDashboardController::class, 'updateTicket']);
 
-        // Promotions
-        Route::get('/promotions', [AdminDashboardController::class, 'promotions']);
-        Route::post('/promotions', [AdminDashboardController::class, 'createPromotion']);
-        Route::put('/promotions/{promotion}', [AdminDashboardController::class, 'updatePromotion']);
-        Route::delete('/promotions/{promotion}', [AdminDashboardController::class, 'deletePromotion']);
+
+
+
+
 
         // Shipping methods
         Route::get('/shipping', [AdminDashboardController::class, 'shippingMethods']);

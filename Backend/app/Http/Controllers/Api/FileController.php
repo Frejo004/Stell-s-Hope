@@ -8,14 +8,20 @@ use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
+    protected $imageService;
+
+    public function __construct(\App\Services\ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     public function upload(Request $request)
     {
         $request->validate([
             'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
-        $file = $request->file('file');
-        $path = $file->store('images', 'public');
+        $path = $this->imageService->optimize($request->file('file'));
 
         return response()->json([
             'path' => $path,

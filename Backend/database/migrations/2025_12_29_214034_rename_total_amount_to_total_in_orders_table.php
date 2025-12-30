@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->renameColumn('total_amount', 'total');
-        });
+        // This migration was intended to rename total_amount to total,
+        // but we decided to keep total_amount for consistency.
     }
 
     /**
@@ -21,8 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->renameColumn('total', 'total_amount');
-        });
+        //
     }
 };

@@ -101,7 +101,8 @@ export interface CartItem {
 export interface Order {
   id: number;
   user_id: number;
-  total: number;
+  total_amount: number;
+  total: number; // Keep for compatibility temporarily
 
   subtotal?: number;
   shipping?: number;
