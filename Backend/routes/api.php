@@ -93,6 +93,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index']);
+    Route::post('/wishlist', [WishlistController::class, 'store']);
+    Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy']);
     Route::post('/wishlist/toggle', [WishlistController::class, 'toggle']);
 
     // Reviews

@@ -1,4 +1,5 @@
 import api from './api';
+import { Order } from '../types';
 
 export interface CreateOrderData {
   shipping_address: {
@@ -26,27 +27,27 @@ export interface CreateOrderData {
 }
 
 export const orderService = {
-  getOrders: async () => {
+  getOrders: async (): Promise<Order[]> => {
     const response = await api.get('/orders');
     return response.data;
   },
 
-  createOrder: async (data: CreateOrderData) => {
+  createOrder: async (data: CreateOrderData): Promise<Order> => {
     const response = await api.post('/orders', data);
     return response.data;
   },
 
-  getOrder: async (id: number) => {
+  getOrder: async (id: number | string): Promise<Order> => {
     const response = await api.get(`/orders/${id}`);
     return response.data;
   },
 
-  trackOrder: async (id: number) => {
+  trackOrder: async (id: number | string): Promise<any> => {
     const response = await api.get(`/orders/${id}/track`);
     return response.data;
   },
 
-  cancelOrder: async (id: number) => {
+  cancelOrder: async (id: number | string): Promise<Order> => {
     const response = await api.post(`/orders/${id}/cancel`);
     return response.data;
   }

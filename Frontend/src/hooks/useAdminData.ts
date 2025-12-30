@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
 import { adminService } from '../services/adminService';
+import { Product, Order, Review, User } from '../types';
+
+interface PaginationData {
+  current_page: number;
+  total: number;
+  last_page: number;
+  per_page: number;
+}
 
 export const useAdminProducts = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ current_page: 1, total: 0, last_page: 1, per_page: 20 });
+  const [pagination, setPagination] = useState<PaginationData>({ current_page: 1, total: 0, last_page: 1, per_page: 20 });
 
   const fetchProducts = async (page = 1, search = '', category = 'all', price = 'all', stock = 'all', status = 'all', showLoading = true) => {
     try {
@@ -17,7 +25,7 @@ export const useAdminProducts = () => {
         last_page: data.last_page || 1,
         per_page: data.per_page || 20
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur produits:', error);
     } finally {
       if (showLoading) setLoading(false);
@@ -32,7 +40,7 @@ export const useAdminProducts = () => {
 
 
 export const useAdminInventory = () => {
-  const [inventory, setInventory] = useState([]);
+  const [inventory, setInventory] = useState<any[]>([]);
   const [stats, setStats] = useState({ total: 0, inStock: 0, lowStock: 0, outOfStock: 0, totalUnits: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +50,7 @@ export const useAdminInventory = () => {
         const data = await adminService.getInventory();
         setInventory(data.inventory);
         setStats(data.stats);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erreur inventaire:', error);
       } finally {
         setLoading(false);
@@ -55,9 +63,9 @@ export const useAdminInventory = () => {
 };
 
 export const useAdminOrders = () => {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ current_page: 1, total: 0, last_page: 1, per_page: 20 });
+  const [pagination, setPagination] = useState<PaginationData>({ current_page: 1, total: 0, last_page: 1, per_page: 20 });
 
   const fetchOrders = async (page = 1, search = '', status = 'all', showLoading = true) => {
     try {
@@ -72,7 +80,7 @@ export const useAdminOrders = () => {
         last_page: data.last_page || 1,
         per_page: data.per_page || 20
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur commandes:', error);
       console.error('Détails erreur:', error.response?.data);
     } finally {
@@ -86,15 +94,15 @@ export const useAdminOrders = () => {
 };
 
 export const useAdminReviews = () => {
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, averageRating: 0 });
   const [loading, setLoading] = useState(true);
 
   const updateReviewStatus = async (id: number, status: string) => {
     try {
       await adminService.updateReviewStatus(id, status);
-      setReviews(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-    } catch (error) {
+      setReviews(prev => prev.map(r => r.id === id ? { ...r, status: status as any } : r));
+    } catch (error: any) {
       console.error('Erreur mise à jour avis:', error);
     }
   };
@@ -105,7 +113,7 @@ export const useAdminReviews = () => {
         const data = await adminService.getReviews();
         setReviews(data.reviews);
         setStats(data.stats);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erreur avis:', error);
       } finally {
         setLoading(false);
@@ -118,7 +126,7 @@ export const useAdminReviews = () => {
 };
 
 export const useAdminCustomers = () => {
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState<(User & { orders_count?: number, total_spent?: number })[]>([]);
   const [stats, setStats] = useState({ total: 0, active: 0, vip: 0, totalOrders: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -126,13 +134,13 @@ export const useAdminCustomers = () => {
     const fetchCustomers = async () => {
       try {
         const data = await adminService.getCustomers();
-        setCustomers(data.data || data);
         const customersData = data.data || data;
+        setCustomers(customersData);
         const total = data.total || customersData?.length || 0;
-        const active = customersData?.filter(c => c.is_active)?.length || 0;
-        const totalOrders = customersData?.reduce((sum, c) => sum + (c.orders_count || 0), 0) || 0;
+        const active = customersData?.filter((c: any) => c.is_active)?.length || 0;
+        const totalOrders = customersData?.reduce((sum: number, c: any) => sum + (c.orders_count || 0), 0) || 0;
         setStats({ total, active, vip: 0, totalOrders });
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erreur clients:', error);
       } finally {
         setLoading(false);

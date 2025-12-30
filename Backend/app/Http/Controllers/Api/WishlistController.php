@@ -35,4 +35,25 @@ class WishlistController extends Controller
             return response()->json(['message' => 'Added to wishlist', 'in_wishlist' => true]);
         }
     }
+
+    public function store(Request $request)
+    {
+        $request->validate(['product_id' => 'required|exists:products,id']);
+
+        Wishlist::firstOrCreate([
+            'user_id' => $request->user()->id,
+            'product_id' => $request->product_id
+        ]);
+
+        return response()->json(['message' => 'Added to wishlist']);
+    }
+
+    public function destroy(Request $request, $productId)
+    {
+        Wishlist::where('user_id', $request->user()->id)
+                ->where('product_id', $productId)
+                ->delete();
+
+        return response()->json(['message' => 'Removed from wishlist']);
+    }
 }
