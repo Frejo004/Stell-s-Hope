@@ -12,32 +12,44 @@ const api = axios.create({
   timeout: 15000
 });
 
-// Intercepteur pour ajouter le token
+// Interceptor for adding token and logging
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  if (import.meta.env.DEV) {
+    console.log(`🚀 ${config.method?.toUpperCase()} ${config.url}`, config.data || '');
+  }
+
   return config;
 });
 
-// Intercepteur pour gérer les erreurs
+// Interceptor for handling errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (import.meta.env.DEV) {
+      console.log(`✅ ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+    }
+    return response;
+  },
   async (error) => {
-    if (error.response?.status === 401 && !error.config?._retry) {
+    const { response } = error;
+
+    if (response?.status === 401 && !error.config?._retry) {
       error.config._retry = true;
       localStorage.removeItem('auth_token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+
+      // Only redirect if not on login/register pages
+      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+        window.location.href = '/login';
+      }
     }
 
-    if (error.response?.status === 403) {
-      console.error('Accès refusé');
-    }
-
-    if (error.response?.status >= 500) {
-      console.error('Erreur serveur:', error.response.data);
+    if (import.meta.env.DEV) {
+      console.error(`❌ ${error.config?.method?.toUpperCase()} ${error.config?.url}`, error.response?.data || error.message);
     }
 
     return Promise.reject(error);

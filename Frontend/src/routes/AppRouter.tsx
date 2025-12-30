@@ -254,7 +254,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                           ) : (
                             <div className="text-center py-16">
                               <h2 className="text-2xl font-bold mb-4">Connexion requise</h2>
-                              <button onClick={() => window.location.href = '/'}>
+                              <button onClick={() => navigate('/')}>
                                 Retour à l'accueil
                               </button>
                             </div>
@@ -277,7 +277,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                         element={
                           <OrderConfirmationPage
                             order={getOrderById('CMD123') || {} as Order}
-                            onContinueShopping={() => window.location.href = '/'}
+                            onContinueShopping={() => navigate('/')}
                           />
                         }
                       />
@@ -327,7 +327,7 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                           <NotFoundPage
                             products={products}
                             onProductClick={handleProductClick}
-                            onNavigateHome={() => window.location.href = '/'}
+                            onNavigateHome={() => navigate('/')}
                             onCategoryChange={handleCategoryChange}
                           />
                         }

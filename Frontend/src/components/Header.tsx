@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../hooks/useAuth';
@@ -24,6 +25,7 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const { cartItemsCount, isOpen, setIsOpen } = useCartContext();
+  const navigate = useNavigate();
 
   console.log('Header isOpen:', isOpen);
 
@@ -157,13 +159,13 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
                   </button>
                   <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
                     <button
-                      onClick={() => window.location.href = '/login'}
+                      onClick={() => navigate('/login')}
                       className="w-full px-3 py-2 text-left hover:bg-gray-50"
                     >
                       Se connecter
                     </button>
                     <button
-                      onClick={() => window.location.href = '/register'}
+                      onClick={() => navigate('/register')}
                       className="w-full px-3 py-2 text-left hover:bg-gray-50"
                     >
                       S'inscrire
@@ -172,7 +174,7 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
                 </div>
               )}
               <button
-                onClick={() => window.location.href = '/wishlist'}
+                onClick={() => navigate('/wishlist')}
                 className="p-2 text-gray-600 hover:text-gray-900 transition-colors relative"
               >
                 <Heart className="w-6 h-6" />
@@ -306,7 +308,7 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => {
-                      window.location.href = '/login';
+                      navigate('/login');
                       setIsMenuOpen(false);
                     }}
                     className="px-4 py-3 bg-white border border-gray-300 rounded-lg font-medium text-gray-700 shadow-sm text-center"
@@ -315,7 +317,7 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
                   </button>
                   <button
                     onClick={() => {
-                      window.location.href = '/register';
+                      navigate('/register');
                       setIsMenuOpen(false);
                     }}
                     className="px-4 py-3 bg-black text-white rounded-lg font-medium shadow-sm text-center"
