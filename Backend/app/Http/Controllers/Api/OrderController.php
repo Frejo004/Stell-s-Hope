@@ -73,7 +73,7 @@ class OrderController extends Controller
         DB::transaction(function () use ($request, $user, $itemsData, $totalAmount, &$order) {
             $order = Order::create([
                 'user_id' => $user->id,
-                'total_amount' => $totalAmount,
+                'total' => $totalAmount,
                 'status' => 'pending',
                 'shipping_address' => $request->shipping_address,
                 'billing_address' => $request->billing_address,

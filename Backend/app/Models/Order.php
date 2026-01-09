@@ -12,7 +12,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'order_number',
-        'total_amount',
+        'total',
         'status',
         'shipping_address',
         'billing_address',
@@ -32,7 +32,7 @@ class Order extends Model
     }
 
     protected $casts = [
-        'total_amount' => 'decimal:2',
+        'total' => 'decimal:2',
         'shipping_address' => 'array',
         'billing_address' => 'array'
     ];

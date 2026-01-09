@@ -24,10 +24,10 @@ class AdminDashboardController extends Controller
         
         $currentRevenue = Order::where('payment_status', 'paid')
             ->where('created_at', '>=', $currentMonth)
-            ->sum('total_amount');
+            ->sum('total');
         $previousRevenue = Order::where('payment_status', 'paid')
             ->whereBetween('created_at', [$previousMonth, $currentMonth])
-            ->sum('total_amount');
+            ->sum('total');
         $revenueChange = $previousRevenue > 0 ? round((($currentRevenue - $previousRevenue) / $previousRevenue) * 100, 1) : ($currentRevenue > 0 ? 100 : 0);
         
         $currentOrders = Order::where('created_at', '>=', $currentMonth)->count();
@@ -38,8 +38,8 @@ class AdminDashboardController extends Controller
         $previousCustomers = User::where('is_admin', false)->whereBetween('created_at', [$previousMonth, $currentMonth])->count();
         $customersChange = $previousCustomers > 0 ? round((($currentCustomers - $previousCustomers) / $previousCustomers) * 100, 1) : ($currentCustomers > 0 ? 100 : 0);
         
-        $currentAvgOrder = Order::where('created_at', '>=', $currentMonth)->avg('total_amount') ?? 0;
-        $previousAvgOrder = Order::whereBetween('created_at', [$previousMonth, $currentMonth])->avg('total_amount') ?? 0;
+        $currentAvgOrder = Order::where('created_at', '>=', $currentMonth)->avg('total') ?? 0;
+        $previousAvgOrder = Order::whereBetween('created_at', [$previousMonth, $currentMonth])->avg('total') ?? 0;
         $avgOrderChange = $previousAvgOrder > 0 ? round((($currentAvgOrder - $previousAvgOrder) / $previousAvgOrder) * 100, 1) : ($previousAvgOrder > 0 ? 100 : 0);
         
         // Données mensuelles pour le graphique (6 derniers mois)
@@ -49,7 +49,7 @@ class AdminDashboardController extends Controller
             $revenue = Order::where('payment_status', 'paid')
                 ->whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
-                ->sum('total_amount');
+                ->sum('total');
             $ordersCount = Order::whereYear('created_at', $month->year)
                 ->whereMonth('created_at', $month->month)
                 ->count();
@@ -130,7 +130,7 @@ class AdminDashboardController extends Controller
             ['name' => 'Paiements', 'value' => Order::where('payment_status', 'paid')->count(), 'percentage' => $visitors > 0 ? round((Order::where('payment_status', 'paid')->count() / $visitors) * 100, 1) : 0, 'color' => 'bg-amber-500']
         ];
         
-        $paymentGrouping = Order::select('payment_method', DB::raw('count(*) as count'), DB::raw('sum(total_amount) as total'))
+        $paymentGrouping = Order::select('payment_method', DB::raw('count(*) as count'), DB::raw('sum(total) as total'))
             ->groupBy('payment_method')
             ->get();
             
@@ -148,7 +148,7 @@ class AdminDashboardController extends Controller
             'orders_per_hour' => Order::where('created_at', '>=', Carbon::now()->subHour())->count(),
             'today_revenue' => Order::where('payment_status', 'paid')
                 ->whereDate('created_at', Carbon::today())
-                ->sum('total_amount')
+                ->sum('total')
         ];
         
         $recentActivity = [];
@@ -205,8 +205,8 @@ class AdminDashboardController extends Controller
     {
         $monthlyRevenue = Order::where('status', 'delivered')
                               ->where('created_at', '>=', Carbon::now()->subMonths(12))
-                              ->selectRaw('MONTH(created_at) as month, SUM(total_amount) as revenue')
-                              ->groupBy('month')
+                              ->select(DB::raw('EXTRACT(MONTH FROM created_at) as month'), DB::raw('SUM(total) as revenue'))
+                              ->groupBy(DB::raw('month'))
                               ->get();
 
         return response()->json($monthlyRevenue);

@@ -28,7 +28,7 @@ class PaymentService
             
             // Préparation des données de paiement
             $payload = [
-                'amount' => $order->total_amount,
+                'amount' => $order->total,
                 'currency' => $currency,
                 'customer' => [
                     'email' => $customerInfo['email'] ?? $order->user->email,
