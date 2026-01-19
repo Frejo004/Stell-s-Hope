@@ -38,7 +38,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Total payé</h3>
-              <p className="text-2xl font-bold text-gray-900">{order.total.toFixed(2)} €</p>
+              <p className="text-2xl font-bold text-gray-900">{(order.total || order.total_amount || 0).toFixed(2)} €</p>
             </div>
           </div>
         </div>
@@ -60,10 +60,10 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                     <p className="text-sm text-gray-600">{item.color} • {item.size}</p>
                     <p className="text-sm">Qté: {item.quantity}</p>
                   </div>
-                  <p className="font-semibold">{(item.product.price * item.quantity).toFixed(2)} €</p>
+                  <p className="font-semibold">{((item.product.price || 0) * item.quantity).toFixed(2)} €</p>
                 </div>
               ))}
-              
+
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Sous-total</span>
@@ -79,7 +79,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total</span>
-                  <span>{order.total.toFixed(2)} €</span>
+                  <span>{(order.total || order.total_amount || 0).toFixed(2)} €</span>
                 </div>
               </div>
             </div>
@@ -96,13 +96,13 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                   <div>
                     <h3 className="font-semibold">Adresse de livraison</h3>
                     <p className="text-sm text-gray-600">
-                      {order.shipping_address.first_name} {order.shipping_address.last_name}<br />
-                      {order.shipping_address.street}<br />
-                      {order.shipping_address.postal_code} {order.shipping_address.city}
+                      {(order.shipping_address?.first_name || '')} {(order.shipping_address?.last_name || '')}<br />
+                      {(order.shipping_address?.street || '')}<br />
+                      {(order.shipping_address?.postal_code || '')} {(order.shipping_address?.city || '')}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="bg-blue-50 p-3 rounded">
                   <p className="text-sm font-medium text-blue-800">
                     📦 Livraison estimée : {estimatedDelivery.toLocaleDateString('fr-FR')}
@@ -127,7 +127,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                     <p className="text-xs text-green-600">Maintenant</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded">
                   <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">2</span>
@@ -137,7 +137,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                     <p className="text-xs text-gray-600">Sous 24h</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded">
                   <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">3</span>
@@ -147,7 +147,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                     <p className="text-xs text-gray-600">1-2 jours ouvrés</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded">
                   <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
                     <Package className="w-3 h-3 text-white" />
@@ -188,7 +188,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
               <Download className="w-4 h-4" />
               <span>Télécharger la facture</span>
             </button>
-            
+
             <button
               onClick={onContinueShopping}
               className="w-full flex items-center justify-center space-x-2 bg-black text-white py-3 rounded hover:bg-gray-900"
@@ -206,13 +206,13 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
             <div>
               <h4 className="font-medium text-blue-800">Confirmation par email</h4>
               <p className="text-sm text-blue-700 mt-1">
-                Un email de confirmation a été envoyé à <strong>{order.shipping_address.first_name?.toLowerCase()}@example.com</strong>.
+                Un email de confirmation a été envoyé à <strong>{(order.shipping_address?.first_name || 'utilisateur').toLowerCase()}@example.com</strong>.
                 Vérifiez également vos spams si vous ne le recevez pas dans les prochaines minutes.
               </p>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
