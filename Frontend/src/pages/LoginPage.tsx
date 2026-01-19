@@ -14,7 +14,7 @@ export default function LoginPage({ onClose }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState<any>({});
-  const { login, loading, isAdmin } = useAuth();
+  const { login, loading } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 

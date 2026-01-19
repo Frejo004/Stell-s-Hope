@@ -40,7 +40,7 @@ export interface OrderItem {
     id: number;
     name: string;
     images: string[];
-    price: number;
+    price?: number;
   };
 }
 

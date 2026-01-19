@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ArrowLeft, Truck, CreditCard, CheckCircle, ShieldCheck, Lock } from 'lucide-react';
+import { Truck, CreditCard, CheckCircle, ShieldCheck, Lock } from 'lucide-react';
 import { useCartContext } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -18,7 +18,7 @@ interface CheckoutPageProps {
 export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageProps) {
   const { guestCart, cartTotal, clearCart } = useCartContext();
   const { products } = useProducts();
-  const { isAuthenticated, user: authUser, isLoading } = useAuth();
+  const { isAuthenticated, user: authUser, loading } = useAuth();
   const navigate = useNavigate();
 
   // Initialiser les valeurs par défaut avec les données de l'utilisateur si connecté
@@ -175,7 +175,7 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
   }
 
   // Loader d'auth
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
@@ -213,15 +213,12 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-50 z-50 overflow-y-auto">
-      {/* Header Minimaliste */}
-      <div className="bg-white border-b sticky top-0 z-40 px-4 lg:px-8 py-4">
+    <div className="h-[calc(100vh-120px)] bg-gray-50 overflow-hidden flex flex-col">
+      {/* Checkout Progress Bar */}
+      <div className="bg-white border-b px-4 lg:px-8 py-4 shrink-0">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
-            <button onClick={onClose} className="p-2 -ml-2 text-gray-500 hover:text-black transition-colors rounded-full hover:bg-gray-100">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <h1 className="ml-4 text-xl font-bold hidden sm:block">Paiement Sécurisé</h1>
+            <h1 className="text-xl font-bold hidden sm:block">Paiement Sécurisé</h1>
           </div>
 
           {/* Steps Indicator */}
@@ -256,11 +253,11 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 lg:py-12">
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 h-full overflow-hidden w-full">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 h-full">
 
           {/* Colonne Principale (Gauche) */}
-          <div className="flex-1">
+          <div className="flex-1 overflow-y-auto pr-2 pb-20 no-scrollbar">
             {errorMsg && (
               <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-lg flex items-center">
                 <span className="mr-2">⚠️</span> {errorMsg}
@@ -467,8 +464,8 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
           </div>
 
           {/* Colonne Latérale Sticky (Droite) - Résumé */}
-          <div className="lg:w-1/3">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-28">
+          <div className="lg:w-1/3 overflow-y-auto pb-20 no-scrollbar">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center">
                 Résumé
                 <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
@@ -552,5 +549,6 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
         </div>
       </div>
     </div>
+
   );
 }
