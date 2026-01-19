@@ -15,6 +15,7 @@ export interface Order {
   created_at: string;
   updated_at: string;
   order_items?: OrderItem[];
+  items?: OrderItem[]; // Add this
   orderItems?: OrderItem[];
   user?: {
     id: number;

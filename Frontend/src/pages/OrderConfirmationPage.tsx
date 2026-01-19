@@ -15,30 +15,46 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
     <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
       <div className="max-w-4xl mx-auto p-6">
         {/* Success Header */}
-        <div className="text-center py-8">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-12 h-12 text-green-600" />
+        <div className="text-center py-12">
+          <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm animate-bounce-slow">
+            <CheckCircle className="w-12 h-12 text-green-500" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Commande confirmée !</h1>
-          <p className="text-gray-600 text-lg">
-            Merci pour votre achat. Votre commande a été reçue et est en cours de traitement.
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Commande confirmée !</h1>
+          <p className="text-gray-500 text-lg max-w-lg mx-auto">
+            Merci pour votre confiance. Votre commande a été enregistrée avec succès.
           </p>
         </div>
 
         {/* Order Details */}
-        <div className="bg-gray-50 rounded-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Numéro de commande</h3>
-              <p className="text-2xl font-bold text-rose-300">#{order.id}</p>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-12 transform hover:border-gray-200 transition-all">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-gray-100">
+            <div className="py-2">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Numéro de commande</h3>
+              <p className="text-3xl font-black text-gray-900">#{order.id}</p>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Date de commande</h3>
-              <p className="text-lg">{new Date(order.created_at).toLocaleDateString('fr-FR')}</p>
+            <div className="py-2">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Date de commande</h3>
+              <p className="text-xl font-semibold text-gray-900">
+                {order.created_at ? new Date(order.created_at).toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                }) : new Date().toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
+              </p>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Total payé</h3>
-              <p className="text-2xl font-bold text-gray-900">{(order.total || order.total_amount || 0).toFixed(2)} €</p>
+            <div className="py-2">
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Montant Total</h3>
+              <p className="text-3xl font-black text-rose-500">
+                {Number(
+                  order.total ||
+                  order.total_amount ||
+                  (order.order_items || order.items || []).reduce((acc: number, item: any) => acc + ((item.price || item.product?.price || 0) * item.quantity), 0)
+                ).toFixed(2)} €
+              </p>
             </div>
           </div>
         </div>
@@ -48,7 +64,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
           <div>
             <h2 className="text-xl font-bold mb-4">Récapitulatif de la commande</h2>
             <div className="border rounded-lg p-4 space-y-4">
-              {(order.order_items || []).map((item, index) => (
+              {(order.order_items || order.items || []).map((item: any, index: number) => (
                 <div key={index} className="flex items-center space-x-4">
                   <img
                     src={getImageUrl(item.product.images?.[0])}
@@ -56,11 +72,13 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                     className="w-16 h-16 object-cover rounded"
                   />
                   <div className="flex-1">
-                    <h3 className="font-medium">{item.product.name}</h3>
-                    <p className="text-sm text-gray-600">{item.color} • {item.size}</p>
-                    <p className="text-sm">Qté: {item.quantity}</p>
+                    <h3 className="font-medium text-gray-900">{item.product.name}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{item.color ? `${item.color} • ` : ''}{item.size || 'Taille unique'}</p>
+                    <p className="text-sm font-medium text-gray-900 mt-1">x{item.quantity}</p>
                   </div>
-                  <p className="font-semibold">{((item.product.price || 0) * item.quantity).toFixed(2)} €</p>
+                  <p className="font-bold text-gray-900">
+                    {((item.price || item.product?.price || 0) * item.quantity).toFixed(2)} €
+                  </p>
                 </div>
               ))}
 
@@ -79,7 +97,11 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total</span>
-                  <span>{(order.total || order.total_amount || 0).toFixed(2)} €</span>
+                  <span>{Number(
+                    order.total ||
+                    order.total_amount ||
+                    (order.order_items || []).reduce((acc: number, item: any) => acc + ((item.price || item.product?.price || 0) * item.quantity), 0)
+                  ).toFixed(2)} €</span>
                 </div>
               </div>
             </div>

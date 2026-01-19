@@ -17,4 +17,8 @@
   .animate-slide-in {
     animation: slide-in 0.3s ease-out forwards;
   }
+  
+  .animate-bounce-slow {
+    animation: bounce 3s infinite;
+  }
 }

@@ -115,7 +115,7 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
         items: hydratedCart.map(item => ({
           product_id: item.productId,
           quantity: item.quantity,
-          price: item.price || 0
+          price: item.price || item.product?.price || 0
         }))
       };
 
@@ -151,10 +151,22 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
       } else {
         // Simulation Paiement Carte "Test" direct
         // Dans un vrai cas, on appellerait Stripe/autre ici
-        setTimeout(() => {
-          setCompletedOrder(orderResponse); // Afficher la confirmation
-          clearCart();
-          if (onOrderComplete) onOrderComplete(orderResponse);
+        // Simulation Paiement Carte "Test" direct
+        // Dans un vrai cas, on appellerait Stripe/autre ici
+        setTimeout(async () => {
+          try {
+            // Récupérer la commande complète avec relations pour l'affichage
+            const fullOrder = await orderService.getOrder(orderId);
+            setCompletedOrder(fullOrder);
+            clearCart();
+            if (onOrderComplete) onOrderComplete(fullOrder);
+          } catch (e) {
+            // Fallback sur la réponse de création si le fetch échoue
+            console.error("Erreur récupération commande complète", e);
+            setCompletedOrder(orderResponse);
+            clearCart();
+            if (onOrderComplete) onOrderComplete(orderResponse);
+          }
         }, 1500);
       }
 
