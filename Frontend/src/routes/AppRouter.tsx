@@ -33,6 +33,11 @@ const AdminLayout = lazy(() => import('../components/admin/AdminLayout'));
 const ApiTest = lazy(() => import('../components/ApiTest'));
 const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
 const VerifyCodePage = lazy(() => import('../pages/VerifyCodePage'));
+const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
+const PaymentErrorPage = lazy(() => import('../pages/PaymentErrorPage'));
+const PublicOrderTrackingPage = lazy(() => import('../pages/PublicOrderTrackingPage'));
+const MentionsLegalesPage = lazy(() => import('../pages/MentionsLegalesPage'));
+const ReturnsPage = lazy(() => import('../pages/ReturnsPage'));
 
 // Composant de loading
 const PageLoader = () => (
@@ -176,6 +181,24 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
           element={<VerifyCodePage onClose={() => navigate('/')} />}
         />
 
+        {/* Réinitialisation mot de passe */}
+        <Route
+          path="/reset-password"
+          element={<ResetPasswordPage onClose={() => navigate('/')} />}
+        />
+
+        {/* Suivi commande public (sans connexion) */}
+        <Route
+          path="/track"
+          element={<PublicOrderTrackingPage />}
+        />
+
+        {/* Erreur de paiement */}
+        <Route
+          path="/payment-error"
+          element={<PaymentErrorPage />}
+        />
+
         {/* Regular Routes with Header/Footer */}
         <Route
           path="/*"
@@ -270,6 +293,18 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                       <Route
                         path="/shipping"
                         element={<LegalPage type="shipping" onClose={() => window.history.back()} />}
+                      />
+
+                      {/* Mentions légales */}
+                      <Route
+                        path="/mentions-legales"
+                        element={<MentionsLegalesPage onClose={() => window.history.back()} />}
+                      />
+
+                      {/* Retours & Échanges */}
+                      <Route
+                        path="/returns"
+                        element={<ReturnsPage onClose={() => window.history.back()} />}
                       />
 
                       {/* Pages utilisateur */}

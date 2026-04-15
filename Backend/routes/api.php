@@ -65,6 +65,9 @@ Route::get('/images/{path}', [FileController::class, 'getImage'])->where('path',
 Route::post('/promotions/validate', [PromotionController::class, 'validate']);
 Route::post('/promotions/apply', [PromotionController::class, 'apply']);
 
+// Suivi de commande public (sans authentification)
+Route::get('/orders/track-public', [OrderController::class, 'trackPublic']);
+
 // Payment routes (public)
 Route::post('/payment/webhook', [PaymentController::class, 'webhook']);
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');

@@ -78,6 +78,6 @@ class PaymentController extends Controller
              return redirect("$frontendUrl/order-confirmation/$orderId?status=success");
         }
         
-        return redirect("$frontendUrl/checkout?error=payment_failed");
+        return redirect("$frontendUrl/payment-error?error=payment_failed&order_id=$orderId");
     }
 }

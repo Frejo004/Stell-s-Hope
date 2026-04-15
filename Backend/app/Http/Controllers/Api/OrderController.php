@@ -135,4 +135,46 @@ class OrderController extends Controller
         $order->update(['status' => 'cancelled']);
         return response()->json(['message' => 'Order cancelled']);
     }
+
+    /**
+     * Suivi public d'une commande par numéro + email (sans authentification).
+     */
+    public function trackPublic(Request $request)
+    {
+        $request->validate([
+            'order_number' => 'required|string',
+            'email'        => 'required|email',
+        ]);
+
+        $order = Order::where('order_number', $request->order_number)
+            ->whereHas('user', function ($q) use ($request) {
+                $q->where('email', $request->email);
+            })
+            ->with(['orderItems.product'])
+            ->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Commande introuvable'], 404);
+        }
+
+        // On retourne uniquement les infos nécessaires au tracking (pas les données sensibles)
+        return response()->json([
+            'id'               => $order->id,
+            'order_number'     => $order->order_number,
+            'status'           => $order->status,
+            'created_at'       => $order->created_at,
+            'shipping_address' => $order->shipping_address,
+            'tracking_number'  => $order->tracking_number,
+            'order_items'      => $order->orderItems->map(fn($item) => [
+                'id'       => $item->id,
+                'quantity' => $item->quantity,
+                'price'    => $item->price,
+                'product'  => [
+                    'id'     => $item->product?->id,
+                    'name'   => $item->product?->name,
+                    'images' => $item->product?->images ?? [],
+                ],
+            ]),
+        ]);
+    }
 }

@@ -1,9 +1,11 @@
 import { useState  } from 'react';
 import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import ContactPage from '../pages/ContactPage';
 import AboutPage from '../pages/AboutPage';
 import FAQPage from '../pages/FAQPage';
 import LegalPage from '../pages/LegalPage';
+import MentionsLegalesPage from '../pages/MentionsLegalesPage';
 import AccountPage from '../pages/AccountPage';
 import Logo from './Logo';
 import { useAuth } from '../hooks/useAuth';
@@ -11,6 +13,7 @@ import { useAuth } from '../hooks/useAuth';
 export default function Footer() {
   const [activePage, setActivePage] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const openPage = (page: string) => setActivePage(page);
   const closePage = () => setActivePage(null);
@@ -45,11 +48,11 @@ export default function Footer() {
           <div className="space-y-4">
             <h4 className="font-semibold text-lg">Boutique</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white transition-colors">Collection Femme</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Collection Homme</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Accessoires</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Nouveautés</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Promotions</a></li>
+              <li><button onClick={() => navigate('/category/femme')} className="hover:text-white transition-colors">Collection Femme</button></li>
+              <li><button onClick={() => navigate('/category/homme')} className="hover:text-white transition-colors">Collection Homme</button></li>
+              <li><button onClick={() => navigate('/category/accessories')} className="hover:text-white transition-colors">Accessoires</button></li>
+              <li><button onClick={() => navigate('/boutique')} className="hover:text-white transition-colors">Nouveautés</button></li>
+              <li><button onClick={() => navigate('/boutique')} className="hover:text-white transition-colors">Promotions</button></li>
             </ul>
           </div>
 
@@ -59,7 +62,7 @@ export default function Footer() {
             <ul className="space-y-2 text-gray-400">
               <li>
                 <button 
-                  onClick={() => isAuthenticated ? openPage('account') : openPage('auth')}
+                  onClick={() => isAuthenticated ? navigate('/account') : navigate('/login')}
                   className="hover:text-white transition-colors"
                 >
                   Mon Compte
@@ -67,27 +70,34 @@ export default function Footer() {
               </li>
               <li>
                 <button 
-                  onClick={() => window.location.href = '/account'}
+                  onClick={() => navigate('/track')}
                   className="hover:text-white transition-colors"
                 >
-                  Suivi de Commande
+                  Suivre ma commande
                 </button>
               </li>
               <li>
                 <button 
-                  onClick={() => openPage('shipping')}
+                  onClick={() => navigate('/returns')}
                   className="hover:text-white transition-colors"
                 >
                   Retours & Échanges
                 </button>
               </li>
-              <li><a href="#" className="hover:text-white transition-colors">Guide des Tailles</a></li>
               <li>
                 <button 
                   onClick={() => openPage('faq')}
                   className="hover:text-white transition-colors"
                 >
                   FAQ
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => openPage('contact')}
+                  className="hover:text-white transition-colors"
+                >
+                  Nous contacter
                 </button>
               </li>
             </ul>
@@ -99,7 +109,7 @@ export default function Footer() {
             <div className="space-y-3 text-gray-400">
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5" />
-                <span>contact@elegance.fr</span>
+                <span>contact@stellshope.fr</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5" />
@@ -130,24 +140,14 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm">
-            © 2024 Stell's Hope. Tous droits réservés.
+            © {new Date().getFullYear()} Stell's Hope. Tous droits réservés.
           </p>
-          <div className="flex space-x-6 text-sm text-gray-400 mt-4 md:mt-0">
-            <button 
-              onClick={() => openPage('cgv')}
-              className="hover:text-white transition-colors"
-            >
-              Conditions Générales
-            </button>
-            <button 
-              onClick={() => openPage('privacy')}
-              className="hover:text-white transition-colors"
-            >
-              Politique de Confidentialité
-            </button>
-            <a href="#" className="hover:text-white transition-colors">
-              Cookies
-            </a>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-400 mt-4 md:mt-0">
+            <button onClick={() => openPage('cgv')} className="hover:text-white transition-colors">CGV</button>
+            <button onClick={() => openPage('privacy')} className="hover:text-white transition-colors">Confidentialité</button>
+            <button onClick={() => openPage('mentions')} className="hover:text-white transition-colors">Mentions légales</button>
+            <button onClick={() => navigate('/shipping')} className="hover:text-white transition-colors">Livraison</button>
+            <button onClick={() => navigate('/returns')} className="hover:text-white transition-colors">Retours</button>
           </div>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function Footer() {
       {activePage === 'faq' && <FAQPage onClose={closePage} />}
       {activePage === 'cgv' && <LegalPage type="cgv" onClose={closePage} />}
       {activePage === 'privacy' && <LegalPage type="privacy" onClose={closePage} />}
-      {activePage === 'shipping' && <LegalPage type="shipping" onClose={closePage} />}
+      {activePage === 'mentions' && <MentionsLegalesPage onClose={closePage} />}
       {activePage === 'account' && isAuthenticated && <AccountPage onClose={closePage} />}
     </footer>
   );

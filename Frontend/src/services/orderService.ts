@@ -50,5 +50,13 @@ export const orderService = {
   cancelOrder: async (id: number | string): Promise<Order> => {
     const response = await api.post(`/orders/${id}/cancel`);
     return response.data;
+  },
+
+  // Suivi public par numéro de commande + email (sans authentification)
+  trackOrderPublic: async (orderNumber: string, email: string): Promise<Order> => {
+    const response = await api.get('/orders/track-public', {
+      params: { order_number: orderNumber, email }
+    });
+    return response.data;
   }
 };
