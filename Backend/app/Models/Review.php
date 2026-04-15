@@ -14,7 +14,8 @@ class Review extends Model
         'product_id',
         'rating',
         'comment',
-        'is_approved'
+        'is_approved',
+        'status', // Correction #14 : ajout de 'status' dans fillable
     ];
 
     protected $casts = [

@@ -47,9 +47,9 @@ export const productService = {
 
   getFeaturedProducts: async (): Promise<Product[]> => {
     try {
-      // Utiliser le endpoint correct avec query parameter
-      const response = await api.get('/products', { params: { featured: true } });
-      return response.data.data || [];
+      // Correction #12 : utiliser le bon endpoint dédié /products/featured
+      const response = await api.get('/products/featured');
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching featured products:', error);
       return [];
@@ -58,9 +58,9 @@ export const productService = {
 
   getBestsellers: async (): Promise<Product[]> => {
     try {
-      // Utiliser le endpoint correct avec query parameter
-      const response = await api.get('/products', { params: { bestseller: true } });
-      return response.data.data || [];
+      // Correction #12 : utiliser le bon endpoint dédié /products/bestsellers
+      const response = await api.get('/products/bestsellers');
+      return response.data || [];
     } catch (error) {
       console.error('Error fetching bestsellers:', error);
       return [];

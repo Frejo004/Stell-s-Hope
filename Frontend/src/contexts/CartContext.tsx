@@ -32,13 +32,26 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated } = useAuth();
 
-  // Charger le panier (invité ou DB selon l'auth)
+  // Charger le panier (invité ou DB selon l'auth) + migration panier invité
   const fetchCart = useCallback(async () => {
     if (isAuthenticated) {
       try {
+        // Correction #7 : migrer le panier invité vers la DB lors de la connexion
+        const savedGuest = localStorage.getItem('guestCart');
+        if (savedGuest) {
+          const guestItems: GuestCartItem[] = JSON.parse(savedGuest);
+          if (guestItems.length > 0) {
+            await Promise.all(
+              guestItems.map(item =>
+                cartService.addToCart({ product_id: item.productId, quantity: item.quantity })
+                  .catch(() => null) // ignorer les erreurs individuelles (stock, etc.)
+              )
+            );
+            localStorage.removeItem('guestCart');
+          }
+        }
+
         const data = await cartService.getCart();
-        // Adapter le format DB au format GuestCartItem pour l'UI si nécessaire
-        // ou simplement utiliser des états séparés
         const items = data.items.map((item: any) => ({
           productId: item.product?.id || item.product_id,
           quantity: item.quantity,

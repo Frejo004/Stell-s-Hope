@@ -1,6 +1,7 @@
+// Correction #3 : utiliser orderService (endpoint /api/orders/{id}) au lieu de adminService
 import { useState, useEffect  } from 'react';
 import { ArrowLeft, Package, MapPin, CreditCard } from 'lucide-react';
-import { adminService } from '../services/adminService';
+import { orderService } from '../services/orderService';
 import { Order, OrderItem } from '../types/order';
 
 interface OrderDetailsPageProps {
@@ -15,7 +16,8 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const data = await adminService.getOrder(parseInt(orderId));
+        // Correction #3 : appel vers /api/orders/{id} (endpoint client, pas admin)
+        const data = await orderService.getOrder(orderId);
         setOrder(data);
       } catch (error) {
         console.error('Erreur commande:', error);
@@ -129,7 +131,8 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
               <div className="space-y-2">
                 <div className="border-t pt-2 flex justify-between font-semibold text-lg">
                   <span>Total</span>
-                  <span>{Number(order.total_amount || 0).toFixed(2)}€</span>
+                  {/* Correction #4 : utiliser order.total (champ DB actuel) */}
+                  <span>{Number(order.total || 0).toFixed(2)}€</span>
                 </div>
               </div>
             </div>

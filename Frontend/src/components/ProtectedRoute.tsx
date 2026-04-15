@@ -1,4 +1,4 @@
-;
+// Correction #18 : suppression du point-virgule parasite en début de fichier
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 

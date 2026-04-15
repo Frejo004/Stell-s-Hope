@@ -41,8 +41,9 @@ class AdminOrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
+        // Correction #11 : ajout de 'processing' dans les statuts valides
         $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,shipped,delivered,cancelled'
+            'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled'
         ]);
 
         $order->update($validated);

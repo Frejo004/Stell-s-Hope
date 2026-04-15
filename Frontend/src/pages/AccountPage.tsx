@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Package, MapPin, Heart, LogOut, Edit2, Mail, Phone, Globe, Shield, ChevronRight, X, Save, Lock } from 'lucide-react';
+import { User, Package, MapPin, Heart, LogOut, Edit2, Mail, Phone, Globe, Shield, ChevronRight, X, Save, Lock, Plus } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useOrders } from '../hooks/useOrders';
 import { useWishlist } from '../contexts/WishlistContext';

@@ -45,14 +45,14 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
 Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail'])->middleware(['auth:sanctum', 'throttle:6,1'])->name('verification.resend');
 
-// Products routes (public)
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{product}', [ProductController::class, 'show']);
+// Products routes (public) — routes statiques AVANT la route dynamique {product}
 Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/bestsellers', [ProductController::class, 'bestsellers']);
 Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/search/suggestions', [ProductController::class, 'searchSuggestions']);
 Route::get('/products/debug', [ProductController::class, 'debug']);
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{product}', [ProductController::class, 'show']);
 
 // Categories routes (public)
 Route::get('/categories', [CategoryController::class, 'index']);
@@ -134,13 +134,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/attributes/{attribute}', [AdminAttributeController::class, 'update']);
         Route::delete('/attributes/{attribute}', [AdminAttributeController::class, 'destroy']);
 
-        // Orders management
+        // Orders management — routes statiques AVANT {order}
         Route::get('/orders', [AdminOrderController::class, 'index']);
         Route::get('/orders/stats', [AdminOrderController::class, 'stats']);
+        Route::get('/orders/export', [AdminOrderController::class, 'export']);
+        Route::post('/orders/bulk-update', [AdminOrderController::class, 'bulkUpdate']);
         Route::get('/orders/{order}', [AdminOrderController::class, 'show']);
         Route::put('/orders/{order}/status', [AdminOrderController::class, 'updateStatus']);
-        Route::post('/orders/bulk-update', [AdminOrderController::class, 'bulkUpdate']);
-        Route::get('/orders/export', [AdminOrderController::class, 'export']);
 
         // Customers management
         Route::get('/customers', [AdminCustomerController::class, 'index']);
@@ -181,10 +181,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/promotions/{promotion}', [AdminPromotionController::class, 'update']);
         Route::delete('/promotions/{promotion}', [AdminPromotionController::class, 'destroy']);
 
-        // Support Tickets
-        Route::get('/tickets', [AdminTicketController::class, 'stats']);
+        // Support Tickets — routes statiques AVANT {ticket}
         Route::get('/tickets/list', [AdminTicketController::class, 'index']);
         Route::get('/tickets/stats', [AdminTicketController::class, 'stats']);
+        Route::get('/tickets', [AdminTicketController::class, 'stats']);
         Route::get('/tickets/{ticket}', [AdminTicketController::class, 'show']);
         Route::put('/tickets/{ticket}', [AdminTicketController::class, 'update']);
 
@@ -205,6 +205,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Analytics
         Route::get('/analytics', [AdminAnalyticsController::class, 'index']);
+        // Correction #13 : routes analytics manquantes ajoutées
+        Route::get('/analytics/revenue', [AdminDashboardController::class, 'revenueAnalytics']);
+        Route::get('/analytics/products', [AdminDashboardController::class, 'productAnalytics']);
+        Route::get('/analytics/customers', [AdminDashboardController::class, 'customerAnalytics']);
 
         // Tickets Status Update
         Route::put('/tickets/{ticket}/status', [AdminTicketController::class, 'updateStatus']);

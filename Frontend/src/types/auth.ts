@@ -1,34 +1,8 @@
-export interface User {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  postal_code?: string;
-  country?: string;
-  is_admin: boolean;
-  is_active: boolean;
-  avatar?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Address {
-  id: string;
-  type: 'billing' | 'shipping';
-  firstName: string;
-  lastName: string;
-  street: string;
-  city: string;
-  postalCode: string;
-  country: string;
-  isDefault: boolean;
-}
+// Correction #16 : types auth réexportent depuis index pour éviter les doublons
+export type { User, Address } from './index';
 
 export interface AuthState {
-  user: User | null;
+  user: import('./index').User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 }

@@ -103,13 +103,13 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
           postal_code: checkoutState.shippingAddress.postalCode || '',
           country: checkoutState.shippingAddress.country || ''
         } : {
-          // Si différent, mapper billingAddress ici
-          first_name: checkoutState.shippingAddress.firstName || '', // Fallback
-          last_name: checkoutState.shippingAddress.lastName || '',
-          street: '',
-          city: '',
-          postal_code: '',
-          country: ''
+          // Correction #22 : utiliser les vraies données billing si différentes
+          first_name: checkoutState.billingAddress.firstName || '',
+          last_name: checkoutState.billingAddress.lastName || '',
+          street: checkoutState.billingAddress.street || '',
+          city: checkoutState.billingAddress.city || '',
+          postal_code: checkoutState.billingAddress.postalCode || '',
+          country: checkoutState.billingAddress.country || ''
         },
         payment_method: checkoutState.paymentMethod || 'card',
         items: hydratedCart.map(item => ({

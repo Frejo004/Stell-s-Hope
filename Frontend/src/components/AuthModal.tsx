@@ -16,7 +16,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
     firstName: '',
     lastName: ''
   });
-  const { login, register, isLoading } = useAuth();
+  // Correction #1 : 'loading' au lieu de 'isLoading'
+  const { login, register, loading } = useAuth();
 
   if (!isOpen) return null;
 
@@ -26,10 +27,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
       if (mode === 'login') {
         await login(formData.email, formData.password);
       } else {
+        // Correction #1 : first_name/last_name + password obligatoire
         await register({
           email: formData.email,
-          firstName: formData.firstName,
-          lastName: formData.lastName
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          password: formData.password,
+          password_confirmation: formData.password,
         });
       }
       onClose();
@@ -112,10 +116,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={loading}
             className="w-full bg-black text-white py-2 rounded hover:bg-gray-900 disabled:opacity-50"
           >
-            {isLoading ? 'Chargement...' : mode === 'login' ? 'Se connecter' : 'S\'inscrire'}
+            {loading ? 'Chargement...' : mode === 'login' ? 'Se connecter' : 'S\'inscrire'}
           </button>
         </form>
 

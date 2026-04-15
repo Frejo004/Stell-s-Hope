@@ -26,11 +26,6 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const { cartItemsCount, isOpen, setIsOpen } = useCartContext();
   const navigate = useNavigate();
-
-  console.log('Header isOpen:', isOpen);
-
-  // Log pour debug
-  console.log('📊 Header cartItemsCount:', cartItemsCount);
   const { wishlist } = useWishlist();
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
@@ -41,19 +36,6 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
     setIsSearchOpen(false);
     setIsAccountOpen(false);
   }, [location.pathname]);
-
-  // Force re-render when wishlist or cart changes
-  useEffect(() => {
-    // This effect will run whenever wishlist changes
-  }, [wishlist]);
-
-  useEffect(() => {
-    console.log('🔄 Header re-rendering, cartItemsCount:', cartItemsCount);
-  }, [cartItemsCount]);
-
-  useEffect(() => {
-    console.log('🔄 Header isOpen changed:', isOpen);
-  }, [isOpen]);
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
@@ -194,10 +176,7 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
               </button>
               <button
                 onClick={() => {
-                  console.log('🛒 Cart icon clicked, current isOpen:', isOpen);
-                  console.log('setIsOpen function:', setIsOpen);
                   setIsOpen(true);
-                  console.log('After setIsOpen(true)');
                 }}
                 className="p-2 text-gray-600 hover:text-gray-900 transition-colors relative"
               >

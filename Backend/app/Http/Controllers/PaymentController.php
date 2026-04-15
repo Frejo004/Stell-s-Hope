@@ -69,13 +69,13 @@ class PaymentController extends Controller
     public function callback(Request $request)
     {
         $orderId = $request->get('order_id');
-        $status = $request->get('status'); // Moneroo renvoie souvent le status en query param
+        $status = $request->get('status');
         
-        // Redirection vers le frontend
         $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
         
+        // Correction #24 : route frontend correcte /order-confirmation/:id (avec tiret)
         if ($status === 'success' || $status === 'successful') {
-             return redirect("$frontendUrl/order/confirmation/$orderId?status=success");
+             return redirect("$frontendUrl/order-confirmation/$orderId?status=success");
         }
         
         return redirect("$frontendUrl/checkout?error=payment_failed");

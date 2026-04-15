@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate, usePa
 import { NuqsAdapter } from 'nuqs/adapters/react-router';
 import { Product } from '../types';
 import { productService } from '../services/productService';
+import { orderService } from '../services/orderService';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
@@ -44,11 +45,31 @@ interface AppRouterProps {
   onOrderComplete: (order: Order) => void;
 }
 
+// Correction #21 : CategoryPageWrapper simplifié — CategoryPage gère useParams elle-même
 function CategoryPageWrapper() {
-  useParams<{ category: string }>();
-  return (
-    <CategoryPage />
-  );
+  return <CategoryPage />;
+}
+
+// Correction #9 : wrapper qui charge la vraie commande depuis l'API
+function OrderConfirmationWrapper({ onContinueShopping }: { onContinueShopping: () => void }) {
+  const { orderId } = useParams<{ orderId: string }>();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (orderId) {
+      orderService.getOrder(orderId)
+        .then(data => setOrder(data))
+        .catch(() => navigate('/'))
+        .finally(() => setLoading(false));
+    }
+  }, [orderId, navigate]);
+
+  if (loading) return <PageLoader />;
+  if (!order) return null;
+
+  return <OrderConfirmationPage order={order} onContinueShopping={onContinueShopping} />;
 }
 
 function OrderTrackingPageWrapper({ onClose }: { onClose: () => void }) {
@@ -101,7 +122,6 @@ function ProductDetailWrapper() {
 
 function AppContent({ onOrderComplete }: AppRouterProps) {
   const { isAuthenticated } = useAuth();
-  const { getOrderById } = useOrders();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -282,10 +302,8 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                       <Route
                         path="/order-confirmation/:orderId"
                         element={
-                          <OrderConfirmationPage
-                            order={getOrderById('CMD123') || {} as Order}
-                            onContinueShopping={() => navigate('/')}
-                          />
+                          // Correction #9 : récupération de la vraie commande via orderId
+                          <OrderConfirmationWrapper onContinueShopping={() => navigate('/')} />
                         }
                       />
 

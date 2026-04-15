@@ -27,8 +27,8 @@ export const useOrders = () => {
 
   const createOrder = async (orderData: any) => {
     try {
-      // Mock implementation
-      const newOrder = { id: 'CMD123', ...orderData } as Order;
+      // Correction #8 : appel réel à l'API au lieu du mock hardcodé
+      const newOrder = await orderService.createOrder(orderData);
       await fetchOrders();
       return newOrder;
     } catch (error) {

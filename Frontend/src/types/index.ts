@@ -1,3 +1,4 @@
+// Correction #16 & #17 : fichier de types unifié — suppression des doublons
 
 export interface Address {
   id?: number;
@@ -23,6 +24,7 @@ export interface User {
   country?: string;
   is_admin: boolean;
   is_active: boolean;
+  avatar?: string;
   created_at: string;
   updated_at: string;
 }
@@ -98,12 +100,28 @@ export interface CartItem {
   subtotal: number;
 }
 
+export interface OrderItem {
+  id: number;
+  order_id: number;
+  product_id: number;
+  quantity: number;
+  price: number;
+  color?: string;
+  size?: string;
+  product: {
+    id: number;
+    name: string;
+    images: string[];
+    price?: number;
+  };
+}
+
 export interface Order {
   id: number;
   user_id: number;
-  total_amount: number;
-  total: number; // Keep for compatibility temporarily
-
+  order_number?: string;
+  /** Champ DB actuel après migration rename */
+  total: number;
   subtotal?: number;
   shipping?: number;
   tax?: number;
@@ -111,6 +129,7 @@ export interface Order {
   shipping_address: Address;
   billing_address: Address;
   payment_method: string;
+  payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
   tracking_number?: string;
   created_at: string;
   updated_at: string;
@@ -121,21 +140,10 @@ export interface Order {
     first_name: string;
     last_name: string;
     email: string;
-  };
-  order_number?: string;
-}
-
-export interface OrderItem {
-  id: number;
-  order_id: number;
-  product_id: number;
-  quantity: number;
-  price: number;
-  product: {
-    id: number;
-    name: string;
-    images: string[];
-    price?: number;
+    address?: string;
+    city?: string;
+    postal_code?: string;
+    country?: string;
   };
 }
 
@@ -146,7 +154,6 @@ export interface Toast {
   duration?: number;
 }
 
-// Generic type for paginated API responses
 export interface PaginatedResponse<T> {
   data: T[];
   links: {

@@ -1,6 +1,7 @@
 import { CheckCircle, Package, Truck, Mail, Phone, Download, ArrowRight } from 'lucide-react';
 import { Order } from '../types/order';
 import { getImageUrl } from '../utils/imageUtils';
+import { useAuth } from '../hooks/useAuth';
 
 interface OrderConfirmationPageProps {
   order: Order;
@@ -8,6 +9,7 @@ interface OrderConfirmationPageProps {
 }
 
 export default function OrderConfirmationPage({ order, onContinueShopping }: OrderConfirmationPageProps) {
+  const { user } = useAuth();
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 3);
 
@@ -48,10 +50,10 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
             </div>
             <div className="py-2">
               <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Montant Total</h3>
+              {/* Correction #4 : utiliser order.total (champ DB actuel) */}
               <p className="text-3xl font-black text-rose-500">
                 {Number(
                   order.total ||
-                  order.total_amount ||
                   (order.order_items || order.items || []).reduce((acc: number, item: any) => acc + ((item.price || item.product?.price || 0) * item.quantity), 0)
                 ).toFixed(2)} €
               </p>
@@ -97,11 +99,8 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total</span>
-                  <span>{Number(
-                    order.total ||
-                    order.total_amount ||
-                    (order.order_items || []).reduce((acc: number, item: any) => acc + ((item.price || item.product?.price || 0) * item.quantity), 0)
-                  ).toFixed(2)} €</span>
+                  {/* Correction #4 : utiliser order.total */}
+                  <span>{Number(order.total || 0).toFixed(2)} €</span>
                 </div>
               </div>
             </div>
@@ -227,8 +226,10 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
             <Mail className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
               <h4 className="font-medium text-blue-800">Confirmation par email</h4>
+              {/* Correction #5 : email réel de l'utilisateur connecté */}
               <p className="text-sm text-blue-700 mt-1">
-                Un email de confirmation a été envoyé à <strong>{(order.shipping_address?.first_name || 'utilisateur').toLowerCase()}@example.com</strong>.
+                Un email de confirmation a été envoyé à{' '}
+                <strong>{user?.email || order.user?.email || 'votre adresse email'}</strong>.
                 Vérifiez également vos spams si vous ne le recevez pas dans les prochaines minutes.
               </p>
             </div>
