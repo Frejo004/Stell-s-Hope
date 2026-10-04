@@ -1,21 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import ProductFilters from '../components/ProductFilters';
 import InfiniteProductList from '../components/InfiniteProductList';
 import { useProductFilters } from '../hooks/useProductFilters';
-import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
+import { ProductListingProvider, useProductListing } from '../contexts/ProductListingContext';
 import { categoryService } from '../services/categoryService';
-
-type SortOption = 'newest' | 'popularity' | 'price-asc' | 'price-desc';
 
 export default function CategoryPage() {
   const { category: categorySlug } = useParams<{ category: string }>();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [sortOption, setSortOption] = useState<SortOption>('newest');
   const [categoryName, setCategoryName] = useState<string>('');
-  const { setCategory, getFilters } = useProductFilters();
-  
+  const { setCategory } = useProductFilters();
+
   // Récupérer l'ID de la catégorie depuis le slug et l'appliquer aux filtres
   useEffect(() => {
     const fetchCategory = async () => {
@@ -36,16 +33,23 @@ export default function CategoryPage() {
     };
     fetchCategory();
   }, [categorySlug, setCategory]);
-  
-  const { products } = useInfiniteProducts(getFilters());
-  const productCount = products.length;
 
-  const sortOptions: { value: SortOption; label: string }[] = [
-    { value: 'newest', label: 'Nouveautés' },
-    { value: 'popularity', label: 'Popularité' },
-    { value: 'price-asc', label: 'Prix croissant' },
-    { value: 'price-desc', label: 'Prix décroissant' },
-  ];
+  return (
+    <ProductListingProvider>
+      <CategoryContent isFiltersOpen={isFiltersOpen} setIsFiltersOpen={setIsFiltersOpen} categoryName={categoryName} />
+    </ProductListingProvider>
+  );
+}
+
+type CategoryContentProps = {
+  isFiltersOpen: boolean;
+  setIsFiltersOpen: (open: boolean) => void;
+  categoryName: string;
+};
+
+const CategoryContent = ({ isFiltersOpen, setIsFiltersOpen, categoryName }: CategoryContentProps) => {
+  const { total } = useProductListing();
+  const productCount = total;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -74,11 +78,10 @@ export default function CategoryPage() {
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-6">
             <p className="text-gray-600">{productCount} produit{productCount > 1 ? 's' : ''}</p>
-            {/* Options de tri */}
           </div>
           <InfiniteProductList />
         </div>
       </div>
     </div>
   );
-}
+};

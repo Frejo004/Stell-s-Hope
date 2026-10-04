@@ -1,73 +1,133 @@
-import { useState, useEffect, useCallback, RefObject } from 'react';
-import { productService } from '../services/productService';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import axios from 'axios';
+import { productService, ProductFilters } from '../services/productService';
 import { useInfiniteScroll } from './useInfiniteScroll';
+import { Product } from '../types';
 
-export const useInfiniteProducts = (filters: any) => {
-  const [products, setProducts] = useState<any[]>([]);
+const PER_PAGE = 20;
+
+const isCanceled = (err: unknown): boolean =>
+  axios.isCancel(err) || (err as { code?: string })?.code === 'ERR_CANCELED';
+
+export const useInfiniteProducts = (filters: ProductFilters) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchMoreProducts = useCallback(async () => {
+  const filtersKey = JSON.stringify(filters ?? {});
+  const filtersRef = useRef<ProductFilters>(filters);
+  filtersRef.current = filters;
+
+  const pageRef = useRef(1);
+  const hasMoreRef = useRef(true);
+  const loadingMoreRef = useRef(false);
+  const listAbortRef = useRef<AbortController | null>(null);
+  const pageAbortRef = useRef<AbortController | null>(null);
+
+  const fetchMore = useCallback(async () => {
+    if (loadingMoreRef.current || !hasMoreRef.current) return;
+
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+
+    const nextPage = pageRef.current + 1;
+    const controller = new AbortController();
+    pageAbortRef.current?.abort();
+    pageAbortRef.current = controller;
+
     try {
-      const data = await productService.getProducts({
-        ...filters,
-        page: currentPage + 1,
-        per_page: 20
-      });
-      
+      const data = await productService.getProducts(
+        { ...filtersRef.current, page: nextPage, per_page: PER_PAGE },
+        controller.signal
+      );
       const newProducts = data.data || [];
-      
-      if (newProducts.length === 0) {
+
+      if (controller.signal.aborted) return;
+
+      if (newProducts.length < PER_PAGE) {
+        hasMoreRef.current = false;
         setHasMore(false);
       } else {
+        pageRef.current = nextPage;
         setProducts(prev => [...prev, ...newProducts]);
-        setCurrentPage(prev => prev + 1);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (!isCanceled(err)) {
+        setError((err as Error).message);
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        loadingMoreRef.current = false;
+        setLoadingMore(false);
+      }
     }
-  }, [filters, currentPage]);
+  }, []);
 
-  const [isFetching] = useInfiniteScroll(fetchMoreProducts, hasMore);
+  const [isFetching] = useInfiniteScroll(fetchMore, hasMore);
 
   useEffect(() => {
-    const fetchInitialProducts = async () => {
-      try {
-        setLoading(true);
-        setProducts([]);
-        setCurrentPage(1);
-        setHasMore(true);
-        setError(null);
+    listAbortRef.current?.abort();
+    pageAbortRef.current?.abort();
 
-        const data = await productService.getProducts({
-          ...filters,
-          page: 1,
-          per_page: 20
-        });
-        
+    const controller = new AbortController();
+    listAbortRef.current = controller;
+
+    pageRef.current = 1;
+    hasMoreRef.current = true;
+    loadingMoreRef.current = false;
+
+    setProducts([]);
+    setTotal(0);
+    setError(null);
+    setHasMore(true);
+    setLoadingMore(false);
+    setLoading(true);
+
+    const fetchFirstPage = async () => {
+      try {
+        const data = await productService.getProducts(
+          { ...filtersRef.current, page: 1, per_page: PER_PAGE },
+          controller.signal
+        );
         const initialProducts = data.data || [];
+
+        if (controller.signal.aborted) return;
+
         setProducts(initialProducts);
-        
-        if (initialProducts.length < 20) {
+        setTotal(data.total ?? initialProducts.length);
+
+        if (initialProducts.length < PER_PAGE) {
+          hasMoreRef.current = false;
           setHasMore(false);
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (!isCanceled(err)) {
+          setError((err as Error).message);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchInitialProducts();
-  }, [JSON.stringify(filters)]);
+    fetchFirstPage();
 
-  return { 
-    products, 
-    loading, 
-    error, 
-    hasMore, 
-    isFetching
+    return () => {
+      controller.abort();
+    };
+  }, [filtersKey]);
+
+  return {
+    products,
+    total,
+    loading,
+    error,
+    hasMore,
+    isFetching: isFetching || loadingMore,
+    fetchMore
   };
 };

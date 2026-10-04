@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { Heart, Star, ShoppingCart, Check } from 'lucide-react';
 import { Product } from '../types';
 import { useWishlist } from '../contexts/WishlistContext';
@@ -23,6 +23,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
 
   const inWishlist = isProductInWishlist(product.id);
   const isItemInCart = guestCart.some(item => item.productId === product.id);
+  const imageUrl = useMemo(() => getProductImageUrl(product), [product]);
 
   // Vérifier si l'image est déjà en cache lors du montage
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
         ) : (
           <img
             ref={imgRef}
-            src={getProductImageUrl(product)}
+            src={imageUrl}
             alt={product.name}
             loading="lazy"
             decoding="async"

@@ -5,10 +5,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  // Uniquement des en-têtes "simples" : sans X-Requested-With ni Content-Type par défaut,
+  // les GET ne déclenchent pas de preflight CORS (sinon 2 requêtes HTTP par appel API).
+  // `Accept` suffit à garder les réponses JSON (et donc $request->expectsJson() côté Laravel).
   headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    'Accept': 'application/json'
   },
   timeout: 15000
 });
@@ -36,6 +37,11 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // Requête annulée (changement de filtre / démontage) : rien à signaler
+    if (axios.isCancel(error) || error?.code === 'ERR_CANCELED') {
+      return Promise.reject(error);
+    }
+
     const { response } = error;
     const message = response?.data?.message || 'Une erreur est survenue';
 

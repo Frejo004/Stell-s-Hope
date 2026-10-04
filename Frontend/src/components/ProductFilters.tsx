@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useProductFilters } from '../hooks/useProductFilters';
 import { productService } from '../services/productService';
 import { Category } from '../types';
@@ -116,25 +116,31 @@ const ProductFilters: React.FC = () => {
     setPage
   } = useProductFilters();
 
-  const resetAllFilters = () => {
-    setPage(1);
-    setSearch('');
-    setCategory(null);
-    setMinPrice(0);
-    setMaxPrice(1000);
-    setSortBy('created_at');
-    setColors([]);
-    setSizes([]);
-    setPriceRange([0, 1000]);
-    setLocalMinPrice(0);
-    setLocalMaxPrice(1000);
-  };
-
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     productService.getCategories().then(setCategories);
   }, []);
+
+  // Valeurs locales des filtres de prix : l'URL n'est mise à jour qu'après le debounce
+  const [localMinPrice, setLocalMinPrice] = useState<number | null>(minPrice);
+  const [localMaxPrice, setLocalMaxPrice] = useState<number | null>(maxPrice);
+  // Valeur locale de la recherche, synchronisée elle aussi avec un debounce
+  const [localSearch, setLocalSearch] = useState(search);
+
+  const resetAllFilters = () => {
+    setPage(1);
+    setSearch('');
+    setCategory(null);
+    setMinPrice(null);
+    setMaxPrice(null);
+    setSortBy('created_at');
+    setColors([]);
+    setSizes([]);
+    setLocalMinPrice(null);
+    setLocalMaxPrice(null);
+    setLocalSearch('');
+  };
 
   const handleColorToggle = (color: string) => {
     setColors(colors.includes(color) 
@@ -164,32 +170,41 @@ const ProductFilters: React.FC = () => {
   ];
 
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-  
-  // Valeurs par défaut pour le slider de prix
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const [localMinPrice, setLocalMinPrice] = useState<number | null>(null);
-  const [localMaxPrice, setLocalMaxPrice] = useState<number | null>(null);
 
-  // Mettre à jour le slider quand les prix changent
+  // Refléter les changements d'URL (navigation, reset, lien partagé) dans les champs locaux
   useEffect(() => {
-    if (minPrice !== null && maxPrice !== null) {
-      setPriceRange([minPrice, maxPrice]);
-      setLocalMinPrice(minPrice);
-      setLocalMaxPrice(maxPrice);
-    }
+    setLocalMinPrice(minPrice);
+    setLocalMaxPrice(maxPrice);
   }, [minPrice, maxPrice]);
 
-  // Gérer le changement de prix avec un debounce
-  const handlePriceChange = useCallback((values: number[]) => {
-    setPriceRange([values[0], values[1]]);
-    // Mettre à jour les prix après un délai
+  useEffect(() => {
+    setLocalSearch(search);
+  }, [search]);
+
+  // Un seul point d'écriture de l'URL pour le prix : une requête par burst de saisie
+  useEffect(() => {
+    if (localMinPrice === minPrice && localMaxPrice === maxPrice) return;
+
     const timer = setTimeout(() => {
-      setMinPrice(values[0]);
-      setMaxPrice(values[1]);
+      setMinPrice(localMinPrice);
+      setMaxPrice(localMaxPrice);
       setPage(1);
-    }, 500);
+    }, 400);
+
     return () => clearTimeout(timer);
-  }, [setMinPrice, setMaxPrice, setPage]);
+  }, [localMinPrice, localMaxPrice, minPrice, maxPrice, setMinPrice, setMaxPrice, setPage]);
+
+  // Idem pour la recherche textuelle
+  useEffect(() => {
+    if (localSearch === search) return;
+
+    const timer = setTimeout(() => {
+      setSearch(localSearch);
+      setPage(1);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [localSearch, search, setSearch, setPage]);
 
   return (
     <div className="bg-white border border-gray-200 w-full max-w-xs">
@@ -209,11 +224,8 @@ const ProductFilters: React.FC = () => {
         <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
         <input
           type="text"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
           placeholder="Rechercher un produit..."
           className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
@@ -258,14 +270,14 @@ const ProductFilters: React.FC = () => {
 
       {/* Prix avec slider */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-4">Prix</label>
+        <label className="block text-sm font-medium text-gray-700 mb-4">Prix minimum</label>
         <div className="px-2">
           <Slider
             min={0}
             max={1000}
             step={10}
-            value={[priceRange[0], priceRange[1]]}
-            onValueChange={handlePriceChange}
+            value={[localMinPrice ?? 0]}
+            onValueChange={(values) => setLocalMinPrice(values[0] ?? 0)}
             className="mb-4"
           />
         </div>
@@ -274,15 +286,8 @@ const ProductFilters: React.FC = () => {
             <span className="text-sm text-gray-500">Min:</span>
             <input
               type="number"
-              value={localMinPrice !== null ? localMinPrice : minPrice || ''}
-              onChange={(e) => {
-                const value = e.target.value ? parseInt(e.target.value) : null;
-                setLocalMinPrice(value);
-                if (value !== null) {
-                  setMinPrice(value);
-                  setPage(1);
-                }
-              }}
+              value={localMinPrice ?? ''}
+              onChange={(e) => setLocalMinPrice(e.target.value ? parseInt(e.target.value) : null)}
               className="w-20 px-2 py-1 text-sm border rounded"
               min="0"
               max={maxPrice || 1000}
@@ -293,15 +298,8 @@ const ProductFilters: React.FC = () => {
             <span className="text-sm text-gray-500">Max:</span>
             <input
               type="number"
-              value={localMaxPrice !== null ? localMaxPrice : maxPrice || ''}
-              onChange={(e) => {
-                const value = e.target.value ? parseInt(e.target.value) : null;
-                setLocalMaxPrice(value);
-                if (value !== null) {
-                  setMaxPrice(value);
-                  setPage(1);
-                }
-              }}
+              value={localMaxPrice ?? ''}
+              onChange={(e) => setLocalMaxPrice(e.target.value ? parseInt(e.target.value) : null)}
               className="w-20 px-2 py-1 text-sm border rounded"
               min={minPrice || 0}
               max="10000"

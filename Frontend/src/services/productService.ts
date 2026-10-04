@@ -21,7 +21,7 @@ export interface ProductResponse {
 }
 
 export const productService = {
-  getProducts: async (filters?: ProductFilters): Promise<ProductResponse> => {
+  getProducts: async (filters?: ProductFilters, signal?: AbortSignal): Promise<ProductResponse> => {
     const params = new URLSearchParams();
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -36,7 +36,7 @@ export const productService = {
       params.append('per_page', '20');
     }
     
-    const response = await api.get(`/products?${params.toString()}`);
+    const response = await api.get(`/products?${params.toString()}`, { signal });
     return response.data;
   },
 

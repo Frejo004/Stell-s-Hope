@@ -1,36 +1,71 @@
-import { useState, useEffect, useCallback, RefObject } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
-export const useInfiniteScroll = (
-  callback: () => void,
-  hasMore: boolean,
-  scrollRef?: RefObject<HTMLElement>
-) => {
+const BOTTOM_THRESHOLD = 300;
+
+const isAtBottom = () => {
+  const doc = document.documentElement;
+  const scrolled = window.scrollY || doc.scrollTop || 0;
+  return doc.scrollHeight - scrolled - window.innerHeight <= BOTTOM_THRESHOLD;
+};
+
+export const useInfiniteScroll = (callback: () => void | Promise<void>, hasMore: boolean) => {
   const [isFetching, setIsFetching] = useState(false);
 
-  const handleScroll = useCallback(() => {
-    const target = scrollRef?.current || document.documentElement;
-    const isAtBottom =
-      target.scrollHeight - target.scrollTop <= target.clientHeight + 200;
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
 
-    if (isAtBottom && hasMore && !isFetching) {
-      setIsFetching(true);
-    }
-  }, [hasMore, isFetching, scrollRef]);
+  const hasMoreRef = useRef(hasMore);
+  hasMoreRef.current = hasMore;
+
+  const fetchingRef = useRef(false);
+  const armedRef = useRef(true);
+
+  const trigger = useCallback(() => {
+    if (fetchingRef.current || !hasMoreRef.current) return;
+    fetchingRef.current = true;
+    setIsFetching(true);
+  }, []);
 
   useEffect(() => {
-    const target = scrollRef?.current || window;
-    target.addEventListener('scroll', handleScroll);
-    return () => target.removeEventListener('scroll', handleScroll);
-  }, [handleScroll, scrollRef]);
+    const handleScroll = () => {
+      if (!isAtBottom()) {
+        // Réarme seulement après avoir quitté le bas de page, sinon l'inertie
+        // de la molette empile des pages les unes derrière les autres.
+        armedRef.current = true;
+        return;
+      }
+
+      if (!armedRef.current) return;
+      armedRef.current = false;
+      trigger();
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [trigger]);
 
   useEffect(() => {
     if (!isFetching) return;
-    const fetchMoreData = async () => {
-      await callback();
-      setIsFetching(false);
+
+    let active = true;
+
+    const run = async () => {
+      try {
+        await callbackRef.current();
+      } finally {
+        if (active) {
+          fetchingRef.current = false;
+          setIsFetching(false);
+        }
+      }
     };
-    fetchMoreData();
-  }, [isFetching, callback]);
+
+    run();
+
+    return () => {
+      active = false;
+    };
+  }, [isFetching]);
 
   return [isFetching, setIsFetching] as const;
 };

@@ -2,23 +2,29 @@ import { useState  } from 'react';
 import { SlidersHorizontal, ChevronDown, X } from 'lucide-react';
 import ProductFilters from '../components/ProductFilters';
 import InfiniteProductList from '../components/InfiniteProductList';
-import { useProductFilters } from '../hooks/useProductFilters';
-import { useInfiniteProducts } from '../hooks/useInfiniteProducts';
+import { ProductListingProvider, useProductListing } from '../contexts/ProductListingContext';
 
 // Ajout de types pour gérer les filtres et le tri, comme recommandé.
 type ActiveFilters = { [key: string]: string | string[] };
 type SortOption = 'newest' | 'popularity' | 'price-asc' | 'price-desc';
 
 export default function BoutiquePage() {
+  return (
+    <ProductListingProvider>
+      <BoutiqueContent />
+    </ProductListingProvider>
+  );
+}
+
+function BoutiqueContent() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   // Ajout d'états pour les filtres actifs, le tri et le nombre de produits.
   // Le filtre initial a été retiré pour afficher tous les produits par défaut.
   const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
   const [sortOption, setSortOption] = useState<SortOption>('newest');
-  
-  const { getFilters } = useProductFilters();
-  const { products } = useInfiniteProducts(getFilters());
-  const productCount = products.length;
+
+  const { total } = useProductListing();
+  const productCount = total;
 
   const sortOptions: { value: SortOption; label: string }[] = [
     { value: 'newest', label: 'Nouveautés' },
@@ -92,7 +98,7 @@ export default function BoutiquePage() {
 
           {/* La liste des produits utiliserait maintenant les filtres et le tri.
               Les "Skeletons Loaders" seraient gérés à l'intérieur de ce composant. */}
-          <InfiniteProductList filters={activeFilters} sortBy={sortOption} />
+          <InfiniteProductList />
         </div>
       </div>
     </div>
