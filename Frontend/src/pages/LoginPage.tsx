@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/useToast';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Logo from '../components/Logo';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 
 interface LoginPageProps {
   onClose: () => void;
@@ -12,176 +14,131 @@ interface LoginPageProps {
 export default function LoginPage({ onClose }: LoginPageProps) {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
   const { login, loading } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirection après login vers la page d'origine si disponible
+  const from = (location.state as any)?.from || null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-
     try {
       const user = await login(formData.email, formData.password);
-      addToast({
-        type: 'success',
-        message: 'Connexion réussie ! Bienvenue sur Stell\'s Hope',
-        duration: 3000
-      });
-
-      // Redirection admin
+      addToast({ type: 'success', message: `Bienvenue ${user.first_name} !`, duration: 3000 });
       if (user.is_admin) {
         navigate('/admin');
+      } else if (from) {
+        navigate(from);
       } else {
         onClose();
       }
     } catch (error: any) {
-      console.error('Erreur connexion:', error);
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else {
-        addToast({
-          type: 'error',
-          message: 'Email ou mot de passe incorrect',
-          duration: 4000
-        });
+        addToast({ type: 'error', message: 'Email ou mot de passe incorrect', duration: 4000 });
       }
     }
   };
 
   return (
-    <div className="h-screen flex overflow-hidden">
-      {/* Left Panel - Form */}
-      <div className="w-full lg:w-1/2 bg-gray-50 overflow-y-auto">
+    <div className="h-screen flex overflow-hidden bg-white">
+      {/* ── Panneau gauche — formulaire ── */}
+      <div className="w-full lg:w-1/2 overflow-y-auto bg-gray-50">
         <div className="min-h-full flex items-center justify-center p-8">
           <div className="w-full max-w-md">
+
             {/* Logo */}
-            <div className="mb-8 text-center">
+            <div className="mb-10 text-center">
               <button onClick={() => navigate('/')} className="inline-block">
                 <Logo className="h-8" />
               </button>
             </div>
 
-            {/* Header */}
+            {/* Titre */}
             <div className="mb-8">
-              <h1 className="text-3xl font-normal text-gray-800 mb-2">Connexion</h1>
+              <h1 className="text-3xl font-light text-gray-900 mb-2">Connexion</h1>
               <p className="text-gray-500 text-sm">
-                Accédez à votre espace personnel et découvrez nos collections exclusives.
+                Accédez à votre espace personnel et découvrez nos collections.
               </p>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Adresse email
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all ${errors.email ? 'border-red-300' : ''
-                    }`}
-                  placeholder="votre@email.com"
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email[0]}</p>
-                )}
-              </div>
+            {/* Formulaire */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <Input
+                label="Adresse email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
+                placeholder="votre@email.com"
+                leftIcon={<Mail className="w-4 h-4" />}
+                error={errors.email?.[0]}
+              />
 
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Mot de passe
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all pr-12 ${errors.password ? 'border-red-300' : ''
-                      }`}
-                    placeholder="Votre mot de passe"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              <Input
+                label="Mot de passe"
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={formData.password}
+                onChange={(e) => setFormData(p => ({ ...p, password: e.target.value }))}
+                placeholder="Votre mot de passe"
+                leftIcon={<Lock className="w-4 h-4" />}
+                rightIcon={
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="hover:text-gray-600 transition-colors">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
-                </div>
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password[0]}</p>
-                )}
-              </div>
+                }
+                error={errors.password?.[0]}
+              />
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                  />
-                  <span className="ml-2 text-sm text-gray-600">Se souvenir de moi</span>
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-sm text-gray-500 hover:text-orange-500 transition-colors"
-                >
+              <div className="flex items-center justify-end">
+                <Link to="/forgot-password" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
                   Mot de passe oublié ?
                 </Link>
               </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium"
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Connexion...
-                  </div>
-                ) : (
-                  'Se connecter'
-                )}
-              </button>
+              <Button type="submit" fullWidth size="lg" loading={loading}>
+                Se connecter
+              </Button>
             </form>
 
-            {/* Register Link */}
-            <div className="mt-8 text-center">
-              <span className="text-gray-600 text-sm">Pas encore de compte ? </span>
-              <Link
-                to="/register"
-                className="text-orange-500 hover:text-orange-600 font-medium hover:underline"
-              >
+            {/* Séparateur */}
+            <div className="my-6 flex items-center gap-3">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-xs text-gray-400 font-medium">OU</span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+
+            {/* Lien inscription */}
+            <p className="text-center text-sm text-gray-600">
+              Pas encore de compte ?{' '}
+              <Link to="/register" className="font-semibold text-gray-900 hover:text-rose-500 transition-colors">
                 Créer un compte
               </Link>
-            </div>
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Right Panel - Image */}
-      <div className="hidden lg:block lg:w-1/2 bg-white">
-        <div className="h-full flex items-center justify-center p-8">
-          <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center">
-            <img
-              src="https://images.pexels.com/photos/6489663/pexels-photo-6489663.jpeg"
-              alt="Kitchen shelves with decorative items"
-              className="w-full h-full object-cover rounded-lg"
-            />
-          </div>
+      {/* ── Panneau droit — image ── */}
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+        <img
+          src="https://images.pexels.com/photos/6489663/pexels-photo-6489663.jpeg"
+          alt="Mode Stell's Hope"
+          className="w-full h-full object-cover"
+        />
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div className="absolute bottom-10 left-10 right-10 text-white">
+          <p className="text-2xl font-light leading-snug">"La mode, c'est ce qui se démode."</p>
+          <p className="text-sm text-white/70 mt-2">— Coco Chanel</p>
         </div>
       </div>
-    </div >
+    </div>
   );
 }
