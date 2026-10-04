@@ -1,7 +1,8 @@
-;
+import React from 'react';
 import { useAdminOrderFilters } from '../../hooks/useAdminFilters';
 import { adminService } from '../../services/adminService';
 import Pagination from '../Pagination';
+import { Order, PaginatedResponse } from '../../types';
 
 const AdminOrderList: React.FC = () => {
   const { 
@@ -13,7 +14,7 @@ const AdminOrderList: React.FC = () => {
     getFilters 
   } = useAdminOrderFilters();
 
-  const [orders, setOrders] = React.useState<any>({ data: [], meta: {} });
+  const [orders, setOrders] = React.useState<PaginatedResponse<Order>>({ data: [], meta: { current_page: 1, from: 0, last_page: 1, path: '', per_page: 15, to: 0, total: 0 }, links: { first: '', last: '', prev: null, next: null } });
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -152,7 +153,7 @@ const AdminOrderList: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {orders.data.map((order: any) => (
+            {orders.data.map((order) => (
               <tr key={order.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
@@ -171,7 +172,7 @@ const AdminOrderList: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {order.total_amount}€
+                  {order.total}€
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <select

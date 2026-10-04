@@ -197,7 +197,7 @@ export default function AdminOrders({ onNavigate: _onNavigate }: AdminOrdersProp
                     </td>
                     <td className="px-8 py-5">
                       <div className="text-sm font-black text-slate-900 border-l-2 border-rose-500 pl-3">
-                        {Number(order.total_amount || 0).toFixed(2)}€
+                        {Number(order.total || 0).toFixed(2)}€
                       </div>
                     </td>
                     <td className="px-8 py-5">

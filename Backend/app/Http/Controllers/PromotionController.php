@@ -12,10 +12,13 @@ class PromotionController extends Controller
     {
         $request->validate([
             'code' => 'required|string',
-            'amount' => 'required|numeric|min:0'
+            'subtotal' => 'sometimes|numeric|min:0',
+            'amount' => 'sometimes|numeric|min:0',
         ]);
 
-        $promotion = Promotion::where('code', $request->code)
+        $amount = $request->input('subtotal', $request->input('amount', 0));
+
+        $promotion = Promotion::where('code', strtoupper($request->code))
             ->where('is_active', true)
             ->where('starts_at', '<=', Carbon::now())
             ->where('expires_at', '>=', Carbon::now())
@@ -29,7 +32,7 @@ class PromotionController extends Controller
             return response()->json(['error' => 'Code promo épuisé'], 400);
         }
 
-        if ($promotion->min_amount && $request->amount < $promotion->min_amount) {
+        if ($promotion->min_amount && $amount < $promotion->min_amount) {
             return response()->json(['error' => "Montant minimum requis: {$promotion->min_amount}€"], 400);
         }
 

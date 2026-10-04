@@ -13,6 +13,11 @@ class Order extends Model
         'user_id',
         'order_number',
         'total',
+        'subtotal',
+        'shipping_amount',
+        'discount_amount',
+        'promotion_code',
+        'currency',
         'status',
         'shipping_address',
         'billing_address',
@@ -33,6 +38,9 @@ class Order extends Model
 
     protected $casts = [
         'total' => 'decimal:2',
+        'subtotal' => 'decimal:2',
+        'shipping_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'shipping_address' => 'array',
         'billing_address' => 'array'
     ];

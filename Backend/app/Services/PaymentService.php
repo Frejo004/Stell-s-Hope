@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Moneroo\Laravel\Facades\PaymentFacade as Moneroo;
 use Moneroo\Exceptions\PaymentException;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use App\Mail\OrderConfirmation;
 
 class PaymentService
@@ -132,11 +133,7 @@ class PaymentService
 
             case 'failed':
             case 'cancelled':
-                $order->update([
-                    'payment_status' => 'failed',
-                    // On ne change pas forcément le statut global en cancelled tout de suite,
-                    // le client peut vouloir réessayer.
-                ]);
+                $this->markPaymentFailedAndRestoreStock($order);
                 break;
                 
             default:
@@ -144,5 +141,29 @@ class PaymentService
         }
 
         return $order;
+    }
+
+    private function markPaymentFailedAndRestoreStock(Order $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedOrder->payment_status === 'failed') {
+                return;
+            }
+
+            $lockedOrder->load('orderItems.product');
+
+            foreach ($lockedOrder->orderItems as $item) {
+                if ($item->product) {
+                    $item->product->increment('stock_quantity', $item->quantity);
+                }
+            }
+
+            $lockedOrder->update([
+                'payment_status' => 'failed',
+                'status' => 'cancelled',
+            ]);
+        });
     }
 }

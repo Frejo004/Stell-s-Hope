@@ -44,10 +44,19 @@ class ProductController extends Controller
                 $query->orderBy('price', 'desc');
                 break;
             case 'popularity':
-                $query->orderBy('created_at', 'desc'); // Temporaire
+                $query->leftJoin('order_items as oi_pop', 'products.id', '=', 'oi_pop.product_id')
+                    ->selectRaw('products.*, COALESCE(SUM(oi_pop.quantity), 0) as total_sold')
+                    ->groupBy('products.id')
+                    ->orderBy('total_sold', 'desc');
                 break;
             case 'rating':
-                $query->orderBy('created_at', 'desc'); // Temporaire
+                $query->leftJoin('reviews as rv_rat', function ($join) {
+                        $join->on('products.id', '=', 'rv_rat.product_id')
+                             ->where('rv_rat.is_approved', true);
+                    })
+                    ->selectRaw('products.*, COALESCE(AVG(rv_rat.rating), 0) as avg_rating')
+                    ->groupBy('products.id')
+                    ->orderBy('avg_rating', 'desc');
                 break;
             default:
                 $query->orderBy('created_at', 'desc');
@@ -87,11 +96,18 @@ class ProductController extends Controller
     public function bestsellers()
     {
         $products = Product::where('is_active', true)
-                          ->with('category')
-                          ->orderBy('created_at', 'desc')
-                          ->limit(8)
-                          ->get();
-        
+            ->leftJoin('order_items as oi_bs', 'products.id', '=', 'oi_bs.product_id')
+            ->leftJoin('orders as o_bs', function ($join) {
+                $join->on('oi_bs.order_id', '=', 'o_bs.id')
+                     ->where('o_bs.payment_status', 'paid');
+            })
+            ->selectRaw('products.*, COALESCE(SUM(oi_bs.quantity), 0) as total_sold')
+            ->groupBy('products.id')
+            ->orderBy('total_sold', 'desc')
+            ->with('category')
+            ->limit(8)
+            ->get();
+
         return response()->json($products);
     }
 
@@ -131,13 +147,4 @@ class ProductController extends Controller
         return response()->json($suggestions);
     }
 
-    public function debug()
-    {
-        $product = Product::first();
-        return response()->json([
-            'raw_images' => $product->getRawOriginal('images'),
-            'processed_images' => $product->images,
-            'product' => $product
-        ]);
-    }
 }

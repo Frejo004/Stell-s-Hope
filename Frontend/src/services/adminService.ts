@@ -37,6 +37,11 @@ export const adminService = {
     return response.data;
   },
 
+  getAdminProducts: async (params: Record<string, string | number | boolean | null | undefined> = {}) => {
+    const response = await api.get('/admin/products', { params });
+    return response.data;
+  },
+
   createProduct: async (productData: any) => {
     const response = await api.post('/admin/products', productData);
     return response.data;
@@ -75,6 +80,11 @@ export const adminService = {
       ...(status !== 'all' && { status })
     });
     const response = await api.get(`/admin/orders?${params}`);
+    return response.data;
+  },
+
+  getAdminOrders: async (params: Record<string, string | number | boolean | null | undefined> = {}) => {
+    const response = await api.get('/admin/orders', { params });
     return response.data;
   },
 

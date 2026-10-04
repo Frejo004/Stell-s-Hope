@@ -1,6 +1,13 @@
 import api from './api';
 import { Order } from '../types';
 
+interface OrderTracking {
+  order_id: number;
+  status: Order['status'];
+  created_at: string;
+  tracking_number: string | null;
+}
+
 export interface CreateOrderData {
   shipping_address: {
     first_name: string;
@@ -19,10 +26,10 @@ export interface CreateOrderData {
     country: string;
   };
   payment_method: string;
+  promotion_code?: string;
   items?: {
     product_id: number;
     quantity: number;
-    price: number;
   }[];
 }
 
@@ -34,7 +41,7 @@ export const orderService = {
 
   createOrder: async (data: CreateOrderData): Promise<Order> => {
     const response = await api.post('/orders', data);
-    return response.data;
+    return response.data.order;
   },
 
   getOrder: async (id: number | string): Promise<Order> => {
@@ -42,7 +49,7 @@ export const orderService = {
     return response.data;
   },
 
-  trackOrder: async (id: number | string): Promise<any> => {
+  trackOrder: async (id: number | string): Promise<OrderTracking> => {
     const response = await api.get(`/orders/${id}/track`);
     return response.data;
   },

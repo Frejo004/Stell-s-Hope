@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -138,22 +141,24 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Ici vous pouvez implémenter l'envoi d'email de réinitialisation
-        // Pour l'instant, on retourne juste un message de succès
-        return response()->json(['message' => 'Email de réinitialisation envoyé']);
+        Password::sendResetLink($request->only('email'));
+
+        return response()->json([
+            'message' => 'Si ce compte existe, un email a ete envoye.',
+        ]);
     }
 
     public function resetPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
+            'email' => 'required|email',
             'token' => 'required|string',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -162,9 +167,25 @@ class AuthController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Ici vous pouvez implémenter la logique de réinitialisation
-        // Pour l'instant, on retourne juste un message de succès
-        return response()->json(['message' => 'Mot de passe réinitialisé avec succès']);
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        if ($status !== Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Lien de reinitialisation invalide ou expire.',
+            ], 422);
+        }
+
+        return response()->json(['message' => 'Mot de passe reinitialise avec succes.']);
     }
 
     public function verify(Request $request, $id, $hash)

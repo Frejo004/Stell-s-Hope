@@ -40,7 +40,8 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
 
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
   const [promoCode, setPromoCode] = useState('');
-  const [appliedPromo, setAppliedPromo] = useState<any>(null);
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; type: 'percentage' | 'fixed'; value: number } | null>(null);
+  const [serverOrderTotal, setServerOrderTotal] = useState<number | null>(null);
   const [promoError, setPromoError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -71,12 +72,18 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
   };
 
   const applyPromoCode = async (): Promise<void> => {
-    // Simulation simple pour l'UI, à connecter au backend réel si endpoint dispo
-    if (promoCode.toUpperCase() === 'WELCOME10') {
-      setAppliedPromo({ code: 'WELCOME10', type: 'percentage', value: 10 });
-      setPromoError('');
-    } else {
-      setPromoError('Code promo invalide');
+    if (!promoCode.trim()) return;
+    setPromoError('');
+    try {
+      const res = await import('../services/api').then(m => m.default.post('/promotions/validate', {
+        code: promoCode.trim().toUpperCase(),
+        subtotal: cartTotal,
+      }));
+      const promo = res.data;
+      setAppliedPromo({ code: promo.code, type: promo.type, value: Number(promo.value) });
+    } catch {
+      setPromoError('Code promo invalide ou expiré.');
+      setAppliedPromo(null);
     }
   };
 
@@ -114,9 +121,9 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
         payment_method: checkoutState.paymentMethod || 'card',
         items: hydratedCart.map(item => ({
           product_id: item.productId,
-          quantity: item.quantity,
-          price: item.price || item.product?.price || 0
-        }))
+          quantity: item.quantity
+        })),
+        promotion_code: appliedPromo?.code
       };
 
       // Appel API création commande
@@ -135,12 +142,12 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
       }
 
       const orderId = orderResponse.id;
+      setServerOrderTotal(Number(orderResponse.total));
 
       // 2. Initier le paiement
       if (checkoutState.paymentMethod === 'moneroo') {
         const paymentResponse = await paymentService.initiatePayment({
-          order_id: orderId,
-          amount: finalTotal // Optionnel si le backend utilise le total de l'order
+          order_id: orderId
         });
 
         if (paymentResponse.checkout_url) {
@@ -170,9 +177,9 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
         }, 1500);
       }
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Payment error:', error);
-      setErrorMsg(error.message || 'Une erreur est survenue lors du traitement.');
+      setErrorMsg(error instanceof Error ? error.message : 'Une erreur est survenue lors du traitement.');
       setIsProcessing(false);
     }
   };
@@ -507,7 +514,7 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
                 <div className="pt-4 border-t flex justify-between items-end">
                   <span className="font-medium text-gray-900 text-lg">Total</span>
                   <div className="text-right">
-                    <span className="font-bold text-2xl text-black block">{finalTotal.toFixed(2)} €</span>
+                    <span className="font-bold text-2xl text-black block">{(serverOrderTotal ?? finalTotal).toFixed(2)} €</span>
                     <span className="text-xs text-gray-400">TVA incluse</span>
                   </div>
                 </div>

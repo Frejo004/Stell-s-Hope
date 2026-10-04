@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\UploadedFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,14 +19,20 @@ class FileController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $path = $this->imageService->optimize($request->file('file'));
 
+        $record = UploadedFile::create([
+            'user_id' => $request->user()->id,
+            'path'    => $path,
+            'disk'    => 'public',
+        ]);
+
         return response()->json([
-            'path' => $path,
-            'url' => Storage::url($path)
+            'id'  => $record->id,
+            'url' => Storage::url($path),
         ]);
     }
 
@@ -40,11 +47,16 @@ class FileController extends Controller
 
     public function delete(Request $request)
     {
-        $request->validate(['path' => 'required|string']);
-        
-        if (Storage::disk('public')->exists($request->path)) {
-            Storage::disk('public')->delete($request->path);
+        $request->validate(['id' => 'required|integer']);
+
+        $record = UploadedFile::findOrFail($request->id);
+
+        if ($record->user_id !== $request->user()->id && !$request->user()->is_admin) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        Storage::disk($record->disk)->delete($record->path);
+        $record->delete();
 
         return response()->json(['message' => 'File deleted']);
     }

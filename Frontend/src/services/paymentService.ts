@@ -16,7 +16,7 @@ export interface PaymentResponse {
 
 export const paymentService = {
     initiatePayment: async (data: PaymentInitiateData): Promise<PaymentResponse> => {
-        const response = await api.post<PaymentResponse>('/payment/initiate', data);
-        return response.data;
+        const response = await api.post<{ data: PaymentResponse }>('/payment/initiate', data);
+        return response.data.data;
     },
 };

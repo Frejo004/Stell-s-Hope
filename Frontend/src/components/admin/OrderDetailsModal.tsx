@@ -114,7 +114,7 @@ export default function OrderDetailsModal({ isOpen, orderId, onClose }: OrderDet
                     </div>
                     <div className="border-t pt-2 flex justify-between font-semibold">
                       <span>Total</span>
-                      <span>{Number(order.total_amount || 0).toFixed(2)}€</span>
+                      <span>{Number(order.total || 0).toFixed(2)}€</span>
                     </div>
                   </div>
                 </div>

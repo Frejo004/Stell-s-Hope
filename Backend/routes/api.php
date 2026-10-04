@@ -38,8 +38,8 @@ Route::get('/user', function (Request $request) {
 // Public routes
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 
 // Email Verification
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
@@ -50,7 +50,6 @@ Route::get('/products/featured', [ProductController::class, 'featured']);
 Route::get('/products/bestsellers', [ProductController::class, 'bestsellers']);
 Route::get('/products/search', [ProductController::class, 'search']);
 Route::get('/products/search/suggestions', [ProductController::class, 'searchSuggestions']);
-Route::get('/products/debug', [ProductController::class, 'debug']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 
@@ -66,10 +65,10 @@ Route::post('/promotions/validate', [PromotionController::class, 'validate']);
 Route::post('/promotions/apply', [PromotionController::class, 'apply']);
 
 // Suivi de commande public (sans authentification)
-Route::get('/orders/track-public', [OrderController::class, 'trackPublic']);
+Route::get('/orders/track-public', [OrderController::class, 'trackPublic'])->middleware('throttle:10,1');
 
 // Payment routes (public)
-Route::post('/payment/webhook', [PaymentController::class, 'webhook']);
+Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->middleware('throttle:60,1');
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 
 // Protected routes

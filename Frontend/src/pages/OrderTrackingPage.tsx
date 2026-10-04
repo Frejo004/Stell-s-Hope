@@ -160,7 +160,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
           <div className="border-t mt-4 pt-4">
             <div className="flex justify-between text-lg font-semibold">
               <span>Total</span>
-              <span>{Number(order.total_amount || 0).toFixed(2)}€</span>
+              <span>{Number(order.total || 0).toFixed(2)}€</span>
             </div>
           </div>
         </div>

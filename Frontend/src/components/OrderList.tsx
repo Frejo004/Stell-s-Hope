@@ -52,7 +52,7 @@ const OrderList: React.FC = () => {
                       {order.status_label || order.status}
                     </span>
                     <p className="text-lg font-bold text-gray-900 mt-1">
-                      {order.total_amount}€
+                      {order.total}€
                     </p>
                   </div>
                 </div>

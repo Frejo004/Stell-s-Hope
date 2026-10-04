@@ -118,16 +118,12 @@ class AdminDashboardController extends Controller
         }
         
         $totalOrders = Order::count();
-        $deliveredOrders = Order::where('status', 'delivered')->count();
-        
-        // Estimation conversion (simulée avec un baseline de visiteurs)
-        $visitors = max(1000, $totalOrders * 20); 
-        
+        $paidOrders = Order::where('payment_status', 'paid')->count();
+
         $salesFunnel = [
-            ['name' => 'Visiteurs', 'value' => $visitors, 'percentage' => 100, 'color' => 'bg-indigo-500'],
-            ['name' => 'Ajouts Panier', 'value' => round($visitors * 0.15), 'percentage' => 15, 'color' => 'bg-emerald-500'],
-            ['name' => 'Commandes', 'value' => $totalOrders, 'percentage' => $visitors > 0 ? round(($totalOrders / $visitors) * 100, 1) : 0, 'color' => 'bg-rose-500'],
-            ['name' => 'Paiements', 'value' => Order::where('payment_status', 'paid')->count(), 'percentage' => $visitors > 0 ? round((Order::where('payment_status', 'paid')->count() / $visitors) * 100, 1) : 0, 'color' => 'bg-amber-500']
+            ['name' => 'Commandes', 'value' => $totalOrders, 'percentage' => 100, 'color' => 'bg-rose-500'],
+            ['name' => 'Paiements', 'value' => $paidOrders, 'percentage' => $totalOrders > 0 ? round(($paidOrders / $totalOrders) * 100, 1) : 0, 'color' => 'bg-amber-500'],
+            ['name' => 'Livrées', 'value' => Order::where('status', 'delivered')->count(), 'percentage' => $totalOrders > 0 ? round((Order::where('status', 'delivered')->count() / $totalOrders) * 100, 1) : 0, 'color' => 'bg-emerald-500'],
         ];
         
         $paymentGrouping = Order::select('payment_method', DB::raw('count(*) as count'), DB::raw('sum(total) as total'))
@@ -143,8 +139,8 @@ class AdminDashboardController extends Controller
         });
         
         $liveMetrics = [
-            'online_visitors' => rand(15, 45), // Simulé
-            'active_carts' => rand(5, 12), // Simulé
+            'online_visitors' => null, // non disponible sans analytics temps réel
+            'active_carts' => null,    // non disponible sans analytics temps réel
             'orders_per_hour' => Order::where('created_at', '>=', Carbon::now()->subHour())->count(),
             'today_revenue' => Order::where('payment_status', 'paid')
                 ->whereDate('created_at', Carbon::today())
@@ -193,9 +189,9 @@ class AdminDashboardController extends Controller
             'categories' => Category::withCount('products')->get(),
             'category_stats' => $categoryStats,
             'sales_funnel' => $salesFunnel,
-            'sales_funnel_conversion' => $visitors > 0 ? round((Order::where('payment_status', 'paid')->count() / $visitors) * 100, 1) . '%' : '0%',
+            'sales_funnel_conversion' => $totalOrders > 0 ? round(($paidOrders / $totalOrders) * 100, 1) . '%' : '0%',
             'payment_methods' => $paymentMethods,
-            'payment_success_rate' => $totalOrders > 0 ? round((Order::where('payment_status', 'paid')->count() / $totalOrders) * 100, 1) . '%' : '0%'
+            'payment_success_rate' => $totalOrders > 0 ? round(($paidOrders / $totalOrders) * 100, 1) . '%' : '0%'
         ];
 
         return response()->json($data);

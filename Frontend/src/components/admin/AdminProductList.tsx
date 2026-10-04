@@ -1,7 +1,8 @@
-;
+import React from 'react';
 import { useAdminProductFilters } from '../../hooks/useAdminFilters';
 import { adminService } from '../../services/adminService';
 import Pagination from '../Pagination';
+import { Category, PaginatedResponse, Product } from '../../types';
 
 const AdminProductList: React.FC = () => {
   const { 
@@ -12,9 +13,9 @@ const AdminProductList: React.FC = () => {
     getFilters 
   } = useAdminProductFilters();
 
-  const [products, setProducts] = React.useState<any>({ data: [], meta: {} });
+  const [products, setProducts] = React.useState<PaginatedResponse<Product>>({ data: [], meta: { current_page: 1, from: 0, last_page: 1, path: '', per_page: 15, to: 0, total: 0 }, links: { first: '', last: '', prev: null, next: null } });
   const [loading, setLoading] = React.useState(true);
-  const [categories, setCategories] = React.useState([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -76,7 +77,7 @@ const AdminProductList: React.FC = () => {
             className="px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Toutes les catégories</option>
-            {categories.map((cat: any) => (
+            {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
@@ -134,7 +135,7 @@ const AdminProductList: React.FC = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {products.data.map((product: any) => (
+            {products.data.map((product) => (
               <tr key={product.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
