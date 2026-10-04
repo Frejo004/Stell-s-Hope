@@ -25,6 +25,14 @@ class PaymentService
      */
     public function initiatePayment(Order $order, array $customerInfo = [])
     {
+        if ($order->payment_status === 'pending' && $order->payment_id && $order->payment_url) {
+            return [
+                'id' => $order->payment_id,
+                'checkout_url' => $order->payment_url,
+                'url' => $order->payment_url,
+            ];
+        }
+
         try {
             // Devise par défaut XOF pour Moneroo (Afrique de l'Ouest)
             $currency = 'XOF'; 

@@ -45,6 +45,7 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
   const [promoError, setPromoError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const hydratedCart = useMemo(() => cart.map((item: any) => {
     const product = products.find(p => p.id === item.productId);
@@ -131,7 +132,7 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
       // Si l'API attend un format spécifique, ajustez ici.
       let orderResponse;
       try {
-        orderResponse = await orderService.createOrder(orderPayload);
+        orderResponse = await orderService.createOrder(orderPayload, idempotencyKey);
       } catch (err) {
         console.error("Erreur création commande", err);
         throw new Error("Impossible de créer la commande. Vérifiez votre panier.");

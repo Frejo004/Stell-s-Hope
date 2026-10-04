@@ -24,7 +24,8 @@ class Order extends Model
         'payment_method',
         'payment_id',
         'payment_url',
-        'payment_status'
+        'payment_status',
+        'idempotency_key'
     ];
 
     protected static function booted()

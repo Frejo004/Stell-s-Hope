@@ -42,9 +42,24 @@ class OrderController extends Controller
             return response()->json(['message' => 'Cart is empty'], 400);
         }
 
+        $idempotencyKey = $request->header('Idempotency-Key');
+        if ($idempotencyKey) {
+            $existingOrder = Order::where('idempotency_key', $idempotencyKey)
+                                  ->where('user_id', $user->id)
+                                  ->with('orderItems.product')
+                                  ->first();
+            if ($existingOrder) {
+                return response()->json([
+                    'message' => 'Order already created (idempotent request)',
+                    'id' => $existingOrder->id,
+                    'order' => $existingOrder,
+                ], 200);
+            }
+        }
+
         $order = null;
 
-        DB::transaction(function () use ($request, $user, $itemsData, &$order) {
+        DB::transaction(function () use ($request, $user, $itemsData, &$order, $idempotencyKey) {
             $preparedItems = [];
             $subtotal = 0.0;
 
@@ -93,6 +108,7 @@ class OrderController extends Controller
                 'shipping_address' => $request->shipping_address,
                 'billing_address' => $request->billing_address,
                 'payment_method' => $request->payment_method,
+                'idempotency_key' => $idempotencyKey,
             ]);
 
             foreach ($preparedItems as $item) {

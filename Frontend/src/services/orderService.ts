@@ -39,8 +39,9 @@ export const orderService = {
     return response.data;
   },
 
-  createOrder: async (data: CreateOrderData): Promise<Order> => {
-    const response = await api.post('/orders', data);
+  createOrder: async (data: CreateOrderData, idempotencyKey?: string): Promise<Order> => {
+    const config = idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : {};
+    const response = await api.post('/orders', data, config);
     return response.data.order;
   },
 
