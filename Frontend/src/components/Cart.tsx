@@ -1,8 +1,8 @@
-import { useState  } from 'react';
+
 import { X, Plus, Minus, Trash2 } from 'lucide-react';
-import { useCart } from '../hooks/useCart';
+import { useCartContext as useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
-import CheckoutPage from '../pages/CheckoutPage';
+
 import { Order } from '../types/order';
 import { getImageUrl } from '../utils/imageUtils';
 
@@ -10,7 +10,7 @@ interface CartProps {
   onOrderComplete?: (order: Order) => void;
 }
 
-export default function Cart({ onOrderComplete }: CartProps = {}) {
+export default function Cart({ onOrderComplete: _onOrderComplete }: CartProps = {}) {
   const {
     cart,
     isOpen,
@@ -57,26 +57,26 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
               </div>
             ) : (
               <div className="space-y-4">
-                {cart.map((item, index) => (
-                  <div key={`${item.product.id}-${item.size}-${item.color}-${index}`} className="flex space-x-3 border-b pb-4">
+                {cart.map((item: any, index: number) => (
+                  <div key={`${item.productId}-${item.size || ''}-${item.color || ''}-${index}`} className="flex space-x-3 border-b pb-4">
                     <img
-                      src={getImageUrl(item.product.images?.[0])}
-                      alt={item.product.name}
+                      src={getImageUrl(item.image)}
+                      alt={item.name}
                       className="w-16 h-16 object-cover rounded"
                     />
                     <div className="flex-1">
-                      <h3 className="font-medium text-sm">{item.product.name}</h3>
+                      <h3 className="font-medium text-sm">{item.name}</h3>
                       <p className="text-sm text-gray-500">
-                        {item.color} • {item.size}
+                        {item.color} {item.color && item.size ? '•' : ''} {item.size}
                       </p>
                       <p className="font-semibold text-sm">
-                        {Number(item.product.price || 0).toFixed(2)} €
+                        {Number(item.price || 0).toFixed(2)} €
                       </p>
                       
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.size, item.color, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                             className="p-1 hover:bg-gray-100 rounded"
                           >
                             <Minus className="w-3 h-3" />
@@ -85,7 +85,7 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.size, item.color, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                             className="p-1 hover:bg-gray-100 rounded"
                           >
                             <Plus className="w-3 h-3" />
@@ -93,7 +93,7 @@ export default function Cart({ onOrderComplete }: CartProps = {}) {
                         </div>
                         
                         <button
-                          onClick={() => removeFromCart(item.product.id, item.size, item.color)}
+                          onClick={() => removeFromCart(item.productId)}
                           className="p-1 text-gray-400 hover:text-red-500"
                         >
                           <Trash2 className="w-4 h-4" />

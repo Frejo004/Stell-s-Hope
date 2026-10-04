@@ -172,3 +172,16 @@ export interface PaginatedResponse<T> {
     total: number;
   };
 }
+
+export interface FilterState {
+  search?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  type?: string | string[] | any;
+  size?: string | string[] | any;
+  color?: string | string[] | any;
+  priceRange?: string | any;
+  sort?: string;
+
+}

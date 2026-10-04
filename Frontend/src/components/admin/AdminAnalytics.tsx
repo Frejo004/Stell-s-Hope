@@ -6,7 +6,7 @@ interface AdminAnalyticsProps {
   onNavigate: (page: string) => void;
 }
 
-export default function AdminAnalytics({ onNavigate }: AdminAnalyticsProps) {
+export default function AdminAnalytics({ onNavigate: _onNavigate }: AdminAnalyticsProps) {
   const [period, setPeriod] = useState('7d');
   const { analytics = { metrics: { revenue: 0, orders: 0, customers: 0, conversion: 0 }, topProducts: [] }, loading } = useAdminAnalytics(period);
 

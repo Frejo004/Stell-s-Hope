@@ -14,7 +14,7 @@ export function useApi<T>(
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { showToast } = useToast();
+  const { addToast } = useToast();
 
   const execute = async () => {
     try {
@@ -27,7 +27,7 @@ export function useApi<T>(
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || 'Une erreur est survenue';
       setError(errorMessage);
-      showToast(errorMessage, 'error');
+      addToast({ message: errorMessage, type: 'error' });
       options.onError?.(err);
       throw err;
     } finally {

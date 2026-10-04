@@ -5,7 +5,7 @@ interface AdminSettingsProps {
   onNavigate: (page: string) => void;
 }
 
-export default function AdminSettings({ onNavigate }: AdminSettingsProps) {
+export default function AdminSettings({ onNavigate: _onNavigate }: AdminSettingsProps) {
   const [activeTab, setActiveTab] = useState('general');
 
   const tabs = [

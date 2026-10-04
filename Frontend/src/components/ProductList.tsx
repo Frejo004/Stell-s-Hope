@@ -1,22 +1,22 @@
 import React from 'react';
 import { useProducts } from '../hooks/useProducts';
-import { useCart } from '../hooks/useCart';
+import { useCartContext as useCart } from '../contexts/CartContext';
 import { useWishlist } from '../hooks/useWishlist';
 import { useProductFilters } from '../hooks/useProductFilters';
 import Pagination from './Pagination';
 import { getImageUrl } from '../utils/imageUtils';
 
 const ProductList: React.FC = () => {
-  const { getFilters, page, setPage } = useProductFilters();
-  const { products, loading, error } = useProducts(getFilters());
+  const { page, setPage } = useProductFilters();
+  const { products, loading, error } = useProducts();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   if (loading) return <div className="text-center py-8">Chargement...</div>;
   if (error) return <div className="text-center py-8 text-red-600">Erreur: {error}</div>;
 
-  const productsData = products?.data || products || [];
-  const pagination = products?.meta || products?.pagination;
+  const productsData = (products as any)?.data || products || [];
+  const pagination = (products as any)?.meta || (products as any)?.pagination;
 
   return (
     <div>

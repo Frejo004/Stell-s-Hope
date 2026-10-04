@@ -11,7 +11,7 @@ interface ForgotPasswordPageProps {
   onClose: () => void;
 }
 
-export default function ForgotPasswordPage({ onClose }: ForgotPasswordPageProps) {
+export default function ForgotPasswordPage({ onClose: _onClose }: ForgotPasswordPageProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);

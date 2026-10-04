@@ -7,7 +7,6 @@ import { orderService } from '../services/orderService';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
-import { useOrders } from '../hooks/useOrders';
 import { Order } from '../types/order';
 
 // Lazy loading des pages pour optimisation

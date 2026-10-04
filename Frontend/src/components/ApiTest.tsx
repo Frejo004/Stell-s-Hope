@@ -18,7 +18,7 @@ export default function ApiTest() {
         setCategories(categoriesResponse.data);
         
         setStatus('✅ API connection successful!');
-      } catch (error) {
+      } catch (error: any) {
         console.error('API Test Error:', error);
         setStatus('❌ API connection failed: ' + (error.response?.data?.message || error.message));
       }

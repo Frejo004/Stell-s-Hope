@@ -1,15 +1,13 @@
 ;
 import { useWishlist } from '../hooks/useWishlist';
-import { useCart } from '../hooks/useCart';
+import { useCartContext as useCart } from '../contexts/CartContext';
 import { useQueryState, parseAsInteger } from 'nuqs';
 import Pagination from './Pagination';
 
 const WishlistGrid: React.FC = () => {
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
-  const { wishlist, loading, toggleWishlist } = useWishlist();
+  const { wishlist, toggleWishlist } = useWishlist();
   const { addToCart } = useCart();
-
-  if (loading) return <div className="text-center py-8">Chargement...</div>;
 
   // Simulate pagination for wishlist (client-side)
   const itemsPerPage = 12;

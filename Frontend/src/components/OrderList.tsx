@@ -10,8 +10,8 @@ const OrderList: React.FC = () => {
   if (loading) return <div className="text-center py-8">Chargement...</div>;
   if (error) return <div className="text-center py-8 text-red-600">Erreur: {error}</div>;
 
-  const ordersData = orders?.data || orders || [];
-  const pagination = orders?.meta || orders?.pagination;
+  const ordersData = (orders as any)?.data || orders || [];
+  const pagination = (orders as any)?.meta || (orders as any)?.pagination;
 
   const getStatusColor = (status: string) => {
     const colors = {

@@ -1,4 +1,4 @@
-;
+import { FileText, Shield, Truck, Mail, Phone } from 'lucide-react';
 
 interface LegalPageProps {
   onClose: () => void;

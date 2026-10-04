@@ -73,13 +73,8 @@ export default function SimpleRouter({ onOrderComplete }: SimpleRouterProps) {
     }
 
     if (currentPath.startsWith('/category/')) {
-      const category = currentPath.split('/')[2];
       return (
-        <CategoryPage
-          products={products}
-          category={category}
-          onProductClick={handleProductClick}
-        />
+        <CategoryPage />
       );
     }
 
@@ -167,7 +162,7 @@ export default function SimpleRouter({ onOrderComplete }: SimpleRouterProps) {
         return (
           <OrderConfirmationPage
             order={order}
-            onClose={() => navigate('/')}
+
             onContinueShopping={() => navigate('/')}
           />
         );

@@ -5,7 +5,7 @@ interface AdminPaymentsProps {
   onNavigate: (page: string) => void;
 }
 
-export default function AdminPayments({ onNavigate }: AdminPaymentsProps) {
+export default function AdminPayments({ onNavigate: _onNavigate }: AdminPaymentsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 

@@ -3,8 +3,8 @@ import { ChevronDown, X } from 'lucide-react';
 import { FilterState } from '../types';
 
 interface FiltersProps {
-  filters: FilterState;
-  onFiltersChange: (filters: FilterState) => void;
+  filters: any;
+  onFiltersChange: (filters: any) => void;
   isOpen: boolean;
   onToggle: () => void;
 }

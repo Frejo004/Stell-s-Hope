@@ -9,7 +9,7 @@ interface ResetPasswordPageProps {
   onClose: () => void;
 }
 
-export default function ResetPasswordPage({ onClose }: ResetPasswordPageProps) {
+export default function ResetPasswordPage({ onClose: _onClose }: ResetPasswordPageProps) {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
   const email = searchParams.get('email') || '';

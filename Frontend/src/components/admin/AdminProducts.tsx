@@ -13,6 +13,7 @@ interface AdminProductsProps {
 export default function AdminProducts({ onNavigate: _onNavigate }: AdminProductsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [priceFilter] = useState('all');
   const [stockFilter, setStockFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'warning', message: string } | null>(null);

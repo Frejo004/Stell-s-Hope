@@ -5,7 +5,7 @@ interface AdminShippingProps {
   onNavigate: (page: string) => void;
 }
 
-export default function AdminShipping({ onNavigate }: AdminShippingProps) {
+export default function AdminShipping({ onNavigate: _onNavigate }: AdminShippingProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 

@@ -5,7 +5,7 @@ interface AdminContentProps {
   onNavigate: (page: string) => void;
 }
 
-export default function AdminContent({ onNavigate }: AdminContentProps) {
+export default function AdminContent({ onNavigate: _onNavigate }: AdminContentProps) {
   const [activeTab, setActiveTab] = useState('pages');
 
   const pages = [

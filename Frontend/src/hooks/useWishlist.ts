@@ -17,13 +17,13 @@ export const useWishlist = () => {
     localStorage.setItem('wishlist', JSON.stringify(newWishlist));
   };
 
-  const removeFromWishlist = (productId: string) => {
+  const removeFromWishlist = (productId: number) => {
     const newWishlist = wishlist.filter(item => item.id !== productId);
     setWishlist(newWishlist);
     localStorage.setItem('wishlist', JSON.stringify(newWishlist));
   };
 
-  const isInWishlist = (productId: string) => {
+  const isInWishlist = (productId: number) => {
     return wishlist.some(item => item.id === productId);
   };
 

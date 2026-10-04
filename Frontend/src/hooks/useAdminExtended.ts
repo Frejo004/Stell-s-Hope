@@ -1,8 +1,34 @@
 import { useState, useEffect } from 'react';
 import { adminService } from '../services/adminService';
 
+export interface Ticket {
+  id: number;
+  customer: string;
+  email: string;
+  subject: string;
+  priority: string;
+  status: string;
+  created: string;
+}
+
+export interface Promotion {
+  id: number;
+  code: string;
+  discount: number;
+  status: string;
+  usage_count: number;
+  [key: string]: any;
+}
+
+export interface AnalyticsData {
+  metrics: { revenue: number; orders: number; customers: number; conversion: number };
+  salesChart: any[];
+  topProducts: { name: string; sales: number; revenue: string; [key: string]: any }[];
+  trafficSources: any[];
+}
+
 export const useAdminAnalytics = (period = '7d') => {
-  const [analytics, setAnalytics] = useState({
+  const [analytics, setAnalytics] = useState<AnalyticsData>({
     metrics: { revenue: 0, orders: 0, customers: 0, conversion: 0 },
     salesChart: [],
     topProducts: [],
@@ -34,7 +60,7 @@ export const useAdminAnalytics = (period = '7d') => {
 };
 
 export const useAdminPromotions = () => {
-  const [promotions, setPromotions] = useState([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [stats, setStats] = useState({ total: 0, active: 0, used: 0, usageRate: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -57,11 +83,11 @@ export const useAdminPromotions = () => {
 };
 
 export const useAdminSupport = () => {
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [stats, setStats] = useState({ total: 0, open: 0, pending: 0, resolved: 0 });
   const [loading, setLoading] = useState(true);
 
-  const updateTicketStatus = async (id: string, status: string) => {
+  const updateTicketStatus = async (id: number, status: string) => {
     try {
       await adminService.updateTicketStatus(id, status);
       setTickets(prev => prev.map(t => t.id === id ? { ...t, status } : t));

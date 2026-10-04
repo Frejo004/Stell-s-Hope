@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUtils';
 
 export default function CartSidebarNew() {
-  const { cartItemsCount, guestCart, isOpen, setIsOpen, removeFromCart, cartTotal } = useCartContext();
+  const { cartItemsCount, cart, isOpen, setIsOpen, removeFromCart, cartTotal } = useCartContext();
   const { isAuthenticated } = useAuth();
   const sidebarRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ export default function CartSidebarNew() {
           ) : (
             /* Liste des articles */
             <div className="px-6 py-4 space-y-5">
-              {guestCart.map((item, index) => (
+              {cart.map((item: any, index: number) => (
                 <div key={`${item.productId}-${index}`} className="flex gap-4 group">
                   {/* Image */}
                   <div

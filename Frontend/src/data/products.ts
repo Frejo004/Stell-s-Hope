@@ -1,6 +1,6 @@
 import { Product } from '../types';
 
-export const products: Product[] = [
+export const products = [
   {
     id: '1',
     name: 'Chemise Oxford Premium',
@@ -131,4 +131,4 @@ export const products: Product[] = [
     reviewCount: 28,
     isBestSeller: true
   }
-];
+] as unknown as Product[];

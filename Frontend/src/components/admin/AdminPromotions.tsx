@@ -7,7 +7,7 @@ interface AdminPromotionsProps {
   onNavigate: (page: string) => void;
 }
 
-export default function AdminPromotions({ onNavigate }: AdminPromotionsProps) {
+export default function AdminPromotions({ onNavigate: _onNavigate }: AdminPromotionsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);

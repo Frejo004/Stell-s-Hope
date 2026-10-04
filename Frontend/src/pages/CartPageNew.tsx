@@ -8,37 +8,20 @@ interface CartPageProps {
 }
 
 export default function CartPageNew({ onClose }: CartPageProps) {
-  const { guestCart, cartItemsCount, cartTotal, removeFromCart, addToCart } = useCartContext();
+  const { cart, cartItemsCount, cartTotal, removeFromCart, updateQuantity } = useCartContext();
   const navigate = useNavigate();
 
-  const handleUpdateQuantity = (productId: number, quantity: number) => {
-    const item = guestCart.find(i => i.productId === productId);
+  const handleIncreaseQuantity = (productId: number) => {
+    const item = cart.find((i: any) => i.productId === productId);
     if (item) {
-      addToCart({ productId, quantity, name: item.name, price: item.price, image: item.image });
+      updateQuantity(productId, item.quantity + 1);
     }
   };
 
-  const handleIncreaseQuantity = (productId: number) => {
-    handleUpdateQuantity(productId, 1);
-  };
-
   const handleDecreaseQuantity = (productId: number) => {
-    const item = guestCart.find(i => i.productId === productId);
-    if (item && item.quantity > 1) {
-      // To decrease, we need a dedicated function, or addToCart needs to handle negative values.
-      // Let's assume addToCart can handle this by replacing the quantity.
-      // A better context would have `updateQuantity`. For now, let's re-implement it here.
-      const newQuantity = item.quantity - 1;
-      // This is a workaround. Ideally, the context would provide an `updateItemQuantity` function.
-      // For now, we will remove and re-add. This is not ideal.
-      // A better approach is to have a proper update function in the context.
-      // Let's see if addToCart can handle quantity updates. The context file shows it does.
-      // `updatedCart[existingIndex].quantity += newItem.quantity;`
-      // So to decrease, I need to add with a negative quantity.
-      addToCart({ productId, quantity: -1, name: item.name, price: item.price, image: item.image });
-
-    } else if (item && item.quantity === 1) {
-      removeFromCart(productId);
+    const item = cart.find((i: any) => i.productId === productId);
+    if (item) {
+      updateQuantity(productId, item.quantity - 1);
     }
   };
 
@@ -69,7 +52,7 @@ export default function CartPageNew({ onClose }: CartPageProps) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
                 <div className="space-y-4">
-                  {guestCart.map((item) => (
+                  {cart.map((item: any) => (
                     <div key={item.productId} className="flex items-center space-x-4 border-b pb-4">
                       <div className="w-24 h-24 bg-gray-200 rounded-md overflow-hidden">
                         <img 

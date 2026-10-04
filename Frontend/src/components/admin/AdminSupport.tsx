@@ -6,7 +6,7 @@ interface AdminSupportProps {
   onNavigate: (page: string) => void;
 }
 
-export default function AdminSupport({ onNavigate }: AdminSupportProps) {
+export default function AdminSupport({ onNavigate: _onNavigate }: AdminSupportProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const { tickets = [], stats = { total: 0, open: 0, pending: 0, resolved: 0 }, loading, updateTicketStatus } = useAdminSupport();

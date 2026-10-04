@@ -16,7 +16,7 @@ interface CheckoutPageProps {
 }
 
 export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageProps) {
-  const { guestCart, cartTotal, clearCart } = useCartContext();
+  const { cart, cartTotal, clearCart } = useCartContext();
   const { products } = useProducts();
   const { isAuthenticated, user: authUser, loading } = useAuth();
   const navigate = useNavigate();
@@ -46,10 +46,10 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const hydratedCart = useMemo(() => guestCart.map(item => {
+  const hydratedCart = useMemo(() => cart.map((item: any) => {
     const product = products.find(p => p.id === item.productId);
     return { ...item, product };
-  }), [guestCart, products]);
+  }), [cart, products]);
 
   const shipping = cartTotal > 100 ? 0 : 5.99; // Livraison gratuite > 100€
   const discount = appliedPromo ?
@@ -450,9 +450,9 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
                   <button onClick={() => setCheckoutState(prev => ({ ...prev, step: 'shipping' }))} className="text-sm font-medium text-black mt-3 hover:underline">Modifier</button>
                 </div>
 
-                <h3 className="font-semibold mb-4 text-gray-900">Articles ({hydratedCart.reduce((acc, i) => acc + i.quantity, 0)})</h3>
+                <h3 className="font-semibold mb-4 text-gray-900">Articles ({hydratedCart.reduce((acc: number, i: any) => acc + i.quantity, 0)})</h3>
                 <div className="space-y-6">
-                  {hydratedCart.map((item) => (
+                  {hydratedCart.map((item: any) => (
                     <div key={item.productId} className="flex gap-4 p-4 border rounded-xl hover:border-gray-300 transition-colors bg-white">
                       <div className="w-20 h-24 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                         <img src={item.image || ''} alt={item.name} className="w-full h-full object-cover" />

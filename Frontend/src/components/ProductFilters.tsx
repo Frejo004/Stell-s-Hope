@@ -47,62 +47,7 @@ const Checkbox = ({ id, checked, onCheckedChange, className = '', children }: Ch
 );
 
 
-interface SelectProps {
-  value: string;
-  onValueChange: (value: string) => void;
-  children: React.ReactNode;
-  className?: string;
-}
 
-const Select = ({ value, onValueChange, children, className = '' }: SelectProps) => (
-  <select 
-    value={value} 
-    onChange={(e) => onValueChange?.(e.target.value)}
-    className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm ${className}`}
-  >
-    {children}
-  </select>
-);
-
-interface SelectTriggerProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-const SelectTrigger = ({ children, className = '' }: SelectTriggerProps) => (
-  <div className={className}>{children}</div>
-);
-
-interface SelectValueProps {
-  placeholder: string;
-  children?: React.ReactNode;
-}
-
-const SelectValue = ({ placeholder }: SelectValueProps) => (
-  <span>{placeholder}</span>
-);
-
-interface SelectContentProps {
-  children: React.ReactNode;
-}
-
-const SelectContent = ({ children }: SelectContentProps) => (
-  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-    {children}
-  </div>
-);
-
-interface SelectItemProps {
-  value: string;
-  children: React.ReactNode;
-  className?: string;
-}
-
-const SelectItem = ({ value, children }: SelectItemProps) => (
-  <option value={value} className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer">
-    {children}
-  </option>
-);
 
 const ProductFilters: React.FC = () => {
   const {

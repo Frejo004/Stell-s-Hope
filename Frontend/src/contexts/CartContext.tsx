@@ -17,12 +17,13 @@ interface GuestCartItem {
 interface CartContextType {
   cartItemsCount: number;
   cartTotal: number;
-  guestCart: GuestCartItem[];
+  cart: GuestCartItem[];
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   addToCart: (data: { productId?: number; product_id?: number; product?: Product; quantity: number; name?: string; price?: number; image?: string; size?: string; color?: string }) => Promise<void>;
   removeFromCart: (productId: number) => Promise<void>;
   clearCart: () => Promise<void>;
+  updateQuantity: (productId: number, quantity: number) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -167,16 +168,40 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const cartItemsCount = guestCart.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotal = guestCart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
 
+  const updateQuantity = useCallback(async (productId: number, quantity: number) => {
+    if (quantity < 1) return removeFromCart(productId);
+    if (isAuthenticated) {
+      try {
+        await cartService.updateCart({ productId, quantity });
+        await fetchCart();
+      } catch (error) {
+        console.error('Erreur updateQuantity:', error);
+      }
+    } else {
+      setGuestCart(prevCart => {
+        const updatedCart = prevCart.map(item => {
+          if (item.productId === productId) {
+            return { ...item, quantity };
+          }
+          return item;
+        });
+        localStorage.setItem('guestCart', JSON.stringify(updatedCart));
+        return updatedCart;
+      });
+    }
+  }, [isAuthenticated, fetchCart, removeFromCart]);
+
   const contextValue = useMemo(() => ({
     cartItemsCount,
-    guestCart,
+    cart: guestCart,
     isOpen,
     setIsOpen,
     addToCart,
     removeFromCart,
     cartTotal,
-    clearCart
-  }), [cartItemsCount, guestCart, isOpen, cartTotal, addToCart, removeFromCart, clearCart]);
+    clearCart,
+    updateQuantity
+  }), [cartItemsCount, guestCart, isOpen, cartTotal, addToCart, removeFromCart, clearCart, updateQuantity]);
 
   return (
     <CartContext.Provider value={contextValue}>

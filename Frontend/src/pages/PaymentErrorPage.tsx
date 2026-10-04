@@ -29,7 +29,7 @@ const ERROR_MESSAGES: Record<string, { title: string; description: string }> = {
   }
 };
 
-export default function PaymentErrorPage({ onClose }: PaymentErrorPageProps) {
+export default function PaymentErrorPage({ onClose: _onClose }: PaymentErrorPageProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const errorCode = searchParams.get('error') || 'default';

@@ -344,7 +344,7 @@ export default function AccountPage({ onClose }: AccountPageProps) {
 
                             <div className="flex items-center justify-between pt-4 border-t border-gray-50">
                               <p className="text-xs text-gray-500 font-medium">
-                                {(order.order_items || order.orderItems || []).length} article{(order.order_items || order.orderItems || []).length > 1 ? 's' : ''} • Paiement par carte
+                                {(order.order_items || []).length} article{(order.order_items || []).length > 1 ? 's' : ''} • Paiement par carte
                               </p>
                               <button
                                 onClick={() => window.location.href = `/order-details/${order.id}`}

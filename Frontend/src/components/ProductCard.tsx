@@ -12,7 +12,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, onProductClick }: ProductCardProps) {
   const { addToWishlist, removeFromWishlist, isProductInWishlist } = useWishlist();
-  const { addToCart, guestCart } = useCartContext();
+  const { addToCart, cart } = useCartContext();
   const [isHovered, setIsHovered] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
@@ -22,7 +22,7 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
   const imgRef = useRef<HTMLImageElement>(null);
 
   const inWishlist = isProductInWishlist(product.id);
-  const isItemInCart = guestCart.some(item => item.productId === product.id);
+  const isItemInCart = cart.some((item: any) => item.productId === product.id);
   const imageUrl = useMemo(() => getProductImageUrl(product), [product]);
 
   // Vérifier si l'image est déjà en cache lors du montage

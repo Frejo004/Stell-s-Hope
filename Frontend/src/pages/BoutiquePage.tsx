@@ -20,7 +20,7 @@ function BoutiqueContent() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   // Ajout d'états pour les filtres actifs, le tri et le nombre de produits.
   // Le filtre initial a été retiré pour afficher tous les produits par défaut.
-  const [activeFilters, setActiveFilters] = useState<ActiveFilters>({});
+  const [activeFilters] = useState<ActiveFilters>({});
   const [sortOption, setSortOption] = useState<SortOption>('newest');
 
   const { total } = useProductListing();
