@@ -10,6 +10,8 @@ use Moneroo\Exceptions\PaymentException;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use App\Mail\OrderConfirmation;
+use App\Models\WebhookEvent;
+use Carbon\Carbon;
 
 class PaymentService
 {
@@ -82,29 +84,67 @@ class PaymentService
             $computedSignature = hash_hmac('sha512', json_encode($payload), $secret);
             if (!hash_equals($signature, $computedSignature)) {
                 Log::error('Invalid Moneroo webhook signature received.');
-                // En mode debug on peut logger les signatures pour comparer
-                // Log::debug("Received: $signature, Computed: $computedSignature");
                 throw new Exception('Invalid webhook signature');
             }
-        } elseif (config('app.env') === 'production') {
-            // En production, la signature est obligatoire
+        } elseif (config('app.env') !== 'local') {
+            // La signature est obligatoire partout sauf en local
             throw new Exception('Missing webhook signature');
+        }
+
+        // Anti-replay : Générer un event_id unique (on utilise le hachage du payload si Moneroo ne fournit pas d'event id)
+        $eventId = $payload['event_id'] ?? hash('sha256', json_encode($payload));
+
+        // Anti-replay : Ignorer si l'événement a déjà été traité
+        if (WebhookEvent::where('event_id', $eventId)->exists()) {
+            Log::info("Webhook event already processed: {$eventId}");
+            return null; // Doublon ignoré silencieusement
+        }
+
+        // Anti-replay : Refuser les événements trop anciens (si un timestamp est fourni)
+        $timestamp = $payload['timestamp'] ?? $payload['created_at'] ?? null;
+        if ($timestamp) {
+            $eventTime = Carbon::parse($timestamp);
+            if ($eventTime->diffInMinutes(now()) > 5) { // Tolérance de 5 minutes
+                Log::warning("Webhook event too old: {$eventId}");
+                throw new Exception('Webhook event too old');
+            }
         }
 
         $paymentId = $payload['id'] ?? null;
         $status = $payload['status'] ?? null;
         $orderId = $payload['metadata']['order_id'] ?? null;
+        $amount = (float) ($payload['amount'] ?? 0);
+        $currency = $payload['currency'] ?? null;
 
         if (!$paymentId || !$orderId) {
             Log::warning('Webhook received without payment_id or order_id', $payload);
-            return null;
+            throw new Exception('Missing payment_id or order_id');
         }
 
         $order = Order::find($orderId);
 
         if (!$order) {
             Log::error("Order not found for webhook payment: $paymentId (Order ID: $orderId)");
-            return null;
+            throw new Exception('Order not found');
+        }
+
+        // Vérification de l'identifiant de paiement
+        if ($order->payment_id && $order->payment_id !== $paymentId) {
+            Log::error("Payment ID mismatch. Expected {$order->payment_id}, got {$paymentId}");
+            throw new Exception('Payment ID mismatch');
+        }
+
+        // Vérification du montant
+        if (abs((float)$order->total - $amount) > 0.01) {
+            Log::error("Amount mismatch. Expected {$order->total}, got {$amount}");
+            throw new Exception('Amount mismatch');
+        }
+
+        // Vérification de la devise
+        $expectedCurrency = $order->currency ?? 'XOF';
+        if (strtoupper($currency) !== strtoupper($expectedCurrency)) {
+            Log::error("Currency mismatch. Expected {$expectedCurrency}, got {$currency}");
+            throw new Exception('Currency mismatch');
         }
 
         // Mise à jour du statut selon Moneroo
@@ -139,6 +179,12 @@ class PaymentService
             default:
                 Log::info("Webhook received for Order #{$order->id} with status: $status");
         }
+
+        // Enregistrer l'événement comme traité
+        WebhookEvent::create([
+            'event_id' => $eventId,
+            'payload' => $payload
+        ]);
 
         return $order;
     }

@@ -34,6 +34,44 @@ class Order extends Model
                 $order->order_number = 'CMD-' . date('Ymd') . '-' . strtoupper(uniqid());
             }
         });
+
+        static::updating(function ($order) {
+            // Status State Machine
+            if ($order->isDirty('status')) {
+                $oldStatus = $order->getOriginal('status');
+                $newStatus = $order->status;
+
+                $validTransitions = [
+                    'pending' => ['confirmed', 'cancelled'],
+                    'confirmed' => ['processing', 'cancelled'],
+                    'processing' => ['shipped', 'cancelled'],
+                    'shipped' => ['delivered'],
+                    'delivered' => [],
+                    'cancelled' => []
+                ];
+
+                if (isset($validTransitions[$oldStatus]) && !in_array($newStatus, $validTransitions[$oldStatus])) {
+                    throw new \DomainException("Invalid status transition from {$oldStatus} to {$newStatus}");
+                }
+            }
+
+            // Payment Status State Machine
+            if ($order->isDirty('payment_status')) {
+                $oldPaymentStatus = $order->getOriginal('payment_status');
+                $newPaymentStatus = $order->payment_status;
+
+                $validPaymentTransitions = [
+                    'pending' => ['paid', 'failed'],
+                    'failed' => ['pending', 'paid'],
+                    'paid' => ['refunded'],
+                    'refunded' => []
+                ];
+
+                if (isset($validPaymentTransitions[$oldPaymentStatus]) && !in_array($newPaymentStatus, $validPaymentTransitions[$oldPaymentStatus])) {
+                    throw new \DomainException("Invalid payment_status transition from {$oldPaymentStatus} to {$newPaymentStatus}");
+                }
+            }
+        });
     }
 
     protected $casts = [

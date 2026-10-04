@@ -46,8 +46,12 @@ class AdminOrderController extends Controller
             'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled'
         ]);
 
-        $order->update($validated);
-        return response()->json($order);
+        try {
+            $order->update($validated);
+            return response()->json($order);
+        } catch (\DomainException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
 
     public function stats()
