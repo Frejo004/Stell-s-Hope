@@ -25,6 +25,7 @@ class Order extends Model
         'payment_id',
         'payment_url',
         'payment_status',
+        'needs_refund',
         'idempotency_key'
     ];
 
@@ -80,6 +81,7 @@ class Order extends Model
         'subtotal' => 'decimal:2',
         'shipping_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
+        'needs_refund' => 'boolean',
         'shipping_address' => 'array',
         'billing_address' => 'array'
     ];

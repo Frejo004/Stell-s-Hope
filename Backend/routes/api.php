@@ -69,7 +69,7 @@ Route::get('/orders/track-public', [OrderController::class, 'trackPublic'])->mid
 
 // Payment routes (public)
 Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->middleware('throttle:60,1');
-Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+Route::get('/payment/callback', [PaymentController::class, 'callback'])->middleware('throttle:30,1')->name('payment.callback');
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {

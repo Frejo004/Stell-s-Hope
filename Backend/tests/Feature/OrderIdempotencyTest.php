@@ -79,7 +79,7 @@ class OrderIdempotencyTest extends TestCase
             'payment_url' => 'https://checkout.moneroo.io/123'
         ]);
 
-        $paymentService = new \App\Services\PaymentService();
+        $paymentService = app(\App\Services\PaymentService::class);
         $result = $paymentService->initiatePayment($order);
 
         $this->assertEquals('pay_abc123', $result['id']);

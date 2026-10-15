@@ -2,222 +2,273 @@
 
 namespace App\Services;
 
-use App\Models\Order;
-use Exception;
-use Illuminate\Support\Facades\Log;
-use Moneroo\Laravel\Facades\PaymentFacade as Moneroo;
-use Moneroo\Exceptions\PaymentException;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
+use App\Exceptions\PaymentException;
 use App\Mail\OrderConfirmation;
+use App\Models\Order;
 use App\Models\WebhookEvent;
-use Carbon\Carbon;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class PaymentService
 {
+    public function __construct(private readonly MonerooGateway $moneroo)
+    {
+    }
+
     /**
-     * Initiate a payment on Moneroo for an order.
+     * Initialise un paiement Moneroo pour une commande.
      *
-     * @param Order $order
-     * @param array $customerInfo Optional customer info overrides
-     * @return array Payment data including checkout_url
-     * @throws Exception
+     * @return array{id: string, payment_id: string, checkout_url: string}
+     * @throws PaymentException
      */
-    public function initiatePayment(Order $order, array $customerInfo = [])
+    public function initiatePayment(Order $order): array
     {
         if ($order->payment_status === 'pending' && $order->payment_id && $order->payment_url) {
-            return [
-                'id' => $order->payment_id,
-                'checkout_url' => $order->payment_url,
-                'url' => $order->payment_url,
-            ];
+            return $this->paymentResponse($order);
+        }
+
+        if ($order->payment_status === 'paid' || $order->status === 'cancelled') {
+            throw new PaymentException('Cette commande ne peut plus être payée.', 422);
+        }
+
+        $user = $order->user;
+
+        try {
+            // https://docs.moneroo.io/payments/standard-integration
+            $payment = $this->moneroo->init([
+                'amount' => $this->toGatewayAmount($order->total),
+                'currency' => $order->currency ?? config('shop.currency'),
+                'description' => "Commande {$order->order_number}",
+                'customer' => [
+                    'email' => $user->email,
+                    'first_name' => $user->first_name,
+                    'last_name' => $user->last_name,
+                ],
+                'return_url' => route('payment.callback', ['order_id' => $order->id]),
+                // Moneroo n'accepte que des valeurs de type chaîne
+                'metadata' => [
+                    'order_id' => (string) $order->id,
+                    'user_id' => (string) $order->user_id,
+                ],
+            ]);
+        } catch (Throwable $e) {
+            Log::error('Moneroo payment initialization failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw new PaymentException('Impossible d\'initialiser le paiement. Réessayez plus tard.', 502, $e);
+        }
+
+        $order->update([
+            'payment_id' => $payment->id,
+            'payment_url' => $payment->checkout_url,
+            'payment_status' => 'pending',
+        ]);
+
+        return $this->paymentResponse($order);
+    }
+
+    /**
+     * Traite un webhook Moneroo.
+     *
+     * Le webhook ne sert que de signal : le statut, le montant et la devise
+     * sont relus auprès de l'API Moneroo (verify) avant toute mise à jour.
+     *
+     * @return Order|null null si l'événement a déjà été traité
+     * @throws PaymentException
+     */
+    public function handleWebhook(string $rawBody, ?string $signature): ?Order
+    {
+        $secret = config('moneroo.webhookSecret');
+
+        if (!$secret) {
+            Log::critical('MONEROO_WEBHOOK_SECRET is not configured: webhook rejected.');
+            throw new PaymentException('Webhook not configured', 500);
+        }
+
+        // HMAC-SHA256 du corps brut : ré-encoder le JSON changerait les octets signés
+        if (!$signature || !hash_equals(hash_hmac('sha256', $rawBody, $secret), $signature)) {
+            Log::warning('Invalid Moneroo webhook signature received.');
+            throw new PaymentException('Invalid signature', 403);
+        }
+
+        $payload = json_decode($rawBody, true);
+        $paymentId = is_array($payload) ? ($payload['data']['id'] ?? null) : null;
+
+        if (!is_string($paymentId) || $paymentId === '') {
+            throw new PaymentException('Invalid payload', 400);
+        }
+
+        // Moneroo renvoie le même corps à chaque nouvelle tentative
+        $eventId = hash('sha256', $rawBody);
+
+        if (WebhookEvent::where('event_id', $eventId)->exists()) {
+            Log::info("Webhook event already processed: {$eventId}");
+            return null;
         }
 
         try {
-            $currency = $order->currency ?? config('shop.currency');
-
-            // Préparation des données de paiement
-            $payload = [
-                // Le XOF n'a pas de subdivision : Moneroo attend un montant entier
-                'amount' => (int) round((float) $order->total, config('shop.currency_decimals')),
-                'currency' => $currency,
-                'customer' => [
-                    'email' => $customerInfo['email'] ?? $order->user->email,
-                    'first_name' => $customerInfo['first_name'] ?? $order->user->first_name,
-                    'last_name' => $customerInfo['last_name'] ?? $order->user->last_name,
-                    'phone' => $customerInfo['phone'] ?? $order->user->phone,
-                ],
-                'return_url' => route('payment.callback', ['order_id' => $order->id]),
-                'metadata' => [
-                    'order_id' => $order->id,
-                    'user_id' => $order->user_id,
-                ],
-            ];
-
-            // Appel API Moneroo
-            // Facade PaymentFacade expose probablement create() directement
-            $payment = Moneroo::create($payload);
-
-            // Mise à jour de la commande avec les infos de paiement
-            $order->update([
-                'payment_id' => $payment['id'],
-                'payment_url' => $payment['checkout_url'] ?? $payment['url'] ?? null,
-                'payment_status' => 'pending'
-            ]);
-
-            return $payment;
-
-        } catch (\Exception $e) {
-            Log::error('Moneroo Payment Initialization Error: ' . $e->getMessage(), [
-                'order_id' => $order->id,
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw new Exception('Impossible d\'initialiser le paiement: ' . $e->getMessage());
+            return $this->syncPayment($paymentId, function () use ($eventId, $payload) {
+                WebhookEvent::create(['event_id' => $eventId, 'payload' => $payload]);
+            });
+        } catch (UniqueConstraintViolationException) {
+            // Même événement traité en parallèle par une autre requête
+            return null;
         }
     }
 
     /**
-     * Verify and process a webhook payload from Moneroo.
+     * Aligne la commande sur l'état réel du paiement chez Moneroo.
+     * Idempotent : utilisé par le webhook et par le retour client (callback).
      *
-     * @param array $payload
-     * @param string|null $signature
-     * @return Order|null
+     * @param callable|null $withinTransaction exécuté dans la transaction de mise à jour
+     * @throws PaymentException
      */
-    public function processWebhook(array $payload, ?string $signature = null)
+    public function syncPayment(string $paymentId, ?callable $withinTransaction = null): Order
     {
-        // 1. Vérification de la signature (Crucial pour la sécurité)
-        $secret = config('moneroo.secretKey');
-        
-        if ($signature) {
-            $computedSignature = hash_hmac('sha512', json_encode($payload), $secret);
-            if (!hash_equals($signature, $computedSignature)) {
-                Log::error('Invalid Moneroo webhook signature received.');
-                throw new Exception('Invalid webhook signature');
-            }
-        } elseif (config('app.env') !== 'local') {
-            // La signature est obligatoire partout sauf en local
-            throw new Exception('Missing webhook signature');
-        }
-
-        // Anti-replay : Générer un event_id unique (on utilise le hachage du payload si Moneroo ne fournit pas d'event id)
-        $eventId = $payload['event_id'] ?? hash('sha256', json_encode($payload));
-
-        // Anti-replay : Ignorer si l'événement a déjà été traité
-        if (WebhookEvent::where('event_id', $eventId)->exists()) {
-            Log::info("Webhook event already processed: {$eventId}");
-            return null; // Doublon ignoré silencieusement
-        }
-
-        // Anti-replay : Refuser les événements trop anciens (si un timestamp est fourni)
-        $timestamp = $payload['timestamp'] ?? $payload['created_at'] ?? null;
-        if ($timestamp) {
-            $eventTime = Carbon::parse($timestamp);
-            if ($eventTime->diffInMinutes(now()) > 5) { // Tolérance de 5 minutes
-                Log::warning("Webhook event too old: {$eventId}");
-                throw new Exception('Webhook event too old');
-            }
-        }
-
-        $paymentId = $payload['id'] ?? null;
-        $status = $payload['status'] ?? null;
-        $orderId = $payload['metadata']['order_id'] ?? null;
-        $amount = (float) ($payload['amount'] ?? 0);
-        $currency = $payload['currency'] ?? null;
-
-        if (!$paymentId || !$orderId) {
-            Log::warning('Webhook received without payment_id or order_id', $payload);
-            throw new Exception('Missing payment_id or order_id');
-        }
-
-        $order = Order::find($orderId);
+        $order = Order::where('payment_id', $paymentId)->first();
 
         if (!$order) {
-            Log::error("Order not found for webhook payment: $paymentId (Order ID: $orderId)");
-            throw new Exception('Order not found');
+            Log::warning("No order found for Moneroo payment {$paymentId}");
+            throw new PaymentException('Order not found', 404);
         }
 
-        // Vérification de l'identifiant de paiement
-        if ($order->payment_id && $order->payment_id !== $paymentId) {
-            Log::error("Payment ID mismatch. Expected {$order->payment_id}, got {$paymentId}");
-            throw new Exception('Payment ID mismatch');
+        try {
+            $payment = $this->moneroo->verify($paymentId);
+        } catch (Throwable $e) {
+            Log::error("Moneroo verification failed for payment {$paymentId}", ['error' => $e->getMessage()]);
+            throw new PaymentException('Payment verification failed', 502, $e);
         }
 
-        // Vérification du montant
-        if (abs((float)$order->total - $amount) > 0.01) {
-            Log::error("Amount mismatch. Expected {$order->total}, got {$amount}");
-            throw new Exception('Amount mismatch');
+        $status = $payment->status ?? null;
+        $this->assertPaymentMatchesOrder($payment, $order);
+
+        $confirmed = false;
+
+        DB::transaction(function () use ($order, $status, $withinTransaction, &$confirmed) {
+            if ($withinTransaction) {
+                $withinTransaction();
+            }
+
+            $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+
+            match ($status) {
+                'success' => $confirmed = $this->markPaid($lockedOrder),
+                'failed', 'cancelled' => $this->markFailedAndRestoreStock($lockedOrder),
+                default => Log::info("Moneroo payment {$lockedOrder->payment_id} for order #{$lockedOrder->id} is {$status}"),
+            };
+        });
+
+        $order->refresh();
+
+        if ($confirmed) {
+            $this->sendConfirmationEmail($order);
         }
-
-        // Vérification de la devise
-        $expectedCurrency = $order->currency ?? config('shop.currency');
-        if (strtoupper($currency) !== strtoupper($expectedCurrency)) {
-            Log::error("Currency mismatch. Expected {$expectedCurrency}, got {$currency}");
-            throw new Exception('Currency mismatch');
-        }
-
-        // Mise à jour du statut selon Moneroo
-        switch ($status) {
-            case 'success':
-            case 'successful':
-            case 'paid':
-                if ($order->payment_status !== 'paid') {
-                    $order->update([
-                        'payment_status' => 'paid',
-                        'status' => 'confirmed', // Confirmer la commande automatiquement
-                        'payment_id' => $paymentId // S'assurer que l'ID est synchro
-                    ]);
-                    
-                    // Envoyer email de confirmation
-                    try {
-                        Mail::to($order->user->email)->send(new OrderConfirmation($order));
-                        Log::info("Order confirmation email sent to {$order->user->email}");
-                    } catch (\Exception $e) {
-                         Log::error("Failed to send order confirmation email: " . $e->getMessage());
-                    }
-
-                    Log::info("Order #{$order->id} paid successfully via Moneroo.");
-                }
-                break;
-
-            case 'failed':
-            case 'cancelled':
-                $this->markPaymentFailedAndRestoreStock($order);
-                break;
-                
-            default:
-                Log::info("Webhook received for Order #{$order->id} with status: $status");
-        }
-
-        // Enregistrer l'événement comme traité
-        WebhookEvent::create([
-            'event_id' => $eventId,
-            'payload' => $payload
-        ]);
 
         return $order;
     }
 
-    private function markPaymentFailedAndRestoreStock(Order $order): void
+    /**
+     * @throws PaymentException
+     */
+    private function assertPaymentMatchesOrder(object $payment, Order $order): void
     {
-        DB::transaction(function () use ($order) {
-            $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+        $metadataOrderId = $payment->metadata->order_id ?? null;
+        if ($metadataOrderId !== null && (string) $metadataOrderId !== (string) $order->id) {
+            Log::critical("Moneroo payment {$order->payment_id}: metadata order_id {$metadataOrderId} does not match order #{$order->id}");
+            throw new PaymentException('Order mismatch', 422);
+        }
 
-            if ($lockedOrder->payment_status === 'failed') {
-                return;
+        if (($payment->status ?? null) !== 'success') {
+            return;
+        }
+
+        $amount = (int) ($payment->amount ?? 0);
+        if ($amount !== $this->toGatewayAmount($order->total)) {
+            Log::critical("Amount mismatch for order #{$order->id}: expected {$order->total}, Moneroo reports {$amount}");
+            throw new PaymentException('Amount mismatch', 422);
+        }
+
+        // Moneroo renvoie la devise sous forme d'objet ({code: "XOF", ...})
+        $currency = is_object($payment->currency ?? null) ? ($payment->currency->code ?? null) : ($payment->currency ?? null);
+        $expectedCurrency = $order->currency ?? config('shop.currency');
+        if (!is_string($currency) || strtoupper($currency) !== strtoupper($expectedCurrency)) {
+            Log::critical("Currency mismatch for order #{$order->id}: expected {$expectedCurrency}, Moneroo reports " . json_encode($currency));
+            throw new PaymentException('Currency mismatch', 422);
+        }
+    }
+
+    /**
+     * @return bool true si la commande vient d'être confirmée
+     */
+    private function markPaid(Order $order): bool
+    {
+        if ($order->payment_status === 'paid') {
+            return false;
+        }
+
+        if ($order->status === 'cancelled') {
+            // Le client a payé une commande annulée entre-temps : l'encaissement
+            // est réel, la commande reste annulée et doit être remboursée.
+            $order->update(['payment_status' => 'paid', 'needs_refund' => true]);
+            Log::critical("Order #{$order->id} was paid after cancellation: refund required.");
+            return false;
+        }
+
+        $order->update(array_filter([
+            'payment_status' => 'paid',
+            'status' => $order->status === 'pending' ? 'confirmed' : null,
+        ]));
+
+        Log::info("Order #{$order->id} paid successfully via Moneroo.");
+
+        return true;
+    }
+
+    private function markFailedAndRestoreStock(Order $order): void
+    {
+        if (in_array($order->payment_status, ['paid', 'failed', 'refunded'], true)) {
+            return;
+        }
+
+        $changes = ['payment_status' => 'failed'];
+
+        // Une commande déjà annulée a déjà rendu son stock
+        if ($order->status !== 'cancelled') {
+            $order->load('orderItems.product');
+            foreach ($order->orderItems as $item) {
+                $item->product?->increment('stock_quantity', $item->quantity);
             }
+            $changes['status'] = 'cancelled';
+        }
 
-            $lockedOrder->load('orderItems.product');
+        $order->update($changes);
+    }
 
-            foreach ($lockedOrder->orderItems as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock_quantity', $item->quantity);
-                }
-            }
+    private function sendConfirmationEmail(Order $order): void
+    {
+        try {
+            Mail::to($order->user->email)->send(new OrderConfirmation($order));
+        } catch (Throwable $e) {
+            Log::error("Failed to send order confirmation email for order #{$order->id}: " . $e->getMessage());
+        }
+    }
 
-            $lockedOrder->update([
-                'payment_status' => 'failed',
-                'status' => 'cancelled',
-            ]);
-        });
+    private function toGatewayAmount($amount): int
+    {
+        // Le XOF n'a pas de subdivision : Moneroo attend un montant entier
+        return (int) round((float) $amount, config('shop.currency_decimals'));
+    }
+
+    private function paymentResponse(Order $order): array
+    {
+        return [
+            'id' => $order->payment_id,
+            'payment_id' => $order->payment_id,
+            'checkout_url' => $order->payment_url,
+        ];
     }
 }

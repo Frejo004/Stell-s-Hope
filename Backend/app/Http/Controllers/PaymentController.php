@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Moneroo\Laravel\Facades\PaymentFacade as MonerooPayment;
+use App\Exceptions\PaymentException;
+use App\Models\Order;
 use App\Services\PaymentService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class PaymentController extends Controller
 {
@@ -19,65 +21,75 @@ class PaymentController extends Controller
     public function initiate(Request $request)
     {
         $request->validate([
-            'order_id' => 'required_without:amount|exists:orders,id',
-            // Pour un checkout direct sans order préalable (optionnel)
-            'amount' => 'required_without:order_id|numeric',
-            'email' => 'required_without:order_id|email',
+            'order_id' => 'required|integer|exists:orders,id',
         ]);
 
-        try {
-            if ($request->has('order_id')) {
-                $order = \App\Models\Order::findOrFail($request->order_id);
-                // Vérifier que l'utilisateur est bien le propriétaire de la commande
-                if ($request->user() && $request->user()->id !== $order->user_id) {
-                    return response()->json(['message' => 'Unauthorized'], 403);
-                }
-            } else {
-                // Création d'une commande temporaire ou gestion spécifique
-                // Pour simplifier ici, on exige un order_id
-                return response()->json(['message' => 'Order ID is required'], 400);
-            }
+        $order = Order::findOrFail($request->order_id);
 
-            $paymentData = $this->paymentService->initiatePayment($order);
-
-            return response()->json([
-                'status' => 'success',
-                'data' => $paymentData
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
+        if ($request->user()->id !== $order->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        try {
+            $paymentData = $this->paymentService->initiatePayment($order);
+        } catch (PaymentException $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $e->status);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $paymentData
+        ]);
     }
 
     public function webhook(Request $request)
     {
-        $signature = $request->header('X-Moneroo-Signature');
-        
         try {
-            $this->paymentService->processWebhook($request->all(), $signature);
-            return response()->json(['status' => 'success']);
-        } catch (\Exception $e) {
+            // Corps brut : la signature porte sur les octets reçus, pas sur le JSON décodé
+            $this->paymentService->handleWebhook($request->getContent(), $request->header('X-Moneroo-Signature'));
+        } catch (PaymentException $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], $e->status);
+        } catch (Throwable $e) {
             Log::error('Webhook Error: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 400);
+            return response()->json(['status' => 'error', 'message' => 'Webhook processing failed'], 500);
         }
+
+        return response()->json(['status' => 'success']);
     }
-    
+
+    /**
+     * Retour du client depuis la page Moneroo (?order_id=…&paymentId=…&paymentStatus=…).
+     * Le statut transmis dans l'URL n'est pas fiable : on le relit auprès de Moneroo.
+     */
     public function callback(Request $request)
     {
-        $orderId = $request->get('order_id');
-        $status = $request->get('status');
-        
-        $frontendUrl = env('FRONTEND_URL', 'http://localhost:5173');
-        
-        // Correction #24 : route frontend correcte /order-confirmation/:id (avec tiret)
-        if ($status === 'success' || $status === 'successful') {
-             return redirect("$frontendUrl/order-confirmation/$orderId?status=success");
+        $order = Order::find((int) $request->query('order_id'));
+        $paymentId = $request->query('paymentId');
+
+        if ($order && is_string($paymentId) && $order->payment_id && hash_equals($order->payment_id, $paymentId)) {
+            try {
+                $order = $this->paymentService->syncPayment($paymentId);
+            } catch (Throwable $e) {
+                // Le webhook prendra le relais ; on redirige selon l'état connu
+                Log::warning("Payment callback sync failed for order #{$order->id}: " . $e->getMessage());
+            }
         }
-        
-        return redirect("$frontendUrl/payment-error?error=payment_failed&order_id=$orderId");
+
+        $frontendUrl = rtrim(config('app.frontend_url'), '/');
+
+        if ($order && $order->payment_status === 'paid' && !$order->needs_refund) {
+            return redirect("{$frontendUrl}/order-confirmation/{$order->id}?status=success");
+        }
+
+        if ($order && $order->payment_status === 'pending' && $order->status !== 'cancelled') {
+            return redirect("{$frontendUrl}/order-confirmation/{$order->id}?status=pending");
+        }
+
+        $query = http_build_query(array_filter([
+            'error' => 'payment_failed',
+            'order_id' => $order?->id,
+        ]));
+
+        return redirect("{$frontendUrl}/payment-error?{$query}");
     }
 }
