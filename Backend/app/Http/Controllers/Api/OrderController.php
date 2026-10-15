@@ -110,6 +110,9 @@ class OrderController extends Controller
                 'idempotency_key' => $idempotencyKey,
             ]);
 
+            // Compté sous verrou : deux commandes simultanées ne peuvent pas dépasser max_uses
+            $promotion?->increment('used_count');
+
             foreach ($preparedItems as $item) {
                 $product = $item['product'];
 
@@ -268,6 +271,7 @@ class OrderController extends Controller
                 $query->whereNull('max_uses')
                     ->orWhereColumn('used_count', '<', 'max_uses');
             })
+            ->lockForUpdate()
             ->first();
 
         if (!$promotion || ($promotion->min_amount && $subtotal < (float) $promotion->min_amount)) {

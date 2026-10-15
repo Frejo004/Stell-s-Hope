@@ -60,9 +60,8 @@ Route::get('/categories/{category}', [CategoryController::class, 'show']);
 // File routes (public)
 Route::get('/images/{path}', [FileController::class, 'getImage'])->where('path', '.*');
 
-// Promotion validation (public)
-Route::post('/promotions/validate', [PromotionController::class, 'validate']);
-Route::post('/promotions/apply', [PromotionController::class, 'apply']);
+// Promotion validation (public) — l'utilisation est comptée à la création de commande
+Route::post('/promotions/validate', [PromotionController::class, 'validate'])->middleware('throttle:20,1');
 
 // Suivi de commande public (sans authentification)
 Route::get('/orders/track-public', [OrderController::class, 'trackPublic'])->middleware('throttle:10,1');

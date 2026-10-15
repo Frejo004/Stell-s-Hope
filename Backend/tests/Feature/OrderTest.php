@@ -73,6 +73,44 @@ class OrderTest extends TestCase
             ->assertJsonPath('order.promotion_code', 'WELCOME10');
     }
 
+    public function test_order_counts_promotion_usage(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct(['price' => 30000, 'stock_quantity' => 5]);
+        $promotion = $this->createPromotion(['max_uses' => 2, 'used_count' => 0]);
+
+        Sanctum::actingAs($user);
+        $this->postJson('/api/orders', $this->payload($product, 1, ['promotion_code' => 'WELCOME10']))
+            ->assertStatus(201);
+
+        $this->assertSame(1, $promotion->fresh()->used_count);
+    }
+
+    public function test_rejects_exhausted_promotion(): void
+    {
+        $user = User::factory()->create();
+        $product = $this->createProduct(['price' => 30000, 'stock_quantity' => 5]);
+        $promotion = $this->createPromotion(['max_uses' => 1, 'used_count' => 1]);
+
+        Sanctum::actingAs($user);
+        $this->postJson('/api/orders', $this->payload($product, 1, ['promotion_code' => 'WELCOME10']))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('promotion_code');
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertSame(1, $promotion->fresh()->used_count);
+        $this->assertSame(5, $product->fresh()->stock_quantity);
+    }
+
+    public function test_promotion_cannot_be_consumed_without_order(): void
+    {
+        $promotion = $this->createPromotion(['max_uses' => 1, 'used_count' => 0]);
+
+        $this->postJson('/api/promotions/apply', ['code' => 'WELCOME10'])->assertStatus(404);
+
+        $this->assertSame(0, $promotion->fresh()->used_count);
+    }
+
     public function test_rejects_order_when_stock_is_insufficient(): void
     {
         $user = User::factory()->create();
@@ -127,6 +165,18 @@ class OrderTest extends TestCase
             'id' => $product->id,
             'stock_quantity' => 3,
         ]);
+    }
+
+    private function createPromotion(array $overrides = []): Promotion
+    {
+        return Promotion::create(array_merge([
+            'code' => 'WELCOME10',
+            'type' => 'percentage',
+            'value' => 10,
+            'starts_at' => now()->subDay(),
+            'expires_at' => now()->addDay(),
+            'is_active' => true,
+        ], $overrides));
     }
 
     private function createProduct(array $overrides = []): Product

@@ -43,19 +43,4 @@ class PromotionController extends Controller
             'value' => $promotion->value
         ]);
     }
-
-    public function apply(Request $request)
-    {
-        $request->validate([
-            'code' => 'required|string'
-        ]);
-
-        $promotion = Promotion::where('code', $request->code)->first();
-        
-        if ($promotion) {
-            $promotion->increment('used_count');
-        }
-
-        return response()->json(['success' => true]);
-    }
 }
