@@ -28,7 +28,8 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
-    sourcemap: true,
+    // Pas de source maps publiques en production (code source lisible par tous)
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {

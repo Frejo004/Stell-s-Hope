@@ -55,7 +55,7 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     // URL du frontend (redirections après paiement)
-    'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
 
     /*
     |--------------------------------------------------------------------------
