@@ -3,6 +3,7 @@ import { useOrders } from '../hooks/useOrders';
 import { useQueryState, parseAsInteger } from 'nuqs';
 import Pagination from './Pagination';
 
+import { formatPrice } from '../utils';
 const OrderList: React.FC = () => {
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
   const { orders, loading, error } = useOrders();
@@ -52,7 +53,7 @@ const OrderList: React.FC = () => {
                       {order.status_label || order.status}
                     </span>
                     <p className="text-lg font-bold text-gray-900 mt-1">
-                      {order.total}€
+                      {formatPrice(order.total)}
                     </p>
                   </div>
                 </div>
@@ -73,7 +74,7 @@ const OrderList: React.FC = () => {
                               {item.product?.name}
                             </p>
                             <p className="text-sm text-gray-500">
-                              Quantité: {item.quantity} × {item.price}€
+                              Quantité: {item.quantity} × {formatPrice(item.price)}
                             </p>
                           </div>
                         </div>

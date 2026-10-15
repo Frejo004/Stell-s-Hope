@@ -5,6 +5,8 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUtils';
 
+import { commerce, formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 export default function CartSidebarNew() {
   const { cartItemsCount, cart, isOpen, setIsOpen, removeFromCart, cartTotal } = useCartContext();
   const { isAuthenticated } = useAuth();
@@ -17,7 +19,7 @@ export default function CartSidebarNew() {
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  const shipping = cartTotal > 100 ? 0 : 5.99;
+  const shipping = commerce.calculateShipping(cartTotal);
   const total = cartTotal + shipping;
 
   const handleCheckout = () => {
@@ -133,7 +135,7 @@ export default function CartSidebarNew() {
                         Qté : <span className="font-semibold text-gray-700">{item.quantity}</span>
                       </span>
                       <span className="text-sm font-bold text-gray-900">
-                        {item.price ? `${(Number(item.price) * item.quantity).toFixed(2)} €` : '—'}
+                        {item.price ? `${formatPrice(Number(item.price) * item.quantity)}` : '—'}
                       </span>
                     </div>
                   </div>
@@ -141,12 +143,12 @@ export default function CartSidebarNew() {
               ))}
 
               {/* Livraison gratuite progress */}
-              {cartTotal < 100 && (
+              {cartTotal < BUSINESS_CONSTANTS.FREE_SHIPPING_THRESHOLD && (
                 <div className="bg-rose-50 rounded-xl p-3 border border-rose-100">
                   <div className="flex items-center gap-2 mb-2">
                     <Tag className="w-3.5 h-3.5 text-rose-500" />
                     <p className="text-xs text-rose-700 font-medium">
-                      Plus que <strong>{(100 - cartTotal).toFixed(2)} €</strong> pour la livraison gratuite !
+                      Plus que <strong>{formatPrice(BUSINESS_CONSTANTS.FREE_SHIPPING_THRESHOLD - cartTotal)}</strong> pour la livraison gratuite !
                     </p>
                   </div>
                   <div className="h-1.5 bg-rose-100 rounded-full overflow-hidden">
@@ -168,18 +170,18 @@ export default function CartSidebarNew() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between text-gray-500">
                 <span>Sous-total</span>
-                <span className="font-medium text-gray-900">{cartTotal.toFixed(2)} €</span>
+                <span className="font-medium text-gray-900">{formatPrice(cartTotal)}</span>
               </div>
               <div className="flex justify-between text-gray-500">
                 <span>Livraison</span>
                 {shipping === 0
                   ? <span className="text-green-600 font-medium">Gratuite</span>
-                  : <span className="font-medium text-gray-900">{shipping.toFixed(2)} €</span>
+                  : <span className="font-medium text-gray-900">{formatPrice(shipping)}</span>
                 }
               </div>
               <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-100">
                 <span>Total</span>
-                <span>{total.toFixed(2)} €</span>
+                <span>{formatPrice(total)}</span>
               </div>
             </div>
 

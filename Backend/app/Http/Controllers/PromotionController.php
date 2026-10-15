@@ -33,7 +33,8 @@ class PromotionController extends Controller
         }
 
         if ($promotion->min_amount && $amount < $promotion->min_amount) {
-            return response()->json(['error' => "Montant minimum requis: {$promotion->min_amount}€"], 400);
+            $minAmount = number_format((float) $promotion->min_amount, 0, ',', ' ');
+            return response()->json(['error' => "Montant minimum requis : {$minAmount} FCFA"], 400);
         }
 
         return response()->json([

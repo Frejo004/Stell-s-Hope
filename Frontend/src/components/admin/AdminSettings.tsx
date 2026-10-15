@@ -111,8 +111,7 @@ export default function AdminSettings({ onNavigate: _onNavigate }: AdminSettings
                       Devise
                     </label>
                     <select className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                      <option value="EUR">Euro (€)</option>
-                      <option value="USD">Dollar ($)</option>
+                      <option value="XOF">Franc CFA (FCFA)</option>
                     </select>
                   </div>
                   <div>

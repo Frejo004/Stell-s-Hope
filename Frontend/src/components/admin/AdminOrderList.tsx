@@ -4,6 +4,7 @@ import { adminService } from '../../services/adminService';
 import Pagination from '../Pagination';
 import { Order, PaginatedResponse } from '../../types';
 
+import { formatPrice } from '../../utils';
 const AdminOrderList: React.FC = () => {
   const { 
     page, setPage, 
@@ -172,7 +173,7 @@ const AdminOrderList: React.FC = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {order.total}€
+                  {formatPrice(order.total)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <select

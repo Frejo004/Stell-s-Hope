@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { Order } from '../types/order';
 import { getImageUrl } from '../utils/imageUtils';
 
+import { formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 interface CartProps {
   onOrderComplete?: (order: Order) => void;
 }
@@ -70,7 +72,7 @@ export default function Cart({ onOrderComplete: _onOrderComplete }: CartProps = 
                         {item.color} {item.color && item.size ? '•' : ''} {item.size}
                       </p>
                       <p className="font-semibold text-sm">
-                        {Number(item.price || 0).toFixed(2)} €
+                        {formatPrice(item.price || 0)}
                       </p>
                       
                       <div className="flex items-center justify-between mt-2">
@@ -111,7 +113,7 @@ export default function Cart({ onOrderComplete: _onOrderComplete }: CartProps = 
             <div className="border-t p-4 space-y-4">
               <div className="flex justify-between items-center">
                 <span className="font-semibold">Total:</span>
-                <span className="font-bold text-lg">{cartTotal.toFixed(2)} €</span>
+                <span className="font-bold text-lg">{formatPrice(cartTotal)}</span>
               </div>
               
               <div className="space-y-2">
@@ -133,7 +135,7 @@ export default function Cart({ onOrderComplete: _onOrderComplete }: CartProps = 
               </div>
               
               <p className="text-xs text-gray-500 text-center">
-                Livraison gratuite dès 100€
+                Livraison gratuite dès {formatPrice(BUSINESS_CONSTANTS.FREE_SHIPPING_THRESHOLD)}
               </p>
             </div>
           )}

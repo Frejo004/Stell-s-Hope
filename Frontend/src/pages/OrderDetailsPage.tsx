@@ -4,6 +4,7 @@ import { ArrowLeft, Package, MapPin, CreditCard } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import { Order, OrderItem } from '../types/order';
 
+import { formatPrice } from '../utils';
 interface OrderDetailsPageProps {
   orderId: string;
   onClose: () => void;
@@ -115,7 +116,7 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
                       <p className="text-sm text-gray-600">Quantité: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">{Number(item.price * item.quantity).toFixed(2)}€</p>
+                      <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
                     </div>
                   </div>
                 ))}
@@ -132,7 +133,7 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
                 <div className="border-t pt-2 flex justify-between font-semibold text-lg">
                   <span>Total</span>
                   {/* Correction #4 : utiliser order.total (champ DB actuel) */}
-                  <span>{Number(order.total || 0).toFixed(2)}€</span>
+                  <span>{formatPrice(order.total || 0)}</span>
                 </div>
               </div>
             </div>

@@ -29,12 +29,12 @@
                 @foreach($order->items as $item)
                 <div class="item">
                     {{ $item->product->name }} x {{ $item->quantity }}
-                    <span style="float: right;">{{ number_format($item->price * $item->quantity, 2) }} €</span>
+                    <span style="float: right;">{{ number_format($item->price * $item->quantity, 0, ',', ' ') }} FCFA</span>
                 </div>
                 @endforeach
                 
                 <div class="total">
-                    Total : {{ number_format($order->total, 2) }} €
+                    Total : {{ number_format($order->total, 0, ',', ' ') }} FCFA
                 </div>
             </div>
 

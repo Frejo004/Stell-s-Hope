@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 
+import { formatPrice } from '../../utils';
 interface AdminDashboardProps {
   onNavigate: (page: string) => void;
 }
@@ -43,7 +44,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const stats = [
     {
       title: 'Chiffre d\'Affaires',
-      value: `${dashboardData?.stats?.revenue || 0} €`,
+      value: `${formatPrice(dashboardData?.stats?.revenue || 0)}`,
       change: dashboardData?.stats?.revenue_change || '+0%',
       icon: DollarSign,
       color: 'bg-emerald-500',
@@ -67,7 +68,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     },
     {
       title: 'Panier Moyen',
-      value: `${Math.round(dashboardData?.stats?.average_order || 0)} €`,
+      value: `${formatPrice(Math.round(dashboardData?.stats?.average_order || 0))}`,
       change: dashboardData?.stats?.average_order_change || '+0%',
       icon: CreditCard,
       color: 'bg-amber-500',
@@ -78,7 +79,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const recentOrders = dashboardData?.recent_orders?.map((order: any) => ({
     id: `CMD${order.id.toString().padStart(3, '0')} `,
     customer: `${order.user?.first_name || 'Client'} ${order.user?.last_name || ''} `,
-    amount: `${order.total} €`,
+    amount: `${formatPrice(order.total)}`,
     status: order.status || 'pending',
     date: new Date(order.created_at).toLocaleDateString('fr-FR')
   })) || [];
@@ -167,7 +168,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                       <div className="relative w-full flex flex-col items-center">
                         {/* Tooltip on hover */}
                         <div className="absolute -top-12 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                          {data.revenue} €
+                          {formatPrice(data.revenue)}
                         </div>
                         {/* Gradient Bar */}
                         <div
@@ -345,7 +346,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-black text-slate-900">{product.revenue || '0 €'}</p>
+                    <p className="text-xs font-black text-slate-900">{formatPrice(product.revenue)}</p>
                   </div>
                 </div>
               ))}

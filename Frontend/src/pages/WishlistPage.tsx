@@ -4,6 +4,7 @@ import { useCartContext } from '../contexts/CartContext';
 import { Product } from '../types';
 import { getImageUrl } from '../utils/imageUtils';
 
+import { formatPrice } from '../utils';
 interface WishlistPageProps {
   onClose: () => void;
   onProductClick: (product: Product) => void;
@@ -65,10 +66,10 @@ export default function WishlistPage({ onClose, onProductClick }: WishlistPagePr
                     {product.name}
                   </h3>
                   <div className="flex items-center space-x-2">
-                    <span className="font-semibold">{Number(product.price || 0).toFixed(2)}€</span>
+                    <span className="font-semibold">{formatPrice(product.price || 0)}</span>
                     {product.originalPrice && (
                       <span className="text-sm text-gray-500 line-through">
-                        {Number(product.originalPrice || 0).toFixed(2)}€
+                        {formatPrice(product.originalPrice || 0)}
                       </span>
                     )}
                   </div>

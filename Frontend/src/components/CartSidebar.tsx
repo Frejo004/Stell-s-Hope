@@ -3,6 +3,8 @@ import { X, ShoppingBag } from 'lucide-react';
 import { useCartContext } from '../contexts/CartContext';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 
 export default function CartSidebar() {
   const { cartItemsCount, isOpen, setIsOpen } = useCartContext();
@@ -108,7 +110,7 @@ export default function CartSidebar() {
               </div>
 
               <p className="text-xs text-gray-500 text-center">
-                Livraison gratuite dès 100€
+                Livraison gratuite dès {formatPrice(BUSINESS_CONSTANTS.FREE_SHIPPING_THRESHOLD)}
               </p>
             </div>
           )}

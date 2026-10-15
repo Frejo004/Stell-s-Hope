@@ -1,4 +1,6 @@
 import { FileText, Shield, Truck, Mail, Phone } from 'lucide-react';
+import { formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 
 interface LegalPageProps {
   onClose: () => void;
@@ -76,7 +78,7 @@ const content = {
       },
       {
         title: '3. Frais de livraison',
-        content: 'Livraison gratuite dès 100€, sinon 5,99€ en France, 9,99€ en Europe.'
+        content: `Livraison gratuite dès ${formatPrice(BUSINESS_CONSTANTS.FREE_SHIPPING_THRESHOLD)}, sinon ${formatPrice(BUSINESS_CONSTANTS.SHIPPING_COST)}.`
       },
       {
         title: '4. Retours gratuits',

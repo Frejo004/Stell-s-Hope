@@ -4,6 +4,7 @@ import { adminService } from '../../services/adminService';
 import Pagination from '../Pagination';
 import { Category, PaginatedResponse, Product } from '../../types';
 
+import { formatPrice } from '../../utils';
 const AdminProductList: React.FC = () => {
   const { 
     page, setPage, 
@@ -158,7 +159,7 @@ const AdminProductList: React.FC = () => {
                   {product.category?.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {product.price}€
+                  {formatPrice(product.price)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {product.stock_quantity}

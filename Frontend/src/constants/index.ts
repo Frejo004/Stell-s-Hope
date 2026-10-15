@@ -82,13 +82,18 @@ export const UI_CONSTANTS = {
 
 // Constantes métier
 export const BUSINESS_CONSTANTS = {
-  // Livraison
-  FREE_SHIPPING_THRESHOLD: 100,
-  SHIPPING_COST: 5.99,
-  
+  // Livraison (affichage uniquement : le serveur fait foi, cf. Backend/config/shop.php)
+  FREE_SHIPPING_THRESHOLD: 65000,
+  SHIPPING_COST: 4000,
+
   // Devise
-  CURRENCY: 'EUR',
-  CURRENCY_SYMBOL: '€',
+  CURRENCY: 'XOF',
+  CURRENCY_SYMBOL: 'FCFA',
+  CURRENCY_DECIMALS: 0,
+
+  // Filtres de prix (catalogue)
+  PRICE_FILTER_MAX: 350000,
+  PRICE_FILTER_STEP: 5000,
   
   // TVA
   VAT_RATE: 0.20,

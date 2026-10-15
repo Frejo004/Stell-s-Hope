@@ -2,6 +2,7 @@ import { useState  } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, Package } from 'lucide-react';
 import { useAdminAnalytics } from '../../hooks/useAdminExtended';
 
+import { formatPrice } from '../../utils';
 interface AdminAnalyticsProps {
   onNavigate: (page: string) => void;
 }
@@ -19,7 +20,7 @@ export default function AdminAnalytics({ onNavigate: _onNavigate }: AdminAnalyti
   }
 
   const metrics = [
-    { title: 'Revenus', value: `${analytics.metrics.revenue}€`, change: '+15%', trend: 'up', icon: DollarSign },
+    { title: 'Revenus', value: `${formatPrice(analytics.metrics.revenue)}`, change: '+15%', trend: 'up', icon: DollarSign },
     { title: 'Commandes', value: analytics.metrics.orders.toString(), change: '+12%', trend: 'up', icon: ShoppingCart },
     { title: 'Clients', value: analytics.metrics.customers.toString(), change: '+8%', trend: 'up', icon: Users },
     { title: 'Taux Conversion', value: `${analytics.metrics.conversion}%`, change: '-2%', trend: 'down', icon: TrendingUp }
@@ -83,7 +84,7 @@ export default function AdminAnalytics({ onNavigate: _onNavigate }: AdminAnalyti
                   className="w-full bg-blue-500 rounded-t flex items-end justify-center text-white text-xs font-medium pb-2"
                   style={{ height: `${(height / 200) * 100}%` }}
                 >
-                  {height}€
+                  {height}
                 </div>
               </div>
             ))}

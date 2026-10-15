@@ -5,6 +5,7 @@ import { adminService } from '../../services/adminService';
 import Toast from '../ui/Toast';
 import OrderDetailsModal from './OrderDetailsModal';
 
+import { formatPrice } from '../../utils';
 interface AdminOrdersProps {
   onNavigate: (page: string) => void;
 }
@@ -197,7 +198,7 @@ export default function AdminOrders({ onNavigate: _onNavigate }: AdminOrdersProp
                     </td>
                     <td className="px-8 py-5">
                       <div className="text-sm font-black text-slate-900 border-l-2 border-rose-500 pl-3">
-                        {Number(order.total || 0).toFixed(2)}€
+                        {formatPrice(order.total || 0)}
                       </div>
                     </td>
                     <td className="px-8 py-5">

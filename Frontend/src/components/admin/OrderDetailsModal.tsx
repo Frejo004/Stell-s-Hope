@@ -2,6 +2,7 @@ import { useState, useEffect  } from 'react';
 import { X, Package, MapPin, CreditCard } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 
+import { formatPrice } from '../../utils';
 interface OrderDetailsModalProps {
   isOpen: boolean;
   orderId: number | null;
@@ -83,7 +84,7 @@ export default function OrderDetailsModal({ isOpen, orderId, onClose }: OrderDet
                           <p className="text-xs text-gray-600">Quantité: {item.quantity}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium text-sm">{Number(item.price * item.quantity).toFixed(2)}€</p>
+                          <p className="font-medium text-sm">{formatPrice(item.price * item.quantity)}</p>
                         </div>
                       </div>
                     ))}
@@ -114,7 +115,7 @@ export default function OrderDetailsModal({ isOpen, orderId, onClose }: OrderDet
                     </div>
                     <div className="border-t pt-2 flex justify-between font-semibold">
                       <span>Total</span>
-                      <span>{Number(order.total || 0).toFixed(2)}€</span>
+                      <span>{formatPrice(order.total || 0)}</span>
                     </div>
                   </div>
                 </div>

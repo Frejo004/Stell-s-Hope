@@ -10,6 +10,8 @@ import AccountPage from '../pages/AccountPage';
 import CartSidebarNew from './CartSidebarNew';
 import Logo from './Logo';
 import { Product } from '../types';
+import { formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 
 interface HeaderProps {
   onCategoryChange: (category: string) => void;
@@ -56,7 +58,7 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
       {/* Top banner */}
       <div className="bg-black text-white py-2 px-4">
         <p className="text-center text-sm">
-          Livraison gratuite dès 100€ • Retours gratuits sous 30 jours
+          Livraison gratuite dès {formatPrice(BUSINESS_CONSTANTS.FREE_SHIPPING_THRESHOLD)} • Retours gratuits sous 30 jours
         </p>
       </div>
 

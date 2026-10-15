@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCartContext } from '../contexts/CartContext';
 import { getImageUrl } from '../utils/imageUtils';
 
+import { formatPrice } from '../utils';
 interface CartPageProps {
   onClose: () => void;
 }
@@ -66,7 +67,7 @@ export default function CartPageNew({ onClose }: CartPageProps) {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold">{item.name}</h3>
-                        <p className="text-sm text-gray-500">Prix: {Number(item.price).toFixed(2)} €</p>
+                        <p className="text-sm text-gray-500">Prix: {formatPrice(item.price)}</p>
                         <div className="flex items-center mt-2">
                           <p className="text-sm text-gray-600 mr-4">Quantité:</p>
                           <div className="flex items-center border rounded">
@@ -77,7 +78,7 @@ export default function CartPageNew({ onClose }: CartPageProps) {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">{(Number(item.price) * item.quantity).toFixed(2)} €</p>
+                        <p className="font-semibold">{formatPrice(Number(item.price) * item.quantity)}</p>
                         <button onClick={() => removeFromCart(item.productId)} className="text-red-500 hover:text-red-700 text-sm mt-2">
                           <Trash2 className="inline-block" size={16} /> Supprimer
                         </button>
@@ -92,7 +93,7 @@ export default function CartPageNew({ onClose }: CartPageProps) {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Sous-total</span>
-                      <span>{cartTotal.toFixed(2)} €</span>
+                      <span>{formatPrice(cartTotal)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Livraison</span>
@@ -100,7 +101,7 @@ export default function CartPageNew({ onClose }: CartPageProps) {
                     </div>
                     <div className="flex justify-between font-bold text-lg pt-2 border-t mt-2">
                       <span>Total</span>
-                      <span>{cartTotal.toFixed(2)} €</span>
+                      <span>{formatPrice(cartTotal)}</span>
                     </div>
                   </div>
                   <button 

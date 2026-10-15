@@ -79,7 +79,7 @@ class AdminAnalyticsController extends Controller
                 return [
                     'name' => $product->name,
                     'sales' => $product->order_items_count ?: rand(10, 50),
-                    'revenue' => ($product->price * ($product->order_items_count ?: rand(10, 50))) . '€'
+                    'revenue' => $product->price * ($product->order_items_count ?: rand(10, 50))
                 ];
             });
     }

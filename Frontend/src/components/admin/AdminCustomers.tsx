@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Search, Eye, Mail, Phone, Users, UserCheck, Star, ShoppingBag, Calendar, MoreHorizontal } from 'lucide-react';
 import { useAdminCustomers } from '../../hooks/useAdminData';
 
+import { formatPrice } from '../../utils';
 interface AdminCustomersProps {
   onNavigate: (page: string) => void;
 }
@@ -140,7 +141,7 @@ export default function AdminCustomers({ onNavigate: _onNavigate }: AdminCustome
                   </td>
                   <td className="px-8 py-5">
                     <div className="text-sm font-black text-slate-900 border-l-2 border-emerald-500 pl-3">
-                      {customer.total_spent ? Number(customer.total_spent).toFixed(2) : '0.00'}€
+                      {formatPrice(customer.total_spent)}
                     </div>
                   </td>
                   <td className="px-8 py-5">

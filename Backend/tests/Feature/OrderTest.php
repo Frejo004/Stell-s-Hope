@@ -18,22 +18,24 @@ class OrderTest extends TestCase
     public function test_can_create_order_with_server_total_and_stock_snapshot(): void
     {
         $user = User::factory()->create();
-        $product = $this->createProduct(['price' => 100.00, 'stock_quantity' => 10]);
+        $product = $this->createProduct(['price' => 40000, 'stock_quantity' => 10]);
 
         Sanctum::actingAs($user);
 
         $response = $this->postJson('/api/orders', $this->payload($product, 2));
 
+        // 80 000 FCFA >= seuil de livraison gratuite (65 000)
         $response->assertStatus(201)
-            ->assertJsonPath('order.total', '200.00')
-            ->assertJsonPath('order.subtotal', '200.00')
+            ->assertJsonPath('order.total', '80000.00')
+            ->assertJsonPath('order.subtotal', '80000.00')
             ->assertJsonPath('order.shipping_amount', '0.00')
-            ->assertJsonPath('order.order_items.0.unit_price', '100.00')
-            ->assertJsonPath('order.order_items.0.line_total', '200.00');
+            ->assertJsonPath('order.currency', 'XOF')
+            ->assertJsonPath('order.order_items.0.unit_price', '40000.00')
+            ->assertJsonPath('order.order_items.0.line_total', '80000.00');
 
         $this->assertDatabaseHas('orders', [
             'user_id' => $user->id,
-            'total' => 200.00,
+            'total' => 80000,
             'payment_method' => 'card',
         ]);
 
@@ -46,7 +48,7 @@ class OrderTest extends TestCase
     public function test_total_includes_shipping_and_promotion(): void
     {
         $user = User::factory()->create();
-        $product = $this->createProduct(['price' => 50.00, 'stock_quantity' => 5]);
+        $product = $this->createProduct(['price' => 30000, 'stock_quantity' => 5]);
 
         Promotion::create([
             'code' => 'WELCOME10',
@@ -64,10 +66,10 @@ class OrderTest extends TestCase
         ]));
 
         $response->assertStatus(201)
-            ->assertJsonPath('order.subtotal', '50.00')
-            ->assertJsonPath('order.shipping_amount', '5.99')
-            ->assertJsonPath('order.discount_amount', '5.00')
-            ->assertJsonPath('order.total', '50.99')
+            ->assertJsonPath('order.subtotal', '30000.00')
+            ->assertJsonPath('order.shipping_amount', '4000.00')
+            ->assertJsonPath('order.discount_amount', '3000.00')
+            ->assertJsonPath('order.total', '31000.00')
             ->assertJsonPath('order.promotion_code', 'WELCOME10');
     }
 

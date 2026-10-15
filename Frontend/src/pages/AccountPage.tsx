@@ -6,6 +6,7 @@ import { useWishlist } from '../contexts/WishlistContext';
 import { authService } from '../services/authService';
 import { eventBus } from '../utils/eventBus';
 
+import { formatPrice } from '../utils';
 interface AccountPageProps {
   onClose: () => void;
 }
@@ -334,7 +335,7 @@ export default function AccountPage({ onClose }: AccountPageProps) {
                               <div className="flex items-center gap-6">
                                 <div className="text-right">
                                   <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-0.5">Total</p>
-                                  <p className="text-lg font-black text-gray-900">{Number(order.total).toFixed(2)}€</p>
+                                  <p className="text-lg font-black text-gray-900">{formatPrice(order.total)}</p>
                                 </div>
                                 <span className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${getStatusStyle(order.status)} animate-pulse-subtle`}>
                                   {getStatusLabel(order.status)}

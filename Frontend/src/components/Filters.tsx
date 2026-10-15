@@ -2,6 +2,8 @@
 import { ChevronDown, X } from 'lucide-react';
 import { FilterState } from '../types';
 
+import { formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 interface FiltersProps {
   filters: any;
   onFiltersChange: (filters: any) => void;
@@ -39,7 +41,7 @@ export default function Filters({ filters, onFiltersChange, isOpen, onToggle }: 
       type: [],
       size: [],
       color: [],
-      priceRange: [0, 500],
+      priceRange: [0, BUSINESS_CONSTANTS.PRICE_FILTER_MAX],
       sort: 'newest'
     });
   };
@@ -170,15 +172,15 @@ export default function Filters({ filters, onFiltersChange, isOpen, onToggle }: 
               <input
                 type="range"
                 min="0"
-                max="500"
-                step="10"
+                max={BUSINESS_CONSTANTS.PRICE_FILTER_MAX}
+                step={BUSINESS_CONSTANTS.PRICE_FILTER_STEP}
                 value={filters.priceRange[1]}
                 onChange={(e) => handleFilterChange('priceRange', [0, parseInt(e.target.value)])}
                 className="w-full"
               />
               <div className="flex justify-between text-sm text-gray-600">
-                <span>0 €</span>
-                <span>{filters.priceRange[1]} €</span>
+                <span>{formatPrice(0)}</span>
+                <span>{formatPrice(filters.priceRange[1])}</span>
               </div>
             </div>
           </div>

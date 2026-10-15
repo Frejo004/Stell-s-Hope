@@ -14,9 +14,6 @@ use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
-    private const FREE_SHIPPING_THRESHOLD = 100;
-    private const SHIPPING_AMOUNT = 5.99;
-
     public function index(Request $request)
     {
         $orders = $request->user()->orders()->with('orderItems.product')->latest()->paginate(10);
@@ -79,7 +76,7 @@ class OrderController extends Controller
                 }
 
                 $unitPrice = (float) $product->price;
-                $lineTotal = round($unitPrice * $item['quantity'], 2);
+                $lineTotal = $this->roundMoney($unitPrice * $item['quantity']);
                 $subtotal += $lineTotal;
 
                 $preparedItems[] = [
@@ -91,19 +88,21 @@ class OrderController extends Controller
                 ];
             }
 
-            $shippingAmount = $subtotal >= self::FREE_SHIPPING_THRESHOLD ? 0.0 : self::SHIPPING_AMOUNT;
+            $shippingAmount = $subtotal >= config('shop.free_shipping_threshold')
+                ? 0.0
+                : (float) config('shop.shipping_amount');
             $promotion = $this->resolvePromotion($request->input('promotion_code'), $subtotal);
             $discountAmount = $promotion ? $this->calculateDiscount($promotion, $subtotal) : 0.0;
-            $totalAmount = round(max(0, $subtotal + $shippingAmount - $discountAmount), 2);
+            $totalAmount = $this->roundMoney(max(0, $subtotal + $shippingAmount - $discountAmount));
 
             $order = Order::create([
                 'user_id' => $user->id,
                 'total' => $totalAmount,
-                'subtotal' => round($subtotal, 2),
+                'subtotal' => $this->roundMoney($subtotal),
                 'shipping_amount' => $shippingAmount,
                 'discount_amount' => $discountAmount,
                 'promotion_code' => $promotion?->code,
-                'currency' => 'XOF',
+                'currency' => config('shop.currency'),
                 'status' => 'pending',
                 'shipping_address' => $request->shipping_address,
                 'billing_address' => $request->billing_address,
@@ -286,6 +285,11 @@ class OrderController extends Controller
             ? $subtotal * ((float) $promotion->value / 100)
             : (float) $promotion->value;
 
-        return round(min($subtotal, $discount), 2);
+        return $this->roundMoney(min($subtotal, $discount));
+    }
+
+    private function roundMoney(float $amount): float
+    {
+        return round($amount, config('shop.currency_decimals'));
     }
 }

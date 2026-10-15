@@ -1,5 +1,7 @@
 import { useState  } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 
 interface FAQPageProps {
   onClose: () => void;
@@ -32,7 +34,7 @@ const faqs = [
       },
       {
         q: 'Quels sont les frais de livraison ?',
-        a: 'Livraison gratuite dès 100€, sinon 5,99€ en France métropolitaine.'
+        a: `Livraison gratuite dès ${formatPrice(BUSINESS_CONSTANTS.FREE_SHIPPING_THRESHOLD)}, sinon ${formatPrice(BUSINESS_CONSTANTS.SHIPPING_COST)}.`
       },
       {
         q: 'Livrez-vous à l\'international ?',

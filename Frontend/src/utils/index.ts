@@ -2,13 +2,14 @@ import { BUSINESS_CONSTANTS, REGEX_PATTERNS } from '../constants';
 
 // Utilitaires de formatage
 export const formatters = {
-  // Formatage de prix
-  price: (amount: number): string => {
+  // Formatage de prix (XOF : pas de décimales, ex. « 12 500 F CFA »)
+  price: (amount: number | string | null | undefined): string => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: BUSINESS_CONSTANTS.CURRENCY,
-      minimumFractionDigits: 2
-    }).format(amount);
+      minimumFractionDigits: BUSINESS_CONSTANTS.CURRENCY_DECIMALS,
+      maximumFractionDigits: BUSINESS_CONSTANTS.CURRENCY_DECIMALS
+    }).format(Number(amount) || 0);
   },
 
   // Formatage de date
@@ -45,6 +46,8 @@ export const formatters = {
     return phone;
   }
 };
+
+export const formatPrice = formatters.price;
 
 // Utilitaires de validation
 export const validators = {

@@ -8,6 +8,8 @@ import { getImageUrl } from '../utils/imageUtils';
 import { reviews } from '../data/reviews';
 import { products } from '../data/products';
 
+import { formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 interface ProductDetailProps {
   product: Product;
   onClose: () => void;
@@ -178,12 +180,12 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
 
               <div className="flex items-baseline space-x-4 mb-6">
                 <span className="text-4xl font-bold text-gray-900">
-                  {Number(product.price || 0).toFixed(2)} €
+                  {formatPrice(product.price || 0)}
                 </span>
                 {product.originalPrice && (
                   <>
                     <span className="text-2xl text-gray-500 line-through">
-                      {Number(product.originalPrice || 0).toFixed(2)} €
+                      {formatPrice(product.originalPrice || 0)}
                     </span>
                     <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-medium">
                       Livraison gratuite
@@ -302,7 +304,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Livraison gratuite</p>
-                    <p className="text-sm text-gray-600">Dès 100€ d'achat</p>
+                    <p className="text-sm text-gray-600">Dès {formatPrice(BUSINESS_CONSTANTS.FREE_SHIPPING_THRESHOLD)} d'achat</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -520,7 +522,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   />
                 </div>
                 <h3 className="font-medium text-gray-900 mb-2">{relatedProduct.name}</h3>
-                <p className="text-lg font-semibold">{Number(relatedProduct.price || 0).toFixed(2)} €</p>
+                <p className="text-lg font-semibold">{formatPrice(relatedProduct.price || 0)}</p>
               </div>
             ))}
           </div>

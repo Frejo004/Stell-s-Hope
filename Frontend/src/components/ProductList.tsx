@@ -6,6 +6,7 @@ import { useProductFilters } from '../hooks/useProductFilters';
 import Pagination from './Pagination';
 import { getImageUrl } from '../utils/imageUtils';
 
+import { formatPrice } from '../utils';
 const ProductList: React.FC = () => {
   const { page, setPage } = useProductFilters();
   const { products, loading, error } = useProducts();
@@ -32,7 +33,7 @@ const ProductList: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.name}</h3>
               <p className="text-gray-600 text-sm mb-2 line-clamp-2">{product.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xl font-bold text-gray-900">{product.price}€</span>
+                <span className="text-xl font-bold text-gray-900">{formatPrice(product.price)}</span>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => toggleWishlist(product.id)}

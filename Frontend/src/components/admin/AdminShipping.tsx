@@ -1,6 +1,7 @@
 import { useState  } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, Truck, MapPin, Clock } from 'lucide-react';
 
+import { formatPrice } from '../../utils';
 interface AdminShippingProps {
   onNavigate: (page: string) => void;
 }
@@ -175,11 +176,11 @@ export default function AdminShipping({ onNavigate: _onNavigate }: AdminShipping
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-500">Prix:</span>
-                      <span className="ml-2 font-medium">{method.price}€</span>
+                      <span className="ml-2 font-medium">{formatPrice(method.price)}</span>
                     </div>
                     <div>
                       <span className="text-gray-500">Gratuit dès:</span>
-                      <span className="ml-2 font-medium">{method.freeThreshold}€</span>
+                      <span className="ml-2 font-medium">{formatPrice(method.freeThreshold)}</span>
                     </div>
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 text-gray-400 mr-1" />

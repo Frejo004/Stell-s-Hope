@@ -6,6 +6,7 @@ import Toast from '../ui/Toast';
 import ConfirmModal from '../ui/ConfirmModal';
 import ProductEditModal from './ProductEditModal';
 
+import { formatPrice } from '../../utils';
 interface AdminProductsProps {
   onNavigate: (page: string) => void;
 }
@@ -181,10 +182,10 @@ export default function AdminProducts({ onNavigate: _onNavigate }: AdminProducts
                   </td>
                   <td className="px-8 py-5">
                     <div className="flex flex-col">
-                      <span className="text-sm font-black text-slate-900">{Number(product.price || 0).toFixed(2)}€</span>
+                      <span className="text-sm font-black text-slate-900">{formatPrice(product.price || 0)}</span>
                       {product.originalPrice && (
                         <span className="text-[10px] text-slate-400 line-through">
-                          {Number(product.originalPrice || 0).toFixed(2)}€
+                          {formatPrice(product.originalPrice || 0)}
                         </span>
                       )}
                     </div>

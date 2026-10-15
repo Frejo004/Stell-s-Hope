@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'T-shirt Premium Homme',
                 'description' => 'T-shirt en coton bio de haute qualité',
-                'price' => 29.99,
+                'price' => 19500,
                 'category_id' => 1,
                 'stock_quantity' => 50,
                 'is_featured' => true,
@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Robe Élégante',
                 'description' => 'Robe élégante pour toutes occasions',
-                'price' => 89.99,
+                'price' => 59000,
                 'category_id' => 2,
                 'stock_quantity' => 25,
                 'is_bestseller' => true,
@@ -68,7 +68,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Sweat à Capuche Unisexe',
                 'description' => 'Sweat confortable pour tous',
-                'price' => 49.99,
+                'price' => 33000,
                 'category_id' => 3,
                 'stock_quantity' => 75,
                 'is_featured' => true,
@@ -77,7 +77,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Sac à Main Cuir',
                 'description' => 'Sac à main en cuir véritable',
-                'price' => 129.99,
+                'price' => 85500,
                 'category_id' => 4,
                 'stock_quantity' => 15,
                 'sku' => 'SAC-001'
@@ -103,7 +103,7 @@ class DatabaseSeeder extends Seeder
             'code' => 'WELCOME10',
             'type' => 'percentage',
             'value' => 10,
-            'min_amount' => 50,
+            'min_amount' => 30000,
             'max_uses' => 100,
             'starts_at' => now(),
             'expires_at' => now()->addMonth(),
@@ -112,8 +112,8 @@ class DatabaseSeeder extends Seeder
         \App\Models\Promotion::create([
             'code' => 'SAVE20',
             'type' => 'fixed',
-            'value' => 20,
-            'min_amount' => 100,
+            'value' => 13000,
+            'min_amount' => 65000,
             'starts_at' => now(),
             'expires_at' => now()->addWeeks(2),
         ]);

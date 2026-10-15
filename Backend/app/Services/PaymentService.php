@@ -34,12 +34,12 @@ class PaymentService
         }
 
         try {
-            // Devise par défaut XOF pour Moneroo (Afrique de l'Ouest)
-            $currency = 'XOF'; 
-            
+            $currency = $order->currency ?? config('shop.currency');
+
             // Préparation des données de paiement
             $payload = [
-                'amount' => $order->total,
+                // Le XOF n'a pas de subdivision : Moneroo attend un montant entier
+                'amount' => (int) round((float) $order->total, config('shop.currency_decimals')),
                 'currency' => $currency,
                 'customer' => [
                     'email' => $customerInfo['email'] ?? $order->user->email,
@@ -149,7 +149,7 @@ class PaymentService
         }
 
         // Vérification de la devise
-        $expectedCurrency = $order->currency ?? 'XOF';
+        $expectedCurrency = $order->currency ?? config('shop.currency');
         if (strtoupper($currency) !== strtoupper($expectedCurrency)) {
             Log::error("Currency mismatch. Expected {$expectedCurrency}, got {$currency}");
             throw new Exception('Currency mismatch');

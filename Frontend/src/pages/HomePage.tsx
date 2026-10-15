@@ -4,6 +4,7 @@ import ProductCard from '../components/ProductCard';
 import { getImageUrl } from '../utils/imageUtils';
 import { productService } from '../services/productService';
 
+import { formatPrice } from '../utils';
 interface HomePageProps {
   products?: Product[]; // Gardé pour les sections existantes comme Trending/Feature
   onProductClick: (product: Product) => void;
@@ -337,7 +338,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                           <span key={i} className="text-yellow-400 text-xs">★</span>
                         ))}
                       </div>
-                      <p className="font-semibold text-gray-800">${Number(product.price || 0).toFixed(2)} €</p>
+                      <p className="font-semibold text-gray-800">{formatPrice(product.price)}</p>
                     </div>
                   </div>
                 ))}
@@ -361,7 +362,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                           <span key={i} className="text-yellow-400 text-xs">★</span>
                         ))}
                       </div>
-                      <p className="font-semibold text-gray-800">{Number(product.price || 0).toFixed(2)} €</p>
+                      <p className="font-semibold text-gray-800">{formatPrice(product.price || 0)}</p>
                     </div>
                   </div>
                 ))}
@@ -385,7 +386,7 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
                           <span key={i} className="text-yellow-400 text-xs">★</span>
                         ))}
                       </div>
-                      <p className="font-semibold text-gray-800">{Number(product.price || 0).toFixed(2)} €</p>
+                      <p className="font-semibold text-gray-800">{formatPrice(product.price || 0)}</p>
                     </div>
                   </div>
                 ))}

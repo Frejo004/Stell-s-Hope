@@ -10,6 +10,7 @@ import { useProducts } from '../hooks/useProducts';
 import { paymentService } from '../services/paymentService';
 import { orderService } from '../services/orderService';
 
+import { commerce, formatPrice } from '../utils';
 interface CheckoutPageProps {
   onClose: () => void;
   onOrderComplete?: (order: Order) => void;
@@ -52,7 +53,7 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
     return { ...item, product };
   }), [cart, products]);
 
-  const shipping = cartTotal > 100 ? 0 : 5.99; // Livraison gratuite > 100€
+  const shipping = commerce.calculateShipping(cartTotal); // Indicatif : le serveur recalcule
   const discount = appliedPromo ?
     (appliedPromo.type === 'percentage' ? cartTotal * (appliedPromo.value / 100) : appliedPromo.value) : 0;
 
@@ -461,7 +462,7 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
                       <div className="flex-1 flex flex-col justify-between py-1">
                         <div className="flex justify-between items-start">
                           <h4 className="font-medium text-gray-900 line-clamp-2">{item.name}</h4>
-                          <span className="font-bold text-gray-900 ml-4 whitespace-nowrap">{((item.price || 0) * item.quantity).toFixed(2)} €</span>
+                          <span className="font-bold text-gray-900 ml-4 whitespace-nowrap">{formatPrice((item.price || 0) * item.quantity)}</span>
                         </div>
                         <div className="text-sm text-gray-500">
                           Quantité: <span className="text-black font-medium">{item.quantity}</span>
@@ -496,26 +497,26 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
               <div className="space-y-4 text-sm text-gray-600 mb-6">
                 <div className="flex justify-between">
                   <span>Sous-total</span>
-                  <span className="font-medium text-gray-900">{cartTotal.toFixed(2)} €</span>
+                  <span className="font-medium text-gray-900">{formatPrice(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Livraison</span>
                   {shipping === 0 ? (
                     <span className="text-green-600 font-medium">Gratuite</span>
                   ) : (
-                    <span className="font-medium text-gray-900">{shipping.toFixed(2)} €</span>
+                    <span className="font-medium text-gray-900">{formatPrice(shipping)}</span>
                   )}
                 </div>
                 {appliedPromo && (
                   <div className="flex justify-between text-green-600 bg-green-50 p-2 rounded-lg">
                     <span>Code "{appliedPromo.code}"</span>
-                    <span>-{discount.toFixed(2)} €</span>
+                    <span>-{formatPrice(discount)}</span>
                   </div>
                 )}
                 <div className="pt-4 border-t flex justify-between items-end">
                   <span className="font-medium text-gray-900 text-lg">Total</span>
                   <div className="text-right">
-                    <span className="font-bold text-2xl text-black block">{(serverOrderTotal ?? finalTotal).toFixed(2)} €</span>
+                    <span className="font-bold text-2xl text-black block">{formatPrice(serverOrderTotal ?? finalTotal)}</span>
                     <span className="text-xs text-gray-400">TVA incluse</span>
                   </div>
                 </div>

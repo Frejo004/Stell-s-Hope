@@ -106,14 +106,14 @@ class AdminDashboardController extends Controller
                 return [
                     'name' => $product->name,
                     'sales' => (int)$product->total_sales,
-                    'revenue' => round($product->total_revenue, 0) . ' €'
+                    'revenue' => round($product->total_revenue, 0)
                 ];
             });
         
         // Si vide, on met des données par défaut pour éviter un dashboard vide
         if ($topProductsData->isEmpty()) {
             $topProductsData = Product::take(3)->get()->map(function($p) {
-                return ['name' => $p->name, 'sales' => 0, 'revenue' => '0 €'];
+                return ['name' => $p->name, 'sales' => 0, 'revenue' => 0];
             });
         }
         

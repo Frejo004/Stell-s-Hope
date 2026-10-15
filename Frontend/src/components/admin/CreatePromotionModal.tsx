@@ -70,7 +70,7 @@ export default function CreatePromotionModal({ isOpen, onClose, onSubmit }: Crea
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Valeur {formData.type === 'percentage' ? '(%)' : '(€)'}
+              Valeur {formData.type === 'percentage' ? '(%)' : '(FCFA)'}
             </label>
             <input
               type="number"
@@ -84,7 +84,7 @@ export default function CreatePromotionModal({ isOpen, onClose, onSubmit }: Crea
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Montant minimum (€)</label>
+            <label className="block text-sm font-medium mb-1">Montant minimum (FCFA)</label>
             <input
               type="number"
               value={formData.min_amount}

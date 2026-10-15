@@ -1,6 +1,7 @@
 import { useState, useEffect  } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 
+import { formatPrice } from '../../utils';
 interface Attribute {
   id: number;
   name: string;
@@ -92,7 +93,7 @@ export default function ProductVariantManager({
                       {variant.attributes[attr.id] || '-'}
                     </td>
                   ))}
-                  <td className="px-4 py-3 text-sm text-gray-900">{variant.price}€</td>
+                  <td className="px-4 py-3 text-sm text-gray-900">{formatPrice(variant.price)}</td>
                   <td className="px-4 py-3 text-sm text-gray-900">{variant.stock_quantity}</td>
                   <td className="px-4 py-3 text-sm">
                     <button
@@ -170,7 +171,7 @@ export default function ProductVariantManager({
           })}
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Prix (FCFA)</label>
             <input
               type="number"
               step="0.01"

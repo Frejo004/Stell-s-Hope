@@ -4,6 +4,7 @@ import { useCartContext as useCart } from '../contexts/CartContext';
 import { useQueryState, parseAsInteger } from 'nuqs';
 import Pagination from './Pagination';
 
+import { formatPrice } from '../utils';
 const WishlistGrid: React.FC = () => {
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
   const { wishlist, toggleWishlist } = useWishlist();
@@ -43,7 +44,7 @@ const WishlistGrid: React.FC = () => {
                   </p>
                   <div className="flex items-center justify-between">
                     <span className="text-xl font-bold text-gray-900">
-                      {item.product?.price}€
+                      {formatPrice(item.product?.price)}
                     </span>
                     <div className="flex space-x-2">
                       <button

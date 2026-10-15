@@ -3,6 +3,7 @@ import { ArrowLeft, Package, Truck, CheckCircle, Clock } from 'lucide-react';
 import { adminService } from '../services/adminService';
 import { Order, OrderItem } from '../types/order';
 
+import { formatPrice } from '../utils';
 interface OrderTrackingPageProps {
   orderId: string;
   onClose: () => void;
@@ -151,7 +152,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">{Number(item.price * item.quantity).toFixed(2)}€</p>
+                  <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
                 </div>
               </div>
             ))}
@@ -160,7 +161,7 @@ export default function OrderTrackingPage({ orderId, onClose }: OrderTrackingPag
           <div className="border-t mt-4 pt-4">
             <div className="flex justify-between text-lg font-semibold">
               <span>Total</span>
-              <span>{Number(order.total || 0).toFixed(2)}€</span>
+              <span>{formatPrice(order.total || 0)}</span>
             </div>
           </div>
         </div>

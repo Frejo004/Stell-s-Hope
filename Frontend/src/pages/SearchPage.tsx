@@ -3,6 +3,8 @@ import { Search, X, Filter } from 'lucide-react';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 
+import { formatPrice } from '../utils';
+import { BUSINESS_CONSTANTS } from '../constants';
 interface SearchPageProps {
   products?: Product[];
   onClose: () => void;
@@ -14,7 +16,7 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
   const [query, setQuery] = useState(initialQuery);
   const [filters, setFilters] = useState({
     category: '',
-    priceRange: [0, 500] as [number, number],
+    priceRange: [0, BUSINESS_CONSTANTS.PRICE_FILTER_MAX] as [number, number],
     sortBy: 'relevance' as 'relevance' | 'price-low' | 'price-high' | 'newest'
   });
   const [showFilters, setShowFilters] = useState(false);
@@ -112,7 +114,8 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
                 <input
                   type="range"
                   min="0"
-                  max="500"
+                  max={BUSINESS_CONSTANTS.PRICE_FILTER_MAX}
+                  step={BUSINESS_CONSTANTS.PRICE_FILTER_STEP}
                   value={filters.priceRange[1]}
                   onChange={(e) => setFilters(prev => ({
                     ...prev,
@@ -120,7 +123,7 @@ export default function SearchPage({ products, onClose, onProductClick, initialQ
                   }))}
                   className="w-full"
                 />
-                <span className="text-sm text-gray-600">{filters.priceRange[1]}€</span>
+                <span className="text-sm text-gray-600">{formatPrice(filters.priceRange[1])}</span>
               </div>
 
               <div>

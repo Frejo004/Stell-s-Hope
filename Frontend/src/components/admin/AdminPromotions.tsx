@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, Search, Filter, Percent, Calendar, Users } from 'lu
 import { useAdminPromotions } from '../../hooks/useAdminExtended';
 import CreatePromotionModal from './CreatePromotionModal';
 
+import { formatPrice } from '../../utils';
 interface AdminPromotionsProps {
   onNavigate: (page: string) => void;
 }
@@ -154,9 +155,9 @@ export default function AdminPromotions({ onNavigate: _onNavigate }: AdminPromot
                   <td className="px-6 py-4">
                     <div className="text-sm font-medium text-gray-900">
                       {promo.type === 'percentage' ? `${promo.value}%` : 
-                       promo.type === 'fixed' ? `${promo.value}€` : 'Gratuit'}
+                       promo.type === 'fixed' ? `${formatPrice(promo.value)}` : 'Gratuit'}
                     </div>
-                    <div className="text-sm text-gray-500">Min: {promo.minAmount}€</div>
+                    <div className="text-sm text-gray-500">Min: {formatPrice(promo.minAmount)}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center">

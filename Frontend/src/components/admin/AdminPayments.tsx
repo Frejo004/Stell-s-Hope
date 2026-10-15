@@ -1,6 +1,7 @@
 import { useState  } from 'react';
 import { Plus, Edit, Search, Filter, CreditCard, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 
+import { formatPrice } from '../../utils';
 interface AdminPaymentsProps {
   onNavigate: (page: string) => void;
 }
@@ -138,7 +139,7 @@ export default function AdminPayments({ onNavigate: _onNavigate }: AdminPayments
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-gray-900">{totalVolume.toLocaleString('fr-FR')}€</div>
+          <div className="text-2xl font-bold text-gray-900">{formatPrice(totalVolume)}</div>
           <div className="text-sm text-gray-600">Volume Total</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
@@ -146,7 +147,7 @@ export default function AdminPayments({ onNavigate: _onNavigate }: AdminPayments
           <div className="text-sm text-gray-600">Transactions</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
-          <div className="text-2xl font-bold text-blue-600">{totalFees.toFixed(2)}€</div>
+          <div className="text-2xl font-bold text-blue-600">{formatPrice(totalFees)}</div>
           <div className="text-sm text-gray-600">Frais Total</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border p-4">
@@ -200,7 +201,7 @@ export default function AdminPayments({ onNavigate: _onNavigate }: AdminPayments
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-500">Volume:</span>
-                    <span className="font-medium">{method.volume.toLocaleString('fr-FR')}€</span>
+                    <span className="font-medium">{formatPrice(method.volume)}</span>
                   </div>
                 </div>
               </div>
@@ -273,10 +274,10 @@ export default function AdminPayments({ onNavigate: _onNavigate }: AdminPayments
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{transaction.customer}</td>
                   <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{transaction.amount}€</div>
+                    <div className="text-sm font-medium text-gray-900">{formatPrice(transaction.amount)}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-900">{transaction.method}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{transaction.fees.toFixed(2)}€</td>
+                  <td className="px-6 py-4 text-sm text-gray-900">{formatPrice(transaction.fees)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(transaction.status)}`}>

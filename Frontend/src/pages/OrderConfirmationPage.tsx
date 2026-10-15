@@ -3,6 +3,7 @@ import { Order } from '../types/order';
 import { getImageUrl } from '../utils/imageUtils';
 import { useAuth } from '../hooks/useAuth';
 
+import { formatPrice } from '../utils';
 interface OrderConfirmationPageProps {
   order: Order;
   onContinueShopping: () => void;
@@ -52,10 +53,8 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
               <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Montant Total</h3>
               {/* Correction #4 : utiliser order.total (champ DB actuel) */}
               <p className="text-3xl font-black text-rose-500">
-                {Number(
-                  order.total ||
-                  (order.order_items || order.items || []).reduce((acc: number, item: any) => acc + ((item.price || item.product?.price || 0) * item.quantity), 0)
-                ).toFixed(2)} €
+                {formatPrice(order.total ||
+                  (order.order_items || order.items || []).reduce((acc: number, item: any) => acc + ((item.price || item.product?.price || 0) * item.quantity), 0))}
               </p>
             </div>
           </div>
@@ -79,7 +78,7 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
                     <p className="text-sm font-medium text-gray-900 mt-1">x{item.quantity}</p>
                   </div>
                   <p className="font-bold text-gray-900">
-                    {((item.price || item.product?.price || 0) * item.quantity).toFixed(2)} €
+                    {formatPrice((item.price || item.product?.price || 0) * item.quantity)}
                   </p>
                 </div>
               ))}
@@ -87,20 +86,20 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Sous-total</span>
-                  <span>{(order.subtotal || 0).toFixed(2)} €</span>
+                  <span>{formatPrice(order.subtotal || 0)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Livraison</span>
-                  <span>{(order.shipping || 0).toFixed(2)} €</span>
+                  <span>{formatPrice(order.shipping || 0)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>TVA</span>
-                  <span>{(order.tax || 0).toFixed(2)} €</span>
+                  <span>{formatPrice(order.tax || 0)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total</span>
                   {/* Correction #4 : utiliser order.total */}
-                  <span>{Number(order.total || 0).toFixed(2)} €</span>
+                  <span>{formatPrice(order.total || 0)}</span>
                 </div>
               </div>
             </div>

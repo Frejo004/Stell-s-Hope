@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useProductFilters } from '../hooks/useProductFilters';
 import { productService } from '../services/productService';
 import { Category } from '../types';
+import { BUSINESS_CONSTANTS } from '../constants';
 
 // Composants temporaires (à remplacer par les vrais composants UI plus tard)
 interface SliderProps {
@@ -219,8 +220,8 @@ const ProductFilters: React.FC = () => {
         <div className="px-2">
           <Slider
             min={0}
-            max={1000}
-            step={10}
+            max={BUSINESS_CONSTANTS.PRICE_FILTER_MAX}
+            step={BUSINESS_CONSTANTS.PRICE_FILTER_STEP}
             value={[localMinPrice ?? 0]}
             onValueChange={(values) => setLocalMinPrice(values[0] ?? 0)}
             className="mb-4"
@@ -233,9 +234,9 @@ const ProductFilters: React.FC = () => {
               type="number"
               value={localMinPrice ?? ''}
               onChange={(e) => setLocalMinPrice(e.target.value ? parseInt(e.target.value) : null)}
-              className="w-20 px-2 py-1 text-sm border rounded"
+              className="w-24 px-2 py-1 text-sm border rounded"
               min="0"
-              max={maxPrice || 1000}
+              max={maxPrice || BUSINESS_CONSTANTS.PRICE_FILTER_MAX}
             />
           </div>
           <div className="h-px w-4 bg-gray-300"></div>
@@ -245,9 +246,9 @@ const ProductFilters: React.FC = () => {
               type="number"
               value={localMaxPrice ?? ''}
               onChange={(e) => setLocalMaxPrice(e.target.value ? parseInt(e.target.value) : null)}
-              className="w-20 px-2 py-1 text-sm border rounded"
+              className="w-24 px-2 py-1 text-sm border rounded"
               min={minPrice || 0}
-              max="10000"
+              max={BUSINESS_CONSTANTS.PRICE_FILTER_MAX}
             />
           </div>
         </div>

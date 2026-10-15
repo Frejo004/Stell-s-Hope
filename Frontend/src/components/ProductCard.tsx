@@ -5,6 +5,7 @@ import { useWishlist } from '../contexts/WishlistContext';
 import { useCartContext } from '../contexts/CartContext';
 import { getProductImageUrl } from '../utils/imageUtils';
 
+import { formatPrice } from '../utils';
 interface ProductCardProps {
   product: Product;
   onProductClick: (product: Product) => void;
@@ -199,11 +200,11 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
 
         <div className="flex items-baseline space-x-2 pt-1">
           <span className="text-lg font-bold text-gray-900">
-            {Number(product.price || 0).toFixed(2)} €
+            {formatPrice(product.price || 0)}
           </span>
           {product.originalPrice && (
             <span className="text-sm text-gray-400 line-through decoration-gray-400">
-              {Number(product.originalPrice).toFixed(2)} €
+              {formatPrice(product.originalPrice)}
             </span>
           )}
         </div>
