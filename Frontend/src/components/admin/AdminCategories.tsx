@@ -19,8 +19,8 @@ export default function AdminCategories({ onNavigate: _onNavigate }: AdminCatego
 
   const [attributes] = useState([
     { id: '1', name: 'Tailles', type: 'size', values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
-    { id: '2', name: 'Couleurs', type: 'color', values: ['Blanc', 'Noir', 'Bleu marine', 'Rose poudré'] },
-    { id: '3', name: 'Types', type: 'type', values: ['Hauts', 'Bas', 'Accessoires'] }
+    { id: '2', name: 'Nuances & Teintes', type: 'color', values: ['Blanc Soie', 'Noir Onyx', 'Terracotta', 'Bleu Nuit', 'Rose Poudré'] },
+    { id: '3', name: 'Coupes', type: 'type', values: ['Hauts & Chemisiers', 'Robes & Ensembles', 'Pantalons & Jupes', 'Accessoires'] }
   ]);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function AdminCategories({ onNavigate: _onNavigate }: AdminCatego
       setLoading(true);
       const data = await adminService.getCategories();
       setCategories(data);
-    } catch (error) {
+    } catch {
       setToast({ type: 'error', message: 'Erreur lors du chargement des catégories' });
     } finally {
       setLoading(false);
@@ -44,16 +44,16 @@ export default function AdminCategories({ onNavigate: _onNavigate }: AdminCatego
     try {
       if (editingCategory) {
         await adminService.updateCategory(editingCategory.id, formData);
-        setToast({ type: 'success', message: 'Catégorie mise à jour' });
+        setToast({ type: 'success', message: 'Univers actualisé avec succès' });
       } else {
         await adminService.createCategory(formData);
-        setToast({ type: 'success', message: 'Catégorie créée' });
+        setToast({ type: 'success', message: 'Nouvel univers créé' });
       }
       setShowModal(false);
       setEditingCategory(null);
       setFormData({ name: '', description: '', is_active: true });
       fetchCategories();
-    } catch (error) {
+    } catch {
       setToast({ type: 'error', message: 'Erreur lors de la sauvegarde' });
     }
   };
@@ -72,11 +72,11 @@ export default function AdminCategories({ onNavigate: _onNavigate }: AdminCatego
   const confirmDelete = async () => {
     try {
       await adminService.deleteCategory(deletingCategory.id);
-      setToast({ type: 'success', message: 'Catégorie supprimée' });
+      setToast({ type: 'success', message: 'Catégorie retirée du catalogue' });
       setShowDeleteModal(false);
       setDeletingCategory(null);
       fetchCategories();
-    } catch (error) {
+    } catch {
       setToast({ type: 'error', message: 'Erreur lors de la suppression' });
     }
   };
@@ -84,144 +84,157 @@ export default function AdminCategories({ onNavigate: _onNavigate }: AdminCatego
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-rose-100 border-t-rose-500 rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-stone-300 border-t-stone-950 rounded-full animate-spin"></div>
+          <span className="text-xs uppercase tracking-widest text-stone-500 font-medium">Chargement des univers...</span>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* ─── Header ─── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-stone-200/60">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Catégories & Attributs</h1>
-          <p className="text-slate-500 mt-1 font-medium">Structurez votre catalogue avec précision.</p>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-terracotta-600">Structure Collections</span>
+          <h1 className="font-serif text-3xl font-normal text-stone-950 mt-1">
+            Univers & Attributs
+          </h1>
+          <p className="text-xs text-stone-500 font-light mt-1">
+            Organisez le vestiaire par univers, lignes de vêtements et déclinaisons de tailles/coloris.
+          </p>
         </div>
+
         <button
-          onClick={() => setShowModal(true)}
-          className="bg-rose-500 text-white px-6 py-3 rounded-2xl border-none font-bold text-sm shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 hover:-translate-y-0.5 transition-all flex items-center space-x-2"
+          onClick={() => {
+            setEditingCategory(null);
+            setFormData({ name: '', description: '', is_active: true });
+            setShowModal(true);
+          }}
+          className="inline-flex items-center gap-2 bg-stone-950 hover:bg-black text-white px-6 py-3 rounded-full text-xs uppercase tracking-widest font-semibold shadow-md hover:shadow-lg transition-all self-start sm:self-auto"
         >
-          <Plus className="w-5 h-5" />
-          <span>Nouvelle Catégorie</span>
+          <Plus className="w-4 h-4 text-terracotta-400" />
+          <span>Nouvel Univers</span>
         </button>
       </div>
 
-      {/* Stats Cards Premium */}
+      {/* ─── Stats Cards ─── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { label: 'Catégories', value: categories.length, icon: Tag, color: 'text-rose-600', bg: 'bg-rose-50' },
-          { label: 'Attributs Actifs', value: attributes.length, icon: Layers, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-          { label: 'Produits Classés', value: categories.reduce((sum, cat) => sum + (cat.products_count || 0), 0), icon: Package, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Univers Actifs', value: categories.length, icon: Tag, color: 'text-stone-900', bg: 'bg-stone-100' },
+          { label: 'Grilles de Tailles & Nuances', value: attributes.length, icon: Layers, color: 'text-stone-800', bg: 'bg-stone-100' },
+          { label: 'Pièces Rattachées', value: categories.reduce((sum, cat) => sum + (cat.products_count || 0), 0), icon: Package, color: 'text-emerald-700', bg: 'bg-emerald-50' },
         ].map((stat, idx) => (
-          <div key={idx} className="bg-white rounded-[1.5rem] p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all">
-            <div className={`w-10 h-10 ${stat.bg} ${stat.color} rounded-xl flex items-center justify-center mb-3`}>
-              <stat.icon className="w-5 h-5" />
+          <div key={idx} className="bg-white rounded-3xl p-5 border border-stone-200/80 shadow-sm">
+            <div className={`w-9 h-9 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mb-3`}>
+              <stat.icon className="w-4 h-4" />
             </div>
-            <div className="text-2xl font-black text-slate-900 leading-none">{stat.value}</div>
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">{stat.label}</div>
+            <div className="font-serif text-2xl font-normal text-stone-950 leading-none">{stat.value}</div>
+            <div className="text-[10px] font-semibold text-stone-400 uppercase tracking-widest mt-2">{stat.label}</div>
           </div>
         ))}
       </div>
 
+      {/* ─── Grille 2 colonnes : Univers + Attributs ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Categories Section */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Catégories Catalogue</h2>
-            <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-              {categories.length} Total
+        {/* Univers du Catalogue */}
+        <div className="bg-white rounded-3xl shadow-sm border border-stone-200/80 overflow-hidden">
+          <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+            <h2 className="font-serif text-base font-normal text-stone-950">Univers du Catalogue</h2>
+            <span className="px-3 py-1 bg-stone-100 rounded-full text-[10px] font-semibold text-stone-600 uppercase tracking-wider">
+              {categories.length} Univers
             </span>
           </div>
-          <div className="p-6">
-            <div className="space-y-3">
-              {categories.map((category) => (
-                <div key={category.id} className="group flex items-center justify-between p-4 bg-slate-50/50 hover:bg-white border border-slate-100 hover:border-rose-200 rounded-2xl transition-all hover:shadow-md">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Tag className="w-5 h-5 text-rose-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-900 leading-tight">{category.name}</h3>
-                      <div className="flex items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                        <Package className="w-3 h-3 mr-1" />
-                        {category.products_count || 0} produits
-                      </div>
-                    </div>
+
+          <div className="p-6 space-y-3">
+            {categories.map((category) => (
+              <div
+                key={category.id}
+                className="flex items-center justify-between p-4 bg-stone-50/60 hover:bg-white border border-stone-200/60 hover:border-stone-300 rounded-2xl transition-all shadow-2xs"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-2xl bg-white border border-stone-200 text-stone-800 flex items-center justify-center shrink-0">
+                    <Tag className="w-4 h-4 text-terracotta-500" />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest border ${category.is_active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-100 text-slate-400 border-slate-200'
-                      }`}>
-                      {category.is_active ? 'Actif' : 'Inactif'}
-                    </span>
-                    <button
-                      onClick={() => handleEdit(category)}
-                      className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(category)}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <div>
+                    <h3 className="font-medium text-xs text-stone-900 leading-tight">{category.name}</h3>
+                    <p className="text-[10px] text-stone-400 mt-0.5">
+                      {category.products_count || 0} création{category.products_count > 1 ? 's' : ''}
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                    category.is_active
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : 'bg-stone-100 text-stone-600 border-stone-200'
+                  }`}>
+                    {category.is_active ? 'En ligne' : 'Masqué'}
+                  </span>
+                  <button
+                    onClick={() => handleEdit(category)}
+                    className="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors"
+                    title="Modifier"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(category)}
+                    className="p-2 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Attributes Section */}
-        <div className="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Attributs & Filtres</h2>
-            <button className="text-rose-500 hover:text-rose-600 text-[10px] font-bold uppercase tracking-widest flex items-center space-x-1">
-              <Plus className="w-3 h-3" />
-              <span>Nouveau</span>
-            </button>
+        {/* Nuanciers & Déclinaisons */}
+        <div className="bg-white rounded-3xl shadow-sm border border-stone-200/80 overflow-hidden">
+          <div className="p-6 border-b border-stone-100 flex items-center justify-between">
+            <h2 className="font-serif text-base font-normal text-stone-950">Attributs & Nuanciers</h2>
+            <span className="text-xs text-stone-400 font-light">Standards Atelier</span>
           </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {attributes.map((attribute) => (
-                <div key={attribute.id} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 hover:border-indigo-200 transition-colors">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-                        <Layers className="w-4 h-4" />
-                      </div>
-                      <h3 className="text-sm font-bold text-slate-900">{attribute.name}</h3>
+
+          <div className="p-6 space-y-4">
+            {attributes.map((attribute) => (
+              <div key={attribute.id} className="bg-stone-50/60 border border-stone-200/60 rounded-2xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-xl bg-white border border-stone-200 flex items-center justify-center text-stone-700">
+                      <Layers className="w-3.5 h-3.5" />
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <button className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {attribute.values.map((value, index) => (
-                      <span key={index} className="px-3 py-1 text-[10px] font-bold bg-white text-slate-600 border border-slate-200 rounded-xl shadow-sm">
-                        {value}
-                      </span>
-                    ))}
+                    <h3 className="font-medium text-xs text-stone-900">{attribute.name}</h3>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {attribute.values.map((value, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 text-[11px] font-medium bg-white text-stone-700 border border-stone-200/80 rounded-xl shadow-2xs"
+                    >
+                      {value}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Modal Premium */}
+      {/* ─── Modal Création / Modification Univers ─── */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
-            <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                {editingCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
+        <div className="fixed inset-0 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-stone-200/80">
+            <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+              <h3 className="font-serif text-lg font-normal text-stone-950">
+                {editingCategory ? 'Modifier l\'Univers' : 'Nouvel Univers'}
               </h3>
               <button
                 onClick={() => {
@@ -229,46 +242,54 @@ export default function AdminCategories({ onNavigate: _onNavigate }: AdminCatego
                   setEditingCategory(null);
                   setFormData({ name: '', description: '', is_active: true });
                 }}
-                className="p-2 bg-white rounded-xl border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-all"
+                className="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nom de la catégorie</label>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-semibold text-stone-400 uppercase tracking-widest">
+                  Nom de l'univers
+                </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-rose-500/20 focus:bg-white transition-all font-medium text-slate-700"
-                  placeholder="Ex: Robes de soirée"
+                  className="w-full bg-stone-50 border border-stone-200/80 rounded-2xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-950/10 focus:bg-white focus:border-stone-400 transition-all font-light"
+                  placeholder="Ex: Soirée & Cérémonie"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Description</label>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-semibold text-stone-400 uppercase tracking-widest">
+                  Description éditoriale
+                </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-rose-500/20 focus:bg-white transition-all font-medium text-slate-700"
-                  rows={4}
-                  placeholder="Que contient cette catégorie ?"
+                  className="w-full bg-stone-50 border border-stone-200/80 rounded-2xl px-4 py-2.5 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-stone-950/10 focus:bg-white focus:border-stone-400 transition-all font-light"
+                  rows={3}
+                  placeholder="Brève description de la sélection..."
                 />
               </div>
-              <div className="flex items-center space-x-3 p-4 bg-slate-50 rounded-2xl">
+
+              <div className="flex items-center gap-3 p-3.5 bg-stone-50 rounded-2xl border border-stone-200/60">
                 <input
                   type="checkbox"
                   id="category_active"
                   checked={formData.is_active}
                   onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                  className="w-5 h-5 rounded-lg border-slate-300 text-rose-500 focus:ring-rose-500/20"
+                  className="w-4 h-4 rounded text-stone-950 focus:ring-stone-950/20"
                 />
-                <label htmlFor="category_active" className="text-sm font-bold text-slate-700 cursor-pointer flex-1">
-                  Marquer cette catégorie comme active sur le site
+                <label htmlFor="category_active" className="text-xs font-medium text-stone-700 cursor-pointer select-none">
+                  Afficher cet univers publiquement dans la boutique
                 </label>
               </div>
-              <div className="flex space-x-3 pt-2">
+
+              <div className="flex gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => {
@@ -276,16 +297,16 @@ export default function AdminCategories({ onNavigate: _onNavigate }: AdminCatego
                     setEditingCategory(null);
                     setFormData({ name: '', description: '', is_active: true });
                   }}
-                  className="flex-1 px-6 py-3.5 bg-slate-100 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-colors"
+                  className="flex-1 px-5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-full text-xs font-semibold uppercase tracking-wider transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3.5 bg-rose-500 text-white rounded-2xl font-bold text-sm hover:bg-rose-600 shadow-lg shadow-rose-500/20 transition-all flex items-center justify-center space-x-2"
+                  className="flex-1 px-5 py-2.5 bg-stone-950 hover:bg-black text-white rounded-full text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2"
                 >
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span>{editingCategory ? 'Mettre à jour' : 'Créer la catégorie'}</span>
+                  <CheckCircle2 className="w-4 h-4 text-terracotta-400" />
+                  <span>{editingCategory ? 'Sauvegarder' : 'Créer'}</span>
                 </button>
               </div>
             </form>
@@ -293,33 +314,32 @@ export default function AdminCategories({ onNavigate: _onNavigate }: AdminCatego
         </div>
       )}
 
-      {/* Delete Confirmation Premium */}
+      {/* ─── Modal Confirmation de Suppression ─── */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200">
-            <div className="p-8 text-center">
-              <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <Trash2 className="w-10 h-10" />
-              </div>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Supprimer la catégorie ?</h3>
-              <p className="text-slate-500 font-medium leading-relaxed">
-                Êtes-vous sûr de vouloir supprimer la catégorie <span className="text-slate-900 font-bold">"{deletingCategory?.name}"</span> ?
-                <br />Cette action supprimera également les associations de produits.
+        <div className="fixed inset-0 bg-stone-950/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden border border-stone-200/80 p-6 text-center space-y-4">
+            <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-serif text-lg font-normal text-stone-950">Retirer l'Univers ?</h3>
+              <p className="text-xs text-stone-500 mt-1 font-light leading-relaxed">
+                Confirmez-vous le retrait de l'univers <strong className="text-stone-900 font-medium">"{deletingCategory?.name}"</strong> ?
               </p>
             </div>
-            <div className="p-8 bg-slate-50 flex space-x-3">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
                   setDeletingCategory(null);
                 }}
-                className="flex-1 px-6 py-3.5 bg-white border border-slate-200 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-100 transition-colors"
+                className="flex-1 px-4 py-2.5 bg-stone-100 text-stone-700 rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-stone-200 transition-colors"
               >
                 Annuler
               </button>
               <button
                 onClick={confirmDelete}
-                className="flex-1 px-6 py-3.5 bg-rose-500 text-white rounded-2xl font-bold text-sm hover:bg-rose-600 shadow-lg shadow-rose-500/10 transition-all"
+                className="flex-1 px-4 py-2.5 bg-rose-600 text-white rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-rose-700 transition-colors"
               >
                 Supprimer
               </button>
