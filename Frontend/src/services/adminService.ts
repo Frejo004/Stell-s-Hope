@@ -100,7 +100,7 @@ export const adminService = {
 
   // Customers management
   getCustomers: async (page = 1) => {
-    const response = await api.get(`/admin/customers/detailed?page=${page}`);
+    const response = await api.get(`/admin/customers?page=${page}`);
     return response.data;
   },
 
