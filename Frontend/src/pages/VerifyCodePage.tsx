@@ -90,7 +90,7 @@ export default function VerifyCodePage({ onClose }: VerifyCodePageProps) {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#FAF9F6] text-stone-900 selection:bg-stone-900 selection:text-white">
+    <div className="min-h-screen lg:h-screen flex bg-[#FAF9F6] text-stone-900 selection:bg-stone-900 selection:text-white lg:overflow-hidden">
       {/* ── Panneau gauche — Code ── */}
       <div className="w-full lg:w-[52%] flex flex-col justify-between p-6 sm:p-10 lg:p-14 overflow-y-auto">
         <div className="flex items-center justify-between">

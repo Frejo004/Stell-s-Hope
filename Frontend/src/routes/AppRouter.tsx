@@ -6,9 +6,9 @@ import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useAuth } from '../hooks/useAuth';
 import { Order } from '../types/order';
 import ProtectedRoute from '../components/ProtectedRoute';
+import ScrollToTop from '../components/ScrollToTop';
 
 // Lazy loading des pages pour optimisation
 const HomePage = lazy(() => import('../pages/HomePage'));
@@ -126,7 +126,6 @@ function ProductDetailWrapper() {
 }
 
 function AppContent({ onOrderComplete }: AppRouterProps) {
-  const { isAuthenticated } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -407,6 +406,7 @@ export default function AppRouter({ onOrderComplete }: AppRouterProps) {
   return (
     <Router>
       <NuqsAdapter>
+        <ScrollToTop />
         <AppContent onOrderComplete={onOrderComplete} />
       </NuqsAdapter>
     </Router>
