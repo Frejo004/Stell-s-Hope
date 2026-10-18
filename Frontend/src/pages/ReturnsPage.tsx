@@ -1,36 +1,34 @@
 import { useState } from 'react';
-import { RotateCcw, Package, CheckCircle, Clock, AlertCircle, ChevronDown, ChevronUp, Mail, Phone } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { RotateCcw, Package, CheckCircle2, Clock, AlertCircle, ChevronDown, Mail, Phone, ArrowLeft, Sparkles, Send } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import Logo from '../components/Logo';
+import { eventBus } from '../utils/eventBus';
 
 interface ReturnsPageProps {
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 const FAQ_ITEMS = [
   {
     question: 'Quel est le délai pour effectuer un retour ?',
-    answer: 'Vous disposez de 30 jours à compter de la réception de votre commande pour nous retourner un article. Passé ce délai, nous ne pourrons malheureusement pas accepter votre retour.'
+    answer: 'Vous disposez d\'un délai de 14 jours francs à compter de la remise en main propre de votre commande pour initier votre démarche de retour.'
   },
   {
-    question: 'Les retours sont-ils gratuits ?',
-    answer: 'Oui, les retours sont entièrement gratuits pour la France métropolitaine. Pour les retours depuis l\'étranger, des frais de port peuvent s\'appliquer.'
+    question: 'Les retours sont-ils pris en charge ?',
+    answer: 'Les retours pour échange de taille ou de conformité sont intégralement pris en charge et organisés par notre service conciergerie.'
   },
   {
-    question: 'Dans quel état doit être l\'article retourné ?',
-    answer: 'L\'article doit être retourné dans son état d\'origine : non porté, non lavé, avec toutes ses étiquettes attachées et dans son emballage d\'origine si possible.'
+    question: 'Dans quel état la création doit-elle être retournée ?',
+    answer: 'La pièce doit impérativement être retournée dans son état neuf d\'origine : non portée, non lavée, avec toutes ses étiquettes textiles scellées et son emballage de protection.'
   },
   {
-    question: 'Quand serai-je remboursé(e) ?',
-    answer: 'Le remboursement est effectué sous 5 à 10 jours ouvrés après réception et vérification de votre retour, sur le moyen de paiement utilisé lors de l\'achat.'
+    question: 'Quel est le délai de remboursement ?',
+    answer: 'Le remboursement est exécuté sous 5 à 7 jours ouvrés suivant la réception et la validation du contrôle qualité en atelier, directement sur le moyen de règlement initial.'
   },
   {
-    question: 'Puis-je échanger un article contre une autre taille ?',
-    answer: 'Oui, les échanges de taille ou de couleur sont possibles sous 30 jours, dans la limite des stocks disponibles. Précisez votre souhait dans le formulaire de retour.'
-  },
-  {
-    question: 'Les articles soldés sont-ils retournables ?',
-    answer: 'Les articles achetés en promotion sont retournables dans les mêmes conditions que les articles à prix plein, sauf mention contraire indiquée sur la fiche produit.'
+    question: 'Comment se déroule un échange de taille ?',
+    answer: 'Précisez la taille souhaitée dans le formulaire de retour. Dès enregistrement, notre équipe réserve la pièce souhaitée sous réserve de disponibilité des stocks.'
   }
 ];
 
@@ -38,293 +36,299 @@ const RETURN_STEPS = [
   {
     step: 1,
     icon: Package,
-    title: 'Initiez votre retour',
-    description: 'Remplissez le formulaire ci-dessous ou connectez-vous à votre compte pour sélectionner la commande concernée.'
+    title: 'Déclaration en ligne',
+    description: 'Remplissez le formulaire ci-dessous ou contactez la conciergerie avec votre référence de commande.'
   },
   {
     step: 2,
     icon: Mail,
-    title: 'Recevez votre étiquette',
-    description: 'Vous recevrez par email une étiquette de retour prépayée sous 24h.'
+    title: 'Confirmation & Bon de retour',
+    description: 'Vous recevez les instructions de retour et le bon de prise en charge par email sous 24h.'
   },
   {
     step: 3,
     icon: RotateCcw,
-    title: 'Expédiez votre colis',
-    description: 'Déposez votre colis dans un point relais ou bureau de poste avec l\'étiquette fournie.'
+    title: 'Remise du colis',
+    description: 'Emballez soigneusement la création dans sa boîte d\'origine et confiez-la à notre coursier mandaté.'
   },
   {
     step: 4,
-    icon: CheckCircle,
-    title: 'Remboursement',
-    description: 'Dès réception et vérification, votre remboursement est traité sous 5-10 jours ouvrés.'
+    icon: CheckCircle2,
+    title: 'Contrôle & Remboursement',
+    description: 'Après validation atelier, votre remboursement ou expédition de la nouvelle taille est opéré sous 5 jours.'
   }
 ];
 
 export default function ReturnsPage({ onClose }: ReturnsPageProps) {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [form, setForm] = useState({
     order_number: '',
     email: '',
-    reason: '',
-    type: 'refund' as 'refund' | 'exchange',
+    reason: 'Taille incorrecte',
+    type: 'exchange' as 'refund' | 'exchange',
     details: ''
   });
   const [submitted, setSubmitted] = useState(false);
 
   const RETURN_REASONS = [
-    'Taille incorrecte',
-    'Couleur différente de la photo',
-    'Article défectueux ou endommagé',
-    'Article non conforme à la description',
+    'Taille incorrecte (souhait d\'échange)',
+    'Nuance différente des attentes',
     'Changement d\'avis',
-    'Commande en double',
-    'Autre raison'
+    'Création défectueuse ou anomalie',
+    'Autre motif particulier'
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Ici on connecterait au backend pour créer un ticket de retour
     setSubmitted(true);
+    eventBus.emit('show-toast', {
+      type: 'success',
+      message: 'Votre demande de retour a été transmise à notre service logistique.'
+    });
   };
 
   return (
-    <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
-      <div className="max-w-4xl mx-auto p-6 sm:p-8">
-        <button onClick={onClose} className="mb-8 text-gray-600 hover:text-black transition-colors">
-          ← Retour
+    <div className="fixed inset-0 bg-[#FAF9F6] text-stone-900 selection:bg-stone-900 selection:text-white z-50 overflow-y-auto animate-in fade-in duration-200">
+      {/* Top Header */}
+      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-stone-200/80 px-6 sm:px-10 py-4 flex items-center justify-between shadow-sm">
+        <button
+          onClick={() => onClose ? onClose() : window.history.back()}
+          className="group inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-stone-500 hover:text-stone-950 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span>Retour à l'Atelier</span>
         </button>
 
+        <Logo className="h-6" />
+
+        <div className="w-20 text-right">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+            Retours
+          </span>
+        </div>
+      </header>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-12 sm:py-16 space-y-12">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-10">
-          <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center">
-            <RotateCcw className="w-6 h-6 text-rose-400" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Retours & Échanges</h1>
-            <p className="text-gray-500 text-sm mt-1">30 jours pour changer d'avis — Retours gratuits</p>
-          </div>
+        <div className="text-center max-w-xl mx-auto">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold tracking-widest uppercase bg-stone-100 text-stone-700 border border-stone-200 mb-3">
+            <Sparkles className="w-3 h-3 text-terracotta-500" />
+            Sérénité & Échanges
+          </span>
+          <h1 className="font-serif text-3xl sm:text-5xl font-medium tracking-tight text-stone-950 mb-3">
+            Retours & Échanges
+          </h1>
+          <p className="text-stone-500 text-xs sm:text-sm leading-relaxed">
+            Votre satisfaction est essentielle. Bénéficiez d'un accompagnement fluide pour échanger votre taille ou demander un remboursement.
+          </p>
         </div>
 
-        {/* Bannière politique */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+        {/* 3 Pillars */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
-            { icon: Clock, label: '30 jours', sub: 'Pour retourner votre article' },
-            { icon: CheckCircle, label: 'Gratuit', sub: 'Retours en France métropolitaine' },
-            { icon: RotateCcw, label: '5-10 jours', sub: 'Délai de remboursement' }
-          ].map(({ icon: Icon, label, sub }) => (
-            <div key={label} className="bg-rose-50 rounded-xl p-4 flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                <Icon className="w-5 h-5 text-rose-400" />
+            { icon: Clock, label: '14 Jours', sub: 'Pour essayer tranquillement chez vous' },
+            { icon: RotateCcw, label: 'Échange Facilité', sub: 'Nouvelle taille réservée immédiatement' },
+            { icon: CheckCircle2, label: 'Remboursement Intégral', sub: 'Effectué sous 5 à 7 jours ouvrés' }
+          ].map(({ icon: Icon, label, sub }, idx) => (
+            <div key={idx} className="bg-white border border-stone-200/80 rounded-3xl p-6 shadow-sm flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-stone-100 flex items-center justify-center text-stone-900 shrink-0">
+                <Icon className="w-5 h-5 text-terracotta-600" />
               </div>
               <div>
-                <p className="font-bold text-gray-900">{label}</p>
-                <p className="text-xs text-gray-500">{sub}</p>
+                <p className="font-serif text-base font-medium text-stone-950">{label}</p>
+                <p className="text-xs text-stone-500 mt-0.5">{sub}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Étapes */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Comment ça marche ?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Steps */}
+        <div className="bg-white border border-stone-200/80 rounded-3xl p-6 sm:p-10 shadow-sm space-y-8">
+          <h2 className="font-serif text-xl sm:text-2xl font-medium text-stone-950 text-center">
+            Les 4 étapes d'un retour en toute simplicité
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {RETURN_STEPS.map(({ step, icon: Icon, title, description }) => (
-              <div key={step} className="relative bg-gray-50 rounded-xl p-5">
-                <div className="w-8 h-8 bg-rose-500 text-white rounded-full flex items-center justify-center text-sm font-bold mb-3">
-                  {step}
+              <div key={step} className="p-5 rounded-2xl bg-[#FAF9F6] border border-stone-200/80 space-y-3 relative">
+                <div className="flex items-center justify-between">
+                  <div className="w-8 h-8 rounded-full bg-stone-950 text-white font-serif text-xs font-semibold flex items-center justify-center shadow-card-luxury">
+                    {step}
+                  </div>
+                  <Icon className="w-4 h-4 text-stone-400" />
                 </div>
-                <Icon className="w-5 h-5 text-rose-400 mb-2" />
-                <h3 className="font-semibold text-gray-900 mb-1 text-sm">{title}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed">{description}</p>
+                <h3 className="font-serif text-sm font-medium text-stone-900">{title}</h3>
+                <p className="text-xs text-stone-500 leading-relaxed">{description}</p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* Formulaire de retour */}
-        <section className="mb-12">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Initier un retour</h2>
-
+        {/* Return Request Form */}
+        <div className="bg-white border border-stone-200/80 rounded-3xl p-6 sm:p-10 shadow-sm">
           {submitted ? (
-            <div className="bg-green-50 border border-green-100 rounded-2xl p-8 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="text-center py-10 max-w-md mx-auto">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Demande envoyée !</h3>
-              <p className="text-gray-600 mb-4">
-                Votre demande de retour a été enregistrée. Vous recevrez votre étiquette de retour par email sous 24h.
+              <h3 className="font-serif text-2xl font-medium text-stone-950 mb-2">Demande enregistrée</h3>
+              <p className="text-xs sm:text-sm text-stone-500 mb-8 leading-relaxed">
+                Notre service retour a bien reçu votre demande pour la commande <strong>#{form.order_number}</strong>. Vous recevrez le bon d'expédition et les détails de passage à l'adresse <strong>{form.email}</strong>.
               </p>
               <button
                 onClick={() => setSubmitted(false)}
-                className="text-sm text-rose-500 hover:underline"
+                className="px-6 py-3 rounded-full bg-stone-950 text-white text-xs font-semibold tracking-wider uppercase hover:bg-stone-800 transition-colors shadow-card-luxury"
               >
-                Faire une autre demande
+                Nouvelle demande
               </button>
             </div>
           ) : (
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-              {/* Raccourci si connecté */}
-              {isAuthenticated ? (
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-blue-500" />
-                    <p className="text-sm text-blue-700 font-medium">Vous êtes connecté — retrouvez vos commandes directement</p>
-                  </div>
-                  <button
-                    onClick={() => navigate('/account')}
-                    className="text-sm font-semibold text-blue-600 hover:underline whitespace-nowrap ml-4"
-                  >
-                    Mes commandes →
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 mb-6 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-gray-400" />
-                    <p className="text-sm text-gray-600">Connectez-vous pour un retour simplifié</p>
-                  </div>
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="text-sm font-semibold text-gray-800 hover:underline whitespace-nowrap ml-4"
-                  >
-                    Se connecter →
-                  </button>
-                </div>
-              )}
+            <div className="max-w-2xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="font-serif text-2xl font-medium text-stone-950 mb-2">
+                  Déclarer un retour ou un échange
+                </h2>
+                <p className="text-xs text-stone-500">
+                  Renseignez les détails de votre commande pour recevoir votre bon de prise en charge.
+                </p>
+              </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Numéro de commande *</label>
+                    <label className="block text-xs font-semibold tracking-wide uppercase text-stone-600 mb-1.5">
+                      Numéro de commande
+                    </label>
                     <input
                       type="text"
                       required
                       value={form.order_number}
-                      onChange={(e) => setForm(p => ({ ...p, order_number: e.target.value.toUpperCase() }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-300 focus:border-transparent outline-none"
-                      placeholder="CMD-20250415-XXXXXX"
+                      onChange={(e) => setForm(prev => ({ ...prev, order_number: e.target.value.toUpperCase() }))}
+                      placeholder="Ex: #ORD-1234"
+                      className="w-full px-4 py-3 bg-[#FAF9F6] border border-stone-200 rounded-2xl text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-950 focus:ring-4 focus:ring-stone-950/5 transition-all shadow-sm"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email de commande *</label>
+                    <label className="block text-xs font-semibold tracking-wide uppercase text-stone-600 mb-1.5">
+                      Adresse email
+                    </label>
                     <input
                       type="email"
                       required
                       value={form.email}
-                      onChange={(e) => setForm(p => ({ ...p, email: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-300 focus:border-transparent outline-none"
-                      placeholder="votre@email.com"
+                      onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="nom@exemple.com"
+                      className="w-full px-4 py-3 bg-[#FAF9F6] border border-stone-200 rounded-2xl text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-950 focus:ring-4 focus:ring-stone-950/5 transition-all shadow-sm"
                     />
                   </div>
                 </div>
 
-                {/* Type : remboursement ou échange */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Je souhaite *</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { value: 'refund', label: 'Un remboursement' },
-                      { value: 'exchange', label: 'Un échange' }
-                    ].map(opt => (
-                      <label
-                        key={opt.value}
-                        className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                          form.type === opt.value ? 'border-black bg-gray-50' : 'border-gray-100 hover:border-gray-200'
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold tracking-wide uppercase text-stone-600 mb-1.5">
+                      Type de demande
+                    </label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setForm(p => ({ ...p, type: 'exchange' }))}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                          form.type === 'exchange'
+                            ? 'bg-stone-950 text-white border-stone-950 shadow-sm'
+                            : 'bg-white text-stone-700 border-stone-200 hover:border-stone-400'
                         }`}
                       >
-                        <input
-                          type="radio"
-                          name="type"
-                          value={opt.value}
-                          checked={form.type === opt.value}
-                          onChange={() => setForm(p => ({ ...p, type: opt.value as 'refund' | 'exchange' }))}
-                          className="sr-only"
-                        />
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${form.type === opt.value ? 'border-black' : 'border-gray-300'}`}>
-                          {form.type === opt.value && <div className="w-2 h-2 bg-black rounded-full" />}
-                        </div>
-                        <span className="font-medium text-sm">{opt.label}</span>
-                      </label>
-                    ))}
+                        Échange de taille
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setForm(p => ({ ...p, type: 'refund' }))}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                          form.type === 'refund'
+                            ? 'bg-stone-950 text-white border-stone-950 shadow-sm'
+                            : 'bg-white text-stone-700 border-stone-200 hover:border-stone-400'
+                        }`}
+                      >
+                        Remboursement
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold tracking-wide uppercase text-stone-600 mb-1.5">
+                      Motif principal
+                    </label>
+                    <select
+                      value={form.reason}
+                      onChange={(e) => setForm(prev => ({ ...prev, reason: e.target.value }))}
+                      className="w-full px-4 py-3 bg-[#FAF9F6] border border-stone-200 rounded-2xl text-xs sm:text-sm text-stone-900 outline-none focus:border-stone-950 focus:ring-4 focus:ring-stone-950/5 transition-all shadow-sm"
+                    >
+                      {RETURN_REASONS.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Motif du retour *</label>
-                  <select
-                    required
-                    value={form.reason}
-                    onChange={(e) => setForm(p => ({ ...p, reason: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-300 focus:border-transparent outline-none bg-white"
-                  >
-                    <option value="">Sélectionnez un motif</option>
-                    {RETURN_REASONS.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Détails supplémentaires</label>
+                  <label className="block text-xs font-semibold tracking-wide uppercase text-stone-600 mb-1.5">
+                    Précisions éventuelles (nouvelle taille souhaitée, etc.)
+                  </label>
                   <textarea
                     rows={3}
                     value={form.details}
-                    onChange={(e) => setForm(p => ({ ...p, details: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-300 focus:border-transparent outline-none resize-none"
-                    placeholder="Décrivez votre problème ou précisez la taille/couleur souhaitée pour un échange..."
+                    onChange={(e) => setForm(prev => ({ ...prev, details: e.target.value }))}
+                    placeholder="Indiquez ici vos précisions..."
+                    className="w-full px-4 py-3 bg-[#FAF9F6] border border-stone-200 rounded-2xl text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 outline-none focus:border-stone-950 focus:ring-4 focus:ring-stone-950/5 transition-all shadow-sm resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-black text-white py-3.5 rounded-xl font-semibold hover:bg-gray-900 transition-all"
+                  className="w-full mt-2 py-4 px-6 rounded-2xl bg-stone-950 text-white font-medium text-xs tracking-wider uppercase hover:bg-stone-800 transition-all duration-200 shadow-card-luxury flex items-center justify-center gap-2 active:scale-[0.99]"
                 >
-                  Envoyer ma demande de retour
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Envoyer la demande de retour</span>
                 </button>
               </form>
             </div>
           )}
-        </section>
+        </div>
 
-        {/* FAQ */}
-        <section className="mb-10">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Questions fréquentes</h2>
+        {/* FAQ Section */}
+        <div className="bg-white border border-stone-200/80 rounded-3xl p-6 sm:p-10 shadow-sm space-y-6">
+          <h2 className="font-serif text-xl sm:text-2xl font-medium text-stone-950">
+            Foire aux questions — Retours & Remboursements
+          </h2>
+
           <div className="space-y-3">
-            {FAQ_ITEMS.map((item, idx) => (
-              <div key={idx} className="border border-gray-100 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+            {FAQ_ITEMS.map((item, idx) => {
+              const isOpen = openFaq === idx;
+              return (
+                <div
+                  key={idx}
+                  className={`border rounded-2xl transition-all ${
+                    isOpen ? 'border-stone-950 bg-[#FAF9F6]' : 'border-stone-200/80'
+                  }`}
                 >
-                  <span className="font-medium text-gray-900 text-sm">{item.question}</span>
-                  {openFaq === idx
-                    ? <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" />
-                    : <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
-                  }
-                </button>
-                {openFaq === idx && (
-                  <div className="px-5 pb-4 text-sm text-gray-600 leading-relaxed border-t border-gray-50 pt-3">
-                    {item.answer}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Contact */}
-        <div className="bg-rose-50 rounded-xl p-6 border border-rose-100">
-          <h3 className="font-semibold text-gray-900 mb-3">Besoin d'aide supplémentaire ?</h3>
-          <div className="flex flex-col sm:flex-row gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-rose-400" />
-              <span>contact@stellshope.fr</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-rose-400" />
-              <span>+33 1 23 45 67 89 — Lun-Ven 9h-19h</span>
-            </div>
+                  <button
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    className="w-full p-5 text-left flex items-center justify-between font-serif text-sm font-medium text-stone-950"
+                  >
+                    <span>{item.question}</span>
+                    <ChevronDown className={`w-4 h-4 text-stone-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 text-xs text-stone-600 leading-relaxed border-t border-stone-100 pt-2">
+                      {item.answer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
