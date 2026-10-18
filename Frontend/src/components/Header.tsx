@@ -1,13 +1,14 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, lazy, Suspense } from 'react';
 import { Search, ShoppingBag, Menu, X, User, Heart, LogOut } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import { useAuth } from '../hooks/useAuth';
 import AuthModal from './AuthModal';
-import SearchPage from '../pages/SearchPage';
-import AccountPage from '../pages/AccountPage';
 import CartSidebarNew from './CartSidebarNew';
+
+const SearchPage = lazy(() => import('../pages/SearchPage'));
+const AccountPage = lazy(() => import('../pages/AccountPage'));
 import Logo from './Logo';
 import { Product } from '../types';
 import { formatPrice } from '../utils';
@@ -367,16 +368,20 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
     />
 
     {isSearchOpen && (
-      <SearchPage
-        products={products || []}
-        onClose={() => setIsSearchOpen(false)}
-        onProductClick={onProductClick}
-        initialQuery={searchQuery}
-      />
+      <Suspense fallback={null}>
+        <SearchPage
+          products={products || []}
+          onClose={() => setIsSearchOpen(false)}
+          onProductClick={onProductClick}
+          initialQuery={searchQuery}
+        />
+      </Suspense>
     )}
 
     {isAccountOpen && isAuthenticated && (
-      <AccountPage onClose={() => setIsAccountOpen(false)} />
+      <Suspense fallback={null}>
+        <AccountPage onClose={() => setIsAccountOpen(false)} />
+      </Suspense>
     )}
 
     <CartSidebarNew />

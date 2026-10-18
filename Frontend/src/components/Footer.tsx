@@ -1,22 +1,11 @@
-import { useState } from 'react';
 import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import ContactPage from '../pages/ContactPage';
-import AboutPage from '../pages/AboutPage';
-import FAQPage from '../pages/FAQPage';
-import LegalPage from '../pages/LegalPage';
-import MentionsLegalesPage from '../pages/MentionsLegalesPage';
-import AccountPage from '../pages/AccountPage';
 import Logo from './Logo';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Footer() {
-  const [activePage, setActivePage] = useState<string | null>(null);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-
-  const openPage = (page: string) => setActivePage(page);
-  const closePage = () => setActivePage(null);
 
   return (
     <footer className="bg-stone-950 text-stone-300 border-t border-stone-800/80">
@@ -115,12 +104,12 @@ export default function Footer() {
                 </button>
               </li>
               <li>
-                <button onClick={() => openPage('faq')} className="hover:text-white transition-colors">
+                <button onClick={() => navigate('/faq')} className="hover:text-white transition-colors">
                   Foire Aux Questions (FAQ)
                 </button>
               </li>
               <li>
-                <button onClick={() => openPage('contact')} className="hover:text-white transition-colors">
+                <button onClick={() => navigate('/contact')} className="hover:text-white transition-colors">
                   Nous Contacter
                 </button>
               </li>
@@ -176,9 +165,9 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-stone-400">
-            <button onClick={() => openPage('cgv')} className="hover:text-white transition-colors">Conditions Générales</button>
-            <button onClick={() => openPage('privacy')} className="hover:text-white transition-colors">Confidentialité</button>
-            <button onClick={() => openPage('mentions')} className="hover:text-white transition-colors">Mentions Légales</button>
+            <button onClick={() => navigate('/cgv')} className="hover:text-white transition-colors">Conditions Générales</button>
+            <button onClick={() => navigate('/privacy')} className="hover:text-white transition-colors">Confidentialité</button>
+            <button onClick={() => navigate('/mentions-legales')} className="hover:text-white transition-colors">Mentions Légales</button>
             <button onClick={() => navigate('/returns')} className="hover:text-white transition-colors">Politique Retours</button>
           </div>
         </div>
@@ -187,15 +176,6 @@ export default function Footer() {
           © {new Date().getFullYear()} Stell's Hope. Tous droits réservés. L'élégance sans compromis.
         </div>
       </div>
-
-      {/* Pages modales */}
-      {activePage === 'contact' && <ContactPage onClose={closePage} />}
-      {activePage === 'about' && <AboutPage onClose={closePage} />}
-      {activePage === 'faq' && <FAQPage onClose={closePage} />}
-      {activePage === 'cgv' && <LegalPage type="cgv" onClose={closePage} />}
-      {activePage === 'privacy' && <LegalPage type="privacy" onClose={closePage} />}
-      {activePage === 'mentions' && <MentionsLegalesPage onClose={closePage} />}
-      {activePage === 'account' && isAuthenticated && <AccountPage onClose={closePage} />}
     </footer>
   );
 }
