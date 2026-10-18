@@ -240,13 +240,19 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
               </div>
               <div className="text-xs text-stone-700 leading-relaxed">
                 <p className="font-serif font-medium text-sm text-stone-900">
-                  {order.shipping_first_name || order.user?.first_name} {order.shipping_last_name || order.user?.last_name}
+                  {order.shipping_address?.first_name || order.user?.first_name || ''} {order.shipping_address?.last_name || order.user?.last_name || ''}
                 </p>
-                <p className="mt-1">{order.shipping_address || order.user?.address || 'Adresse renseignée à la commande'}</p>
-                <p>{order.shipping_postal_code || order.user?.postal_code} {order.shipping_city || order.user?.city}</p>
-                <p>{order.shipping_country || order.user?.country || 'Côte d\'Ivoire'}</p>
-                {(order.shipping_phone || order.user?.phone) && (
-                  <p className="mt-2 text-stone-500">Tél : {order.shipping_phone || order.user?.phone}</p>
+                <p className="mt-1">
+                  {order.shipping_address?.street || order.user?.address || 'Adresse renseignée à la commande'}
+                </p>
+                <p>
+                  {order.shipping_address?.postal_code || order.user?.postal_code || ''} {order.shipping_address?.city || order.user?.city || ''}
+                </p>
+                <p>
+                  {order.shipping_address?.country || order.user?.country || 'Côte d\'Ivoire'}
+                </p>
+                {order.user?.phone && (
+                  <p className="mt-2 text-stone-500">Tél : {order.user.phone}</p>
                 )}
               </div>
             </div>
