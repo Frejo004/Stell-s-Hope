@@ -18,14 +18,14 @@
   }
 
   body {
-    @apply font-sans text-gray-900 bg-white;
+    @apply font-sans text-stone-900 bg-[#FAF9F6] selection:bg-rose-200 selection:text-rose-950;
   }
 
-  /* Scrollbar globale */
-  ::-webkit-scrollbar        { width: 6px; height: 6px; }
+  /* Scrollbar globale fine et élégante */
+  ::-webkit-scrollbar        { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track  { background: transparent; }
-  ::-webkit-scrollbar-thumb  { @apply bg-gray-300 rounded-full; }
-  ::-webkit-scrollbar-thumb:hover { @apply bg-gray-400; }
+  ::-webkit-scrollbar-thumb  { @apply bg-stone-300 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-stone-400; }
 }
 
 /* ─── Components ────────────────────────────────────────────── */
@@ -34,14 +34,32 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Focus ring cohérent */
+  /* Focus ring subtil */
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-rose-300 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-luxury-stone/30 focus:ring-offset-2;
   }
 
-  /* Card standard */
+  /* Glassmorphism Header & Surfaces */
+  .glass-header {
+    @apply bg-[#FAF9F6]/85 backdrop-blur-xl border-b border-black/[0.05] transition-all duration-300;
+  }
+
+  .glass-pill {
+    @apply bg-white/75 backdrop-blur-md border border-white/60 shadow-sm;
+  }
+
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-stone-200/50 shadow-glass rounded-2xl;
+  }
+
+  /* Card standard moderne */
   .card {
-    @apply bg-white rounded-2xl border border-gray-100 shadow-card;
+    @apply bg-white rounded-2xl border border-stone-200/60 shadow-card hover:shadow-card-md transition-shadow duration-300;
+  }
+
+  /* Badge éditorial moderne */
+  .badge-editorial {
+    @apply inline-flex items-center text-[10px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-full;
   }
 
   /* Input standard */

@@ -1,5 +1,5 @@
-import { useState  } from 'react';
-import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
+import { useState } from 'react';
+import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ContactPage from '../pages/ContactPage';
 import AboutPage from '../pages/AboutPage';
@@ -17,141 +17,177 @@ export default function Footer() {
 
   const openPage = (page: string) => setActivePage(page);
   const closePage = () => setActivePage(null);
+
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="space-y-4">
-            <Logo className="text-white" />
-            <p className="text-gray-400">
-              Mode contemporaine et intemporelle pour homme et femme. 
-              Qualité premium et style authentique depuis 2020.
+    <footer className="bg-stone-950 text-stone-300 border-t border-stone-800/80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+          {/* Brand Presentation (4 cols) */}
+          <div className="lg:col-span-4 space-y-5">
+            <Logo className="text-white" size="md" />
+            <p className="text-stone-400 text-xs sm:text-sm font-light leading-relaxed max-w-sm">
+              Maison de mode contemporaine et intemporelle. L'alliance subtile entre silhouettes audacieuses, coupes raffinées et matières d'exception.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Facebook className="w-5 h-5" />
+            <div className="flex items-center space-x-3 pt-2">
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/15 transition-all duration-200"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-4 h-4" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Instagram className="w-5 h-5" />
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/15 transition-all duration-200"
+                aria-label="Facebook"
+              >
+                <Facebook className="w-4 h-4" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Twitter className="w-5 h-5" />
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/15 transition-all duration-200"
+                aria-label="Twitter"
+              >
+                <Twitter className="w-4 h-4" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <Youtube className="w-5 h-5" />
+              <a
+                href="#"
+                className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/15 transition-all duration-200"
+                aria-label="YouTube"
+              >
+                <Youtube className="w-4 h-4" />
               </a>
             </div>
           </div>
 
-          {/* Shop */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Boutique</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><button onClick={() => navigate('/category/femme')} className="hover:text-white transition-colors">Collection Femme</button></li>
-              <li><button onClick={() => navigate('/category/homme')} className="hover:text-white transition-colors">Collection Homme</button></li>
-              <li><button onClick={() => navigate('/category/accessories')} className="hover:text-white transition-colors">Accessoires</button></li>
-              <li><button onClick={() => navigate('/boutique')} className="hover:text-white transition-colors">Nouveautés</button></li>
-              <li><button onClick={() => navigate('/boutique')} className="hover:text-white transition-colors">Promotions</button></li>
+          {/* Boutique Navigation (2 cols) */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="text-xs uppercase tracking-widest font-semibold text-white">Collections</h4>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-stone-400 font-light">
+              <li>
+                <button onClick={() => navigate('/category/femme')} className="hover:text-white transition-colors">
+                  Vestiaire Femme
+                </button>
+              </li>
+              <li>
+                <button onClick={() => navigate('/category/homme')} className="hover:text-white transition-colors">
+                  Vestiaire Homme
+                </button>
+              </li>
+              <li>
+                <button onClick={() => navigate('/category/accessories')} className="hover:text-white transition-colors">
+                  Maroquinerie & Accessoires
+                </button>
+              </li>
+              <li>
+                <button onClick={() => navigate('/boutique')} className="hover:text-white transition-colors">
+                  Toutes les Pièces
+                </button>
+              </li>
+              <li>
+                <button onClick={() => navigate('/boutique')} className="text-rose-400 hover:text-rose-300 transition-colors font-medium">
+                  Ventes Privées & Promos
+                </button>
+              </li>
             </ul>
           </div>
 
-          {/* Customer Service */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Service Client</h4>
-            <ul className="space-y-2 text-gray-400">
+          {/* Service Client (3 cols) */}
+          <div className="lg:col-span-3 space-y-4">
+            <h4 className="text-xs uppercase tracking-widest font-semibold text-white">Service Client</h4>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-stone-400 font-light">
               <li>
-                <button 
+                <button
                   onClick={() => isAuthenticated ? navigate('/account') : navigate('/login')}
                   className="hover:text-white transition-colors"
                 >
-                  Mon Compte
+                  Mon Espace Client
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => navigate('/track')}
-                  className="hover:text-white transition-colors"
-                >
-                  Suivre ma commande
+                <button onClick={() => navigate('/track')} className="hover:text-white transition-colors">
+                  Suivi de Commande en Direct
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => navigate('/returns')}
-                  className="hover:text-white transition-colors"
-                >
-                  Retours & Échanges
+                <button onClick={() => navigate('/returns')} className="hover:text-white transition-colors">
+                  Retours & Modalités d'Échange
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => openPage('faq')}
-                  className="hover:text-white transition-colors"
-                >
-                  FAQ
+                <button onClick={() => openPage('faq')} className="hover:text-white transition-colors">
+                  Foire Aux Questions (FAQ)
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => openPage('contact')}
-                  className="hover:text-white transition-colors"
-                >
-                  Nous contacter
+                <button onClick={() => openPage('contact')} className="hover:text-white transition-colors">
+                  Nous Contacter
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Contact */}
-          <div className="space-y-4">
-            <h4 className="font-semibold text-lg">Contact</h4>
-            <div className="space-y-3 text-gray-400">
-              <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5" />
+          {/* Coordonnées & Newsletter Rapide (3 cols) */}
+          <div className="lg:col-span-3 space-y-4">
+            <h4 className="text-xs uppercase tracking-widest font-semibold text-white">Atelier & Contact</h4>
+            <div className="space-y-2.5 text-xs text-stone-400 font-light">
+              <div className="flex items-center space-x-2.5">
+                <Mail className="w-3.5 h-3.5 text-stone-500" />
                 <span>contact@stellshope.fr</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5" />
-                <span>+33 1 23 45 67 89</span>
+              <div className="flex items-center space-x-2.5">
+                <Phone className="w-3.5 h-3.5 text-stone-500" />
+                <span>+225 07 00 00 00 00</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <MapPin className="w-5 h-5" />
-                <span>75001 Paris, France</span>
+              <div className="flex items-center space-x-2.5">
+                <MapPin className="w-3.5 h-3.5 text-stone-500" />
+                <span>Abidjan, Côte d'Ivoire</span>
               </div>
             </div>
-            
-            {/* Newsletter */}
-            <div className="pt-4">
-              <h5 className="font-medium mb-3">Newsletter</h5>
-              <div className="flex">
+
+            {/* Newsletter Mini */}
+            <div className="pt-3">
+              <p className="text-[11px] uppercase tracking-wider text-stone-300 font-medium mb-2">
+                Lettre Confidentielle
+              </p>
+              <div className="flex rounded-full overflow-hidden border border-stone-800 bg-stone-900 focus-within:border-stone-600 transition-colors">
                 <input
                   type="email"
-                  placeholder="Votre email"
-                  className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-l focus:outline-none focus:border-rose-300"
+                  placeholder="Votre email..."
+                  className="w-full px-4 py-2 bg-transparent text-xs text-white placeholder:text-stone-500 focus:outline-none"
                 />
-                <button className="bg-rose-300 px-4 py-2 rounded-r hover:bg-rose-400 transition-colors">
-                  OK
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-white text-stone-950 hover:bg-stone-200 transition-colors text-xs font-semibold"
+                  aria-label="S'inscrire"
+                >
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} Stell's Hope. Tous droits réservés.
-          </p>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-400 mt-4 md:mt-0">
-            <button onClick={() => openPage('cgv')} className="hover:text-white transition-colors">CGV</button>
+        {/* ── Séparateur & Paiements Sécurisés ── */}
+        <div className="border-t border-stone-900 mt-14 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2 text-xs text-stone-400">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <span>Paiement 100% sécurisé via Mobile Money (Wave, Orange, MTN, Moov) & Cartes Bancaires</span>
+          </div>
+
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-stone-400">
+            <button onClick={() => openPage('cgv')} className="hover:text-white transition-colors">Conditions Générales</button>
             <button onClick={() => openPage('privacy')} className="hover:text-white transition-colors">Confidentialité</button>
-            <button onClick={() => openPage('mentions')} className="hover:text-white transition-colors">Mentions légales</button>
-            <button onClick={() => navigate('/shipping')} className="hover:text-white transition-colors">Livraison</button>
-            <button onClick={() => navigate('/returns')} className="hover:text-white transition-colors">Retours</button>
+            <button onClick={() => openPage('mentions')} className="hover:text-white transition-colors">Mentions Légales</button>
+            <button onClick={() => navigate('/returns')} className="hover:text-white transition-colors">Politique Retours</button>
           </div>
         </div>
+
+        <div className="text-center mt-8 text-[11px] text-stone-500">
+          © {new Date().getFullYear()} Stell's Hope. Tous droits réservés. L'élégance sans compromis.
+        </div>
       </div>
-      
+
       {/* Pages modales */}
       {activePage === 'contact' && <ContactPage onClose={closePage} />}
       {activePage === 'about' && <AboutPage onClose={closePage} />}

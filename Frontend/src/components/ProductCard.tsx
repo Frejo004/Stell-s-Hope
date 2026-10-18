@@ -67,25 +67,25 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
 
   return (
     <div
-      className="group cursor-pointer relative"
+      className="group cursor-pointer relative flex flex-col"
       onClick={() => onProductClick(product)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative overflow-hidden bg-gray-200 rounded-lg aspect-[3/4]">
-
+      {/* Image Container */}
+      <div className="relative overflow-hidden bg-[#F3EFEA] rounded-2xl aspect-[3/4] border border-stone-200/50 shadow-sm transition-all duration-300 group-hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.07)]">
         {/* Skeleton Loader */}
         {!imageLoaded && !imageError && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+          <div className="absolute inset-0 bg-stone-200/60 animate-pulse flex items-center justify-center">
             <span className="sr-only">Chargement...</span>
           </div>
         )}
 
         {/* Fallback Error Image */}
         {imageError ? (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100 text-gray-400">
-            <span className="text-4xl">📷</span>
-            <span className="text-xs mt-2">Image indisponible</span>
+          <div className="w-full h-full flex flex-col items-center justify-center bg-stone-100 text-stone-400">
+            <span className="text-3xl">📷</span>
+            <span className="text-[11px] mt-1 font-medium">Image indisponible</span>
           </div>
         ) : (
           <img
@@ -99,138 +99,124 @@ export default function ProductCard({ product, onProductClick }: ProductCardProp
               setImageError(true);
               setImageLoaded(true);
             }}
-            className={`w-full h-full object-cover transition-all duration-500 ease-in-out ${
-              // Zoom effect on hover
-              isHovered ? 'scale-110' : 'scale-100'
-              } ${
-              // Fade in effect
-              imageLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-sm'
-              }`}
+            className={`w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
           />
         )}
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+        {/* Top Badges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 pointer-events-none">
           {product.isNew && (
-            <span className="bg-black text-white text-xs px-2 py-1 rounded shadow-sm">
-              NOUVEAU
+            <span className="bg-stone-900/90 backdrop-blur-md text-white text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full shadow-sm">
+              Nouveau
             </span>
           )}
           {product.isOnSale && (
-            <span className="bg-rose-500 text-white text-xs px-2 py-1 rounded shadow-sm">
-              PROMO
+            <span className="bg-rose-500/90 backdrop-blur-md text-white text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full shadow-sm">
+              Promo
             </span>
           )}
           {product.is_bestseller && (
-            <span className="bg-indigo-600 text-white text-xs px-2 py-1 rounded shadow-sm">
-              BEST-SELLER
+            <span className="bg-amber-600/90 backdrop-blur-md text-white text-[10px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full shadow-sm">
+              Best-Seller
             </span>
           )}
         </div>
 
-        {/* Wishlist button */}
+        {/* Wishlist Button (Glass Pill) */}
         <button
           onClick={handleWishlistClick}
-          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 hover:bg-gray-50 hover:scale-110 z-10"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/85 backdrop-blur-md shadow-sm border border-black/5 flex items-center justify-center hover:bg-white hover:scale-110 active:scale-95 transition-all duration-200 z-10"
           aria-label={inWishlist ? "Retirer des favoris" : "Ajouter aux favoris"}
         >
-          <Heart className={`w-4 h-4 ${inWishlist ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+          <Heart className={`w-3.5 h-3.5 transition-colors ${inWishlist ? 'fill-rose-500 text-rose-500' : 'text-stone-700'}`} />
         </button>
 
-        {/* Quick view / Add to cart overlay */}
-        <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 transition-all duration-300 transform ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}>
-          <div className="flex flex-col space-y-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onProductClick(product);
-              }}
-              className="w-full bg-white/95 backdrop-blur-sm text-black py-2.5 px-4 rounded font-medium hover:bg-white transition-colors flex items-center justify-center shadow-lg"
-            >
-              <span>Voir les détails</span>
-            </button>
-
-            <button
-              onClick={handleAddToCart}
-              disabled={isAddingToCart || isItemInCart}
-              className={`w-full py-2.5 px-4 rounded font-medium transition-all shadow-lg flex items-center justify-center space-x-2 ${isItemInCart
-                  ? 'bg-green-500 text-white'
-                  : 'bg-rose-500 text-white hover:bg-rose-600'
-                }`}
-            >
-              {isAddingToCart ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Ajout...</span>
-                </>
-              ) : isItemInCart ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>Dans le panier</span>
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4 h-4" />
-                  <span>Ajouter</span>
-                </>
-              )}
-            </button>
-          </div>
+        {/* Floating Quick Action Pill */}
+        <div className="absolute inset-x-3 bottom-3 z-10 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 ease-out hidden sm:block">
+          <button
+            onClick={handleAddToCart}
+            disabled={isAddingToCart || isItemInCart}
+            className={`w-full py-2.5 px-4 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-200 shadow-lg flex items-center justify-center gap-2 border ${
+              isItemInCart
+                ? 'bg-emerald-600 text-white border-emerald-500'
+                : 'bg-white/95 backdrop-blur-md text-stone-900 border-white/80 hover:bg-stone-900 hover:text-white hover:border-stone-900'
+            }`}
+          >
+            {isAddingToCart ? (
+              <>
+                <svg className="animate-spin h-3.5 w-3.5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Ajout...</span>
+              </>
+            ) : isItemInCart ? (
+              <>
+                <Check className="w-3.5 h-3.5" />
+                <span>Dans le panier</span>
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-3.5 h-3.5" />
+                <span>Ajouter</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
-      <div className="mt-4 space-y-1">
+      {/* Product Information */}
+      <div className="mt-3.5 space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-medium text-gray-900 group-hover:text-rose-500 transition-colors line-clamp-2 leading-tight">
+          <h3 className="text-xs sm:text-sm font-medium text-stone-900 group-hover:text-stone-600 transition-colors line-clamp-1">
             {product.name}
           </h3>
           {product.rating && (
-            <div className="flex items-center space-x-1 shrink-0 bg-gray-50 px-1.5 py-0.5 rounded">
-              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs font-medium text-gray-600">
+            <div className="flex items-center space-x-1 shrink-0 bg-stone-100/80 px-1.5 py-0.5 rounded-full">
+              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+              <span className="text-[10px] font-semibold text-stone-700">
                 {product.rating}
               </span>
             </div>
           )}
         </div>
 
-        <div className="flex items-baseline space-x-2 pt-1">
-          <span className="text-lg font-bold text-gray-900">
+        {/* Pricing */}
+        <div className="flex items-baseline space-x-2 pt-0.5">
+          <span className="text-sm sm:text-base font-bold text-stone-950">
             {formatPrice(product.price || 0)}
           </span>
-          {product.originalPrice && (
-            <span className="text-sm text-gray-400 line-through decoration-gray-400">
+          {product.originalPrice && product.originalPrice > product.price && (
+            <span className="text-xs text-stone-400 line-through decoration-stone-300">
               {formatPrice(product.originalPrice)}
             </span>
           )}
         </div>
 
-        {/* Color swatches */}
+        {/* Color Swatches */}
         {product.colors && product.colors.length > 0 && (
-          <div className="flex space-x-1.5 pt-1">
+          <div className="flex items-center space-x-1.5 pt-1">
             {product.colors.slice(0, 4).map((color, index) => (
               <div
                 key={index}
-                className="w-3.5 h-3.5 rounded-full border border-gray-200 shadow-sm"
+                className="w-3 h-3 rounded-full border border-stone-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.1)] transition-transform hover:scale-125"
                 title={color}
                 style={{
                   backgroundColor: color.toLowerCase() === 'blanc' ? '#ffffff' :
-                    color.toLowerCase() === 'noir' ? '#000000' :
+                    color.toLowerCase() === 'noir' ? '#121212' :
                       color.toLowerCase() === 'bleu marine' ? '#1e3a8a' :
-                        color.toLowerCase() === 'rose poudré' ? '#f9a8d4' :
-                          color.toLowerCase() === 'gris' ? '#6b7280' :
-                            color.toLowerCase() === 'camel' ? '#d2b48c' :
-                              color.toLowerCase() === 'bordeaux' ? '#7f1d1d' :
+                        color.toLowerCase() === 'rose poudré' ? '#f472b6' :
+                          color.toLowerCase() === 'gris' ? '#78716c' :
+                            color.toLowerCase() === 'camel' ? '#b45309' :
+                              color.toLowerCase() === 'bordeaux' ? '#881337' :
                                 color
                 }}
               />
             ))}
             {product.colors.length > 4 && (
-              <span className="text-xs text-gray-400 leading-none self-center">
+              <span className="text-[10px] text-stone-400 font-medium leading-none self-center">
                 +{product.colors.length - 4}
               </span>
             )}

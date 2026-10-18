@@ -4,6 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        luxury: {
+          black: '#121212',
+          charcoal: '#1A1A1A',
+          stone: '#292524',
+          cream: '#FAF8F5',
+          sand: '#F4EFEB',
+          warm: '#F7F4EE',
+          gold: '#C5A880',
+          terracotta: '#C96E58',
+          rose: '#E8A598',
+          blush: '#FDF6F4',
+        },
         brand: {
           50:  '#fff1f2',
           100: '#ffe4e6',
@@ -18,7 +30,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Outfit', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'Outfit', 'system-ui', 'sans-serif'],
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
       },
       animation: {
         'fade-in':      'fadeIn 0.3s ease-out forwards',
@@ -61,11 +75,14 @@ export default {
         },
       },
       boxShadow: {
-        'card':    '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
-        'card-md': '0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07)',
-        'card-lg': '0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08)',
-        'rose':    '0 4px 14px 0 rgb(244 63 94 / 0.25)',
-        'black':   '0 4px 14px 0 rgb(0 0 0 / 0.20)',
+        'card':        '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
+        'card-md':     '0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07)',
+        'card-lg':     '0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08)',
+        'card-luxury': '0 20px 40px -15px rgba(0, 0, 0, 0.05)',
+        'soft-hover':  '0 12px 28px -6px rgba(0, 0, 0, 0.08)',
+        'glass':       '0 8px 30px rgba(0, 0, 0, 0.04)',
+        'rose':        '0 4px 14px 0 rgb(244 63 94 / 0.25)',
+        'black':       '0 4px 14px 0 rgb(0 0 0 / 0.20)',
       },
       borderRadius: {
         '2xl': '1rem',

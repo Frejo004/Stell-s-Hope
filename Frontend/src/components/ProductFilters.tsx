@@ -3,8 +3,8 @@ import { useProductFilters } from '../hooks/useProductFilters';
 import { productService } from '../services/productService';
 import { Category } from '../types';
 import { BUSINESS_CONSTANTS } from '../constants';
+import { Search, RotateCcw } from 'lucide-react';
 
-// Composants temporaires (à remplacer par les vrais composants UI plus tard)
 interface SliderProps {
   min: number;
   max: number;
@@ -21,34 +21,10 @@ const Slider = ({ min, max, value, onValueChange, className = '', step = 1 }: Sl
     max={max} 
     value={value?.[0] || 0} 
     onChange={(e) => onValueChange?.([parseInt(e.target.value)])}
-    className={`w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer ${className}`}
+    className={`w-full h-1.5 bg-stone-200 accent-stone-950 rounded-lg appearance-none cursor-pointer ${className}`}
     step={step}
   />
 );
-
-interface CheckboxProps {
-  id: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  className?: string;
-  children?: React.ReactNode;
-}
-
-const Checkbox = ({ id, checked, onCheckedChange, className = '', children }: CheckboxProps) => (
-  <div className="flex items-center space-x-2">
-    <input
-      type="checkbox"
-      id={id}
-      checked={checked}
-      onChange={(e) => onCheckedChange?.(e.target.checked)}
-      className={`h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${className}`}
-    />
-    {children && <label htmlFor={id} className="text-sm font-normal">{children}</label>}
-  </div>
-);
-
-
-
 
 const ProductFilters: React.FC = () => {
   const {
@@ -68,10 +44,8 @@ const ProductFilters: React.FC = () => {
     productService.getCategories().then(setCategories);
   }, []);
 
-  // Valeurs locales des filtres de prix : l'URL n'est mise à jour qu'après le debounce
   const [localMinPrice, setLocalMinPrice] = useState<number | null>(minPrice);
   const [localMaxPrice, setLocalMaxPrice] = useState<number | null>(maxPrice);
-  // Valeur locale de la recherche, synchronisée elle aussi avec un debounce
   const [localSearch, setLocalSearch] = useState(search);
 
   const resetAllFilters = () => {
@@ -107,17 +81,16 @@ const ProductFilters: React.FC = () => {
   const availableColors = [
     { name: 'Noir', value: 'noir', bg: 'bg-black' },
     { name: 'Blanc', value: 'blanc', bg: 'bg-white border' },
-    { name: 'Gris', value: 'gris', bg: 'bg-gray-400' },
-    { name: 'Bleu', value: 'bleu', bg: 'bg-blue-500' },
-    { name: 'Rouge', value: 'rouge', bg: 'bg-red-500' },
-    { name: 'Vert', value: 'vert', bg: 'bg-green-500' },
+    { name: 'Gris', value: 'gris', bg: 'bg-stone-500' },
+    { name: 'Bleu', value: 'bleu', bg: 'bg-sky-600' },
+    { name: 'Rouge', value: 'rouge', bg: 'bg-rose-600' },
+    { name: 'Vert', value: 'vert', bg: 'bg-emerald-600' },
     { name: 'Beige', value: 'beige', bg: 'bg-amber-100' },
-    { name: 'Marine', value: 'marine', bg: 'bg-blue-900' },
+    { name: 'Marine', value: 'marine', bg: 'bg-blue-950' },
   ];
 
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
-  // Refléter les changements d'URL (navigation, reset, lien partagé) dans les champs locaux
   useEffect(() => {
     setLocalMinPrice(minPrice);
     setLocalMaxPrice(maxPrice);
@@ -127,176 +100,182 @@ const ProductFilters: React.FC = () => {
     setLocalSearch(search);
   }, [search]);
 
-  // Un seul point d'écriture de l'URL pour le prix : une requête par burst de saisie
   useEffect(() => {
     if (localMinPrice === minPrice && localMaxPrice === maxPrice) return;
-
     const timer = setTimeout(() => {
       setMinPrice(localMinPrice);
       setMaxPrice(localMaxPrice);
       setPage(1);
     }, 400);
-
     return () => clearTimeout(timer);
   }, [localMinPrice, localMaxPrice, minPrice, maxPrice, setMinPrice, setMaxPrice, setPage]);
 
-  // Idem pour la recherche textuelle
   useEffect(() => {
     if (localSearch === search) return;
-
     const timer = setTimeout(() => {
       setSearch(localSearch);
       setPage(1);
     }, 400);
-
     return () => clearTimeout(timer);
   }, [localSearch, search, setSearch, setPage]);
 
   return (
-    <div className="bg-white border border-gray-200 w-full max-w-xs">
-      <div className="flex justify-between items-center p-4 border-b border-gray-200">
-        <h3 className="font-semibold text-gray-900">Filtres</h3>
+    <div className="bg-white rounded-3xl border border-stone-200/70 shadow-sm overflow-hidden w-full max-w-sm">
+      {/* En-tête des filtres */}
+      <div className="flex justify-between items-center p-5 border-b border-stone-100">
+        <h3 className="text-xs uppercase tracking-widest font-bold text-stone-900">
+          Filtres de recherche
+        </h3>
         <button
           onClick={resetAllFilters}
-          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          className="inline-flex items-center gap-1.5 text-xs text-rose-600 hover:text-rose-700 font-medium transition-colors"
         >
-          Réinitialiser
+          <RotateCcw className="w-3 h-3" />
+          <span>Effacer</span>
         </button>
       </div>
-      <div className="p-4 space-y-6">
 
-      {/* Recherche */}
-      <div>
-        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">Recherche</label>
-        <input
-          type="text"
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
-          placeholder="Rechercher un produit..."
-          className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      {/* Catégorie */}
-      <div className="mb-4">
-        <label htmlFor="category" className="block text-sm font-medium mb-2">Catégorie</label>
-        <select
-          value={category || ''}
-          onChange={(e) => {
-            setCategory(e.target.value ? parseInt(e.target.value) : null);
-            setPage(1);
-          }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        >
-          <option value="">Toutes les catégories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>{cat.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Options de tri */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Trier par</label>
-        <select
-          value={sortBy}
-          onChange={(e) => {
-            setSortBy(e.target.value);
-            setPage(1);
-          }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-        >
-          <option value="created_at">Nouveautés</option>
-          <option value="price_asc">Prix croissant</option>
-          <option value="price_desc">Prix décroissant</option>
-          <option value="popularity">Populaire</option>
-          <option value="rating">Mieux notés</option>
-        </select>
-      </div>
-
-      {/* Prix avec slider */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-4">Prix minimum</label>
-        <div className="px-2">
-          <Slider
-            min={0}
-            max={BUSINESS_CONSTANTS.PRICE_FILTER_MAX}
-            step={BUSINESS_CONSTANTS.PRICE_FILTER_STEP}
-            value={[localMinPrice ?? 0]}
-            onValueChange={(values) => setLocalMinPrice(values[0] ?? 0)}
-            className="mb-4"
-          />
-        </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Min:</span>
+      <div className="p-5 space-y-6">
+        {/* Recherche rapide */}
+        <div>
+          <label htmlFor="search" className="block text-xs uppercase tracking-wider font-semibold text-stone-600 mb-2">
+            Mots-clés
+          </label>
+          <div className="relative">
             <input
-              type="number"
-              value={localMinPrice ?? ''}
-              onChange={(e) => setLocalMinPrice(e.target.value ? parseInt(e.target.value) : null)}
-              className="w-24 px-2 py-1 text-sm border rounded"
-              min="0"
-              max={maxPrice || BUSINESS_CONSTANTS.PRICE_FILTER_MAX}
+              id="search"
+              type="text"
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              placeholder="Ex: Robe, Veste, Sac..."
+              className="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-200/80 rounded-xl text-xs text-stone-900 placeholder:text-stone-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400/20 focus:border-stone-400 transition-all"
             />
+            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-2.5" />
           </div>
-          <div className="h-px w-4 bg-gray-300"></div>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-500">Max:</span>
-            <input
-              type="number"
-              value={localMaxPrice ?? ''}
-              onChange={(e) => setLocalMaxPrice(e.target.value ? parseInt(e.target.value) : null)}
-              className="w-24 px-2 py-1 text-sm border rounded"
-              min={minPrice || 0}
+        </div>
+
+        {/* Catégorie */}
+        <div>
+          <label htmlFor="category" className="block text-xs uppercase tracking-wider font-semibold text-stone-600 mb-2">
+            Catégorie
+          </label>
+          <select
+            id="category"
+            value={category || ''}
+            onChange={(e) => {
+              setCategory(e.target.value ? parseInt(e.target.value) : null);
+              setPage(1);
+            }}
+            className="w-full px-3 py-2 bg-stone-50 border border-stone-200/80 rounded-xl text-xs text-stone-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400/20 focus:border-stone-400 transition-all"
+          >
+            <option value="">Toutes les catégories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Options de tri */}
+        <div>
+          <label className="block text-xs uppercase tracking-wider font-semibold text-stone-600 mb-2">
+            Trier par
+          </label>
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              setPage(1);
+            }}
+            className="w-full px-3 py-2 bg-stone-50 border border-stone-200/80 rounded-xl text-xs text-stone-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-stone-400/20 focus:border-stone-400 transition-all"
+          >
+            <option value="created_at">Nouveautés d'abord</option>
+            <option value="price_asc">Prix : Moins cher au plus cher</option>
+            <option value="price_desc">Prix : Plus cher au moins cher</option>
+            <option value="popularity">Pièces les plus populaires</option>
+            <option value="rating">Mieux notées</option>
+          </select>
+        </div>
+
+        {/* Plage de Prix avec slider */}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs uppercase tracking-wider font-semibold text-stone-600">
+              Budget (FCFA)
+            </span>
+            <span className="text-xs font-semibold text-stone-900">
+              {localMaxPrice ? `${localMaxPrice.toLocaleString()} FCFA` : 'Max'}
+            </span>
+          </div>
+          <div className="py-2">
+            <Slider
+              min={0}
               max={BUSINESS_CONSTANTS.PRICE_FILTER_MAX}
+              step={BUSINESS_CONSTANTS.PRICE_FILTER_STEP}
+              value={[localMaxPrice ?? BUSINESS_CONSTANTS.PRICE_FILTER_MAX]}
+              onValueChange={(values) => setLocalMaxPrice(values[0] ?? null)}
             />
           </div>
+          <div className="flex items-center gap-2 pt-1 text-xs text-stone-500">
+            <span className="bg-stone-100 px-2.5 py-1 rounded-lg font-medium text-stone-700">0 FCFA</span>
+            <span className="flex-1 text-center font-light text-[10px] text-stone-400">à</span>
+            <span className="bg-stone-100 px-2.5 py-1 rounded-lg font-medium text-stone-700">
+              {BUSINESS_CONSTANTS.PRICE_FILTER_MAX.toLocaleString()} FCFA
+            </span>
+          </div>
         </div>
-      </div>
 
-      {/* Couleurs */}
-      <div className="mb-6">
-        <span className="block text-sm font-medium text-gray-700 mb-3">Couleurs</span>
-        <div className="space-y-2">
-          {availableColors.map((color) => (
-            <div key={color.value} className="flex items-center space-x-2">
-              <Checkbox
-                id={`color-${color.value}`}
-                checked={colors.includes(color.value)}
-                onCheckedChange={() => handleColorToggle(color.value)}
-              >
-                <div className="flex items-center space-x-2">
-                  <span className={`w-4 h-4 rounded-full ${color.bg} border border-gray-200`}></span>
-                  <span className="text-sm font-normal">{color.name}</span>
-                </div>
-              </Checkbox>
-            </div>
-          ))}
+        {/* Couleurs */}
+        <div>
+          <span className="block text-xs uppercase tracking-wider font-semibold text-stone-600 mb-3">
+            Nuances & Couleurs
+          </span>
+          <div className="grid grid-cols-2 gap-2">
+            {availableColors.map((color) => {
+              const isChecked = colors.includes(color.value);
+              return (
+                <button
+                  key={color.value}
+                  type="button"
+                  onClick={() => handleColorToggle(color.value)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+                    isChecked
+                      ? 'border-stone-950 bg-stone-950 text-white shadow-sm'
+                      : 'border-stone-200/80 bg-white text-stone-700 hover:bg-stone-50'
+                  }`}
+                >
+                  <span className={`w-3 h-3 rounded-full ${color.bg} shadow-sm shrink-0`} />
+                  <span className="truncate">{color.name}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* Tailles */}
-      <div className="mb-6">
-        <span className="block text-sm font-medium text-gray-700 mb-3">Tailles</span>
-        <div className="grid grid-cols-3 gap-2">
-          {availableSizes.map((size) => (
-            <div key={size} className="flex items-center">
-              <div key={size} className="flex items-center">
-                <input
-                  type="checkbox"
-                  id={`size-${size}`}
-                  checked={sizes.includes(size)}
-                  onChange={() => handleSizeToggle(size)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <label htmlFor={`size-${size}`} className="ml-2 text-sm font-normal">
+        {/* Tailles */}
+        <div>
+          <span className="block text-xs uppercase tracking-wider font-semibold text-stone-600 mb-3">
+            Tailles disponibles
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {availableSizes.map((size) => {
+              const isChecked = sizes.includes(size);
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => handleSizeToggle(size)}
+                  className={`w-10 h-10 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center border ${
+                    isChecked
+                      ? 'bg-stone-950 text-white border-stone-950 shadow-sm'
+                      : 'bg-white text-stone-700 border-stone-200/80 hover:bg-stone-50 hover:border-stone-300'
+                  }`}
+                >
                   {size}
-                </label>
-              </div>
-            </div>
-          ))}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );
