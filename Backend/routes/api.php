@@ -145,11 +145,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Customers management
         Route::get('/customers', [AdminCustomerController::class, 'index']);
+        Route::get('/customers/detailed', [AdminCustomerController::class, 'index']);
         Route::get('/customers/stats', [AdminCustomerController::class, 'stats']);
-        Route::get('/customers/{customer}', [AdminCustomerController::class, 'show']);
-        Route::get('/customers/{customer}/orders', [AdminCustomerController::class, 'orders']);
-        Route::put('/customers/{customer}/status', [AdminCustomerController::class, 'updateStatus']);
         Route::get('/customers/export', [AdminCustomerController::class, 'export']);
+        Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->whereNumber('customer');
+        Route::get('/customers/{customer}/orders', [AdminCustomerController::class, 'orders'])->whereNumber('customer');
+        Route::put('/customers/{customer}/status', [AdminCustomerController::class, 'updateStatus'])->whereNumber('customer');
 
 
 
