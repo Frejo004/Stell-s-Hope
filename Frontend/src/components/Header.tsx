@@ -54,7 +54,8 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
   ], []);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#FAF9F6]/90 backdrop-blur-xl border-b border-stone-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] transition-all duration-300">
+    <>
+      <header className="sticky top-0 z-50 bg-[#FAF9F6]/90 backdrop-blur-xl border-b border-stone-200/60 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] transition-all duration-300">
       {/* Top luxury announcement bar */}
       <div className="bg-stone-950 text-stone-200 py-2 px-4 border-b border-white/5">
         <p className="text-center text-[11px] tracking-widest uppercase font-medium flex items-center justify-center gap-2">
@@ -358,28 +359,29 @@ const Header = ({ onCategoryChange, currentCategory, products, onProductClick }:
           </div>
         </div>
       </div>
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-      />
-
-      {isSearchOpen && (
-        <SearchPage
-          products={products || []}
-          onClose={() => setIsSearchOpen(false)}
-          onProductClick={onProductClick}
-          initialQuery={searchQuery}
-        />
-      )}
-
-      {isAccountOpen && isAuthenticated && (
-        <AccountPage onClose={() => setIsAccountOpen(false)} />
-      )}
-
-      <CartSidebarNew />
     </header>
-  );
+
+    <AuthModal
+      isOpen={isAuthModalOpen}
+      onClose={() => setIsAuthModalOpen(false)}
+    />
+
+    {isSearchOpen && (
+      <SearchPage
+        products={products || []}
+        onClose={() => setIsSearchOpen(false)}
+        onProductClick={onProductClick}
+        initialQuery={searchQuery}
+      />
+    )}
+
+    {isAccountOpen && isAuthenticated && (
+      <AccountPage onClose={() => setIsAccountOpen(false)} />
+    )}
+
+    <CartSidebarNew />
+  </>
+);
 };
 
 Header.displayName = 'Header';

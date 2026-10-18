@@ -2,6 +2,7 @@ import { X, ShoppingBag, Trash2, ArrowRight, Lock, Sparkles, ShieldCheck } from 
 import { useCartContext } from '../contexts/CartContext';
 import { useAuth } from '../hooks/useAuth';
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { getImageUrl } from '../utils/imageUtils';
 import { commerce, formatPrice } from '../utils';
@@ -34,11 +35,13 @@ export default function CartSidebarNew() {
     navigate('/cart');
   };
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <>
       {/* Backdrop sombre avec flou */}
       <div
-        className={`fixed inset-0 z-[9998] bg-stone-950/60 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[99998] bg-stone-950/60 backdrop-blur-sm transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsOpen(false)}
@@ -51,12 +54,12 @@ export default function CartSidebarNew() {
         role="dialog"
         aria-modal="true"
         aria-label="Panier d'achats"
-        className={`fixed right-0 top-0 h-full w-full sm:w-[440px] bg-[#FAF9F6] z-[9999] shadow-2xl flex flex-col transition-transform duration-300 ease-out sm:rounded-l-3xl border-l border-stone-200/60 ${
+        className={`fixed right-0 top-0 h-screen h-[100dvh] w-full sm:w-[440px] bg-[#FAF9F6] z-[99999] shadow-2xl flex flex-col transition-transform duration-300 ease-out sm:rounded-l-3xl border-l border-stone-200/60 overflow-hidden ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-stone-200/60 bg-white/70 backdrop-blur-md sm:rounded-tl-3xl">
+        <div className="shrink-0 flex items-center justify-between px-6 py-5 border-b border-stone-200/60 bg-white/70 backdrop-blur-md sm:rounded-tl-3xl">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-900">
               <ShoppingBag className="w-4 h-4" />
@@ -79,7 +82,7 @@ export default function CartSidebarNew() {
 
         {/* ── Jauge de Livraison Offerte ── */}
         {cartItemsCount > 0 && (
-          <div className="px-6 py-3.5 bg-white border-b border-stone-200/50">
+          <div className="shrink-0 px-6 py-3.5 bg-white border-b border-stone-200/50">
             <div className="flex items-center justify-between text-xs mb-1.5">
               <span className="font-medium text-stone-700 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-rose-500" />
@@ -105,10 +108,10 @@ export default function CartSidebarNew() {
         )}
 
         {/* ── Contenu / Liste des articles ── */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar flex flex-col">
           {cartItemsCount === 0 ? (
             /* État vide */
-            <div className="h-full flex flex-col items-center justify-center text-center px-6 py-12">
+            <div className="my-auto flex flex-col items-center justify-center text-center px-4 py-8">
               <div className="w-20 h-20 bg-stone-100 rounded-3xl flex items-center justify-center mb-5 border border-stone-200/60 shadow-sm">
                 <ShoppingBag className="w-8 h-8 text-stone-400" />
               </div>
@@ -118,7 +121,7 @@ export default function CartSidebarNew() {
               </p>
               <button
                 onClick={() => { setIsOpen(false); navigate('/boutique'); }}
-                className="px-6 py-3 bg-stone-950 hover:bg-black text-white text-xs uppercase tracking-widest font-semibold rounded-full shadow-md transition-all hover:scale-105"
+                className="px-6 py-3 bg-stone-950 hover:bg-black text-white text-xs uppercase tracking-widest font-semibold rounded-full shadow-md transition-all hover:scale-105 active:scale-95"
               >
                 Découvrir la boutique
               </button>
@@ -189,7 +192,7 @@ export default function CartSidebarNew() {
 
         {/* ── Footer du panier ── */}
         {cartItemsCount > 0 && (
-          <div className="border-t border-stone-200/60 bg-white/95 backdrop-blur-md px-6 py-5 space-y-4 sm:rounded-bl-3xl">
+          <div className="shrink-0 border-t border-stone-200/60 bg-white/95 backdrop-blur-md px-6 py-5 space-y-4 sm:rounded-bl-3xl">
             {/* Récapitulatif tarifaire */}
             <div className="space-y-2 text-xs">
               <div className="flex justify-between text-stone-500">
@@ -237,6 +240,7 @@ export default function CartSidebarNew() {
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body
   );
 }

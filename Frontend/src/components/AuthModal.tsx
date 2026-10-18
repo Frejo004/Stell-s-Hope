@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
@@ -22,7 +23,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   const [errorMsg, setErrorMsg] = useState('');
   const { login, register, loading } = useAuth();
 
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +50,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-stone-950/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 transition-all">
+  return createPortal(
+    <div className="fixed inset-0 bg-stone-950/60 backdrop-blur-md flex items-center justify-center z-[99999] p-4 transition-all">
       <div
         className="bg-[#FAF9F6] border border-stone-200/80 rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-md relative overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-stone-900"
         role="dialog"
@@ -246,6 +247,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
