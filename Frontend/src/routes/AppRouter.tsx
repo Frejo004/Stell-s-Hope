@@ -8,6 +8,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
 import { Order } from '../types/order';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 // Lazy loading des pages pour optimisation
 const HomePage = lazy(() => import('../pages/HomePage'));
@@ -153,10 +154,14 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Admin Route - No Header/Footer */}
+        {/* Admin Route - No Header/Footer (Protected: Admin only) */}
         <Route
           path="/admin"
-          element={<AdminLayout />}
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
         />
 
         {/* Auth Routes - No Header/Footer */}
@@ -310,16 +315,9 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                       <Route
                         path="/account"
                         element={
-                          isAuthenticated ? (
+                          <ProtectedRoute>
                             <AccountPage onClose={() => window.history.back()} />
-                          ) : (
-                            <div className="text-center py-16">
-                              <h2 className="text-2xl font-bold mb-4">Connexion requise</h2>
-                              <button onClick={() => navigate('/')}>
-                                Retour à l'accueil
-                              </button>
-                            </div>
-                          )
+                          </ProtectedRoute>
                         }
                       />
 
@@ -363,9 +361,11 @@ function AppContent({ onOrderComplete }: AppRouterProps) {
                       <Route
                         path="/order-details/:orderId"
                         element={
-                          <OrderDetailsPageWrapper
-                            onClose={() => window.history.back()}
-                          />
+                          <ProtectedRoute>
+                            <OrderDetailsPageWrapper
+                              onClose={() => window.history.back()}
+                            />
+                          </ProtectedRoute>
                         }
                       />
 

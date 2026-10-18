@@ -38,11 +38,20 @@ class FileController extends Controller
 
     public function getImage($path)
     {
-        if (!Storage::disk('public')->exists('images/' . $path)) {
+        // Prévention contre le Path Traversal : refuser tout chemin avec .. ou caractères illégaux
+        if (str_contains($path, '..') || str_contains($path, '\\') || str_contains($path, "\0")) {
+            abort(400, 'Chemin de fichier invalide');
+        }
+
+        $baseDir = realpath(storage_path('app/public/images'));
+        $fullPath = storage_path('app/public/images/' . $path);
+        $filePath = file_exists($fullPath) ? realpath($fullPath) : false;
+
+        if (!$baseDir || !$filePath || !str_starts_with($filePath, $baseDir) || !is_file($filePath)) {
             abort(404);
         }
 
-        return response()->file(storage_path('app/public/images/' . $path));
+        return response()->file($filePath);
     }
 
     public function delete(Request $request)

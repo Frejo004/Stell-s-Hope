@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Créer un admin
-        User::create([
+        User::forceCreate([
             'first_name' => 'Admin',
             'last_name' => 'User',
             'email' => 'admin@stellshope.com',

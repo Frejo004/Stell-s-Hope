@@ -11,7 +11,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
   const { isAuthenticated, isAdmin, loading } = useAuth();
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Chargement...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6]">
+        <div className="animate-spin rounded-full h-10 w-10 border-2 border-stone-200 border-t-stone-800"></div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

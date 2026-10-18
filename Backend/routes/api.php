@@ -71,7 +71,7 @@ Route::post('/payment/webhook', [PaymentController::class, 'webhook'])->middlewa
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->middleware('throttle:30,1')->name('payment.callback');
 
 // Protected routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
@@ -108,11 +108,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
 
     // File Management
-    Route::post('/files/upload', [FileController::class, 'upload']);
+    Route::post('/files/upload', [FileController::class, 'upload'])->middleware('throttle:15,1');
     Route::delete('/files/delete', [FileController::class, 'delete']);
 
     // Payment
-    Route::post('/payment/initiate', [PaymentController::class, 'initiate']);
+    Route::post('/payment/initiate', [PaymentController::class, 'initiate'])->middleware('throttle:10,1');
 
     // Admin routes
     Route::middleware('admin')->prefix('admin')->group(function () {
