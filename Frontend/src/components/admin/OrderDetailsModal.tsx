@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, Package, MapPin, CreditCard, Sparkles, Printer } from 'lucide-react';
+import { X, Package, MapPin, CreditCard, Sparkles, Printer, FileText } from 'lucide-react';
 import { adminService } from '../../services/adminService';
 import { formatPrice } from '../../utils';
+import InvoiceModal from '../InvoiceModal';
 
 interface OrderDetailsModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface OrderDetailsModalProps {
 export default function OrderDetailsModal({ isOpen, orderId, onClose }: OrderDetailsModalProps) {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
 
   useEffect(() => {
     if (isOpen && orderId) {
@@ -66,9 +68,9 @@ export default function OrderDetailsModal({ isOpen, orderId, onClose }: OrderDet
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => window.print()}
+              onClick={() => setShowInvoice(true)}
               className="p-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors"
-              title="Imprimer le bon de commande"
+              title="Générer la facture / bon de commande"
             >
               <Printer className="w-4 h-4" />
             </button>
@@ -218,6 +220,12 @@ export default function OrderDetailsModal({ isOpen, orderId, onClose }: OrderDet
           </button>
         </div>
       </div>
+
+      <InvoiceModal
+        isOpen={showInvoice}
+        onClose={() => setShowInvoice(false)}
+        order={order}
+      />
     </div>
   );
 }

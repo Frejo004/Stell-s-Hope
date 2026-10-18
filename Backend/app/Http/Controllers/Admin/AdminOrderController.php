@@ -48,6 +48,17 @@ class AdminOrderController extends Controller
 
         try {
             $order->update($validated);
+
+            // Notification client par email (non bloquante si serveur SMTP non configuré)
+            try {
+                $recipientEmail = $order->user->email ?? (is_array($order->shipping_address) ? ($order->shipping_address['email'] ?? null) : null);
+                if ($recipientEmail) {
+                    \Illuminate\Support\Facades\Mail::to($recipientEmail)->send(new \App\Mail\OrderStatusUpdated($order));
+                }
+            } catch (\Throwable $mailError) {
+                \Illuminate\Support\Facades\Log::warning("Notification email statut commande #{$order->id}: " . $mailError->getMessage());
+            }
+
             return response()->json($order);
         } catch (\DomainException $e) {
             return response()->json(['message' => $e->getMessage()], 422);

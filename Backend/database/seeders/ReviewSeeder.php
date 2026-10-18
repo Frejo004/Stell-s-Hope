@@ -12,35 +12,42 @@ class ReviewSeeder extends Seeder
     public function run(): void
     {
         $users = User::where('is_admin', false)->get();
-        $products = Product::where('is_active', true)->limit(100)->get();
+        if ($users->isEmpty()) {
+            return;
+        }
+
+        $products = Product::where('is_active', true)->limit(50)->get();
         
-        $comments = [
-            'Excellent produit, très satisfait de mon achat !',
-            'Qualité au rendez-vous, je recommande vivement.',
-            'Bon rapport qualité-prix, conforme à mes attentes.',
-            'Produit correct mais sans plus.',
-            'Déçu de la qualité, ne correspond pas à la description.',
-            'Parfait ! Exactement ce que je cherchais.',
-            'Très bonne qualité, livraison rapide.',
-            'Produit moyen, j\'ai vu mieux ailleurs.',
-            'Super ! Je rachèterai sans hésiter.',
-            'Qualité décevante pour le prix.',
+        $luxuryComments = [
+            'Une confection absolument sublime. Les finitions, le tombé du tissu et les coutures invisibles témoignent d\'un savoir-faire d\'exception.',
+            'Pièce reçue dans un coffret parfumé magnifique avec son certificat. Coupe impeccable et élégance intemporelle.',
+            'La qualité des matières est extraordinaire. Je l\'ai portée pour un gala et elle a fait l\'unanimité.',
+            'Un vêtement d\'une rare préciosité. Les détails brodés à la main sont fascinants. Stell\'s Hope est à la hauteur de sa réputation.',
+            'Très agréable à porter, le tissu respire le luxe discret. La livraison a été particulièrement rapide et soignée.',
+            'Un tombé parfait, digne des plus grandes maisons de couture de l\'avenue Montaigne.',
+            'Très beau produit, confort remarquable et allure sophistiquée. Je commanderai à nouveau sans hésitation.',
         ];
 
         foreach ($products as $product) {
-            $reviewCount = rand(0, 8);
-            $reviewedUsers = $users->random($reviewCount);
+            $count = min($users->count(), rand(2, 5));
+            $selectedUsers = $users->random($count);
 
-            foreach ($reviewedUsers as $user) {
-                $rating = rand(1, 5);
-                $comment = $rating >= 4 ? $comments[rand(0, 6)] : $comments[rand(7, 9)];
+            foreach ($selectedUsers as $user) {
+                // Éviter les doublons
+                if (Review::where('user_id', $user->id)->where('product_id', $product->id)->exists()) {
+                    continue;
+                }
+
+                $rating = rand(4, 5);
+                $comment = $luxuryComments[array_rand($luxuryComments)];
 
                 Review::create([
                     'user_id' => $user->id,
                     'product_id' => $product->id,
                     'rating' => $rating,
                     'comment' => $comment,
-                    'is_approved' => rand(0, 10) > 2,
+                    'is_approved' => true,
+                    'status' => 'approved',
                 ]);
             }
         }

@@ -1,16 +1,18 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
-import { Star, Heart, Truck, RotateCcw, ShieldCheck, Plus, Minus, Share2, ChevronLeft, ChevronRight, ArrowLeft, Check, Sparkles } from 'lucide-react';
+import { Star, Heart, Truck, RotateCcw, ShieldCheck, Plus, Minus, Share2, ChevronLeft, ChevronRight, ArrowLeft, Check, Sparkles, MessageSquarePlus, X } from 'lucide-react';
 import { Product } from '../types';
 import { useCartContext } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
+import { useAuth } from '../hooks/useAuth';
 import { getImageUrl } from '../utils/imageUtils';
 import { reviews } from '../data/reviews';
 import { products } from '../data/products';
 import ProductCard from './ProductCard';
 import { formatPrice } from '../utils';
 import { BUSINESS_CONSTANTS } from '../constants';
+import SEO from './SEO';
 
 interface ProductDetailProps {
   product: Product;
@@ -36,7 +38,53 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
     return getImageUrl(imagePath);
   };
 
-  const productReviews = reviews.filter(review => review.product_id === product.id);
+  const { isAuthenticated } = useAuth();
+  const [liveReviews, setLiveReviews] = useState<any[]>([]);
+  const [apiAverage, setApiAverage] = useState<number | null>(null);
+  const [apiCount, setApiCount] = useState<number | null>(null);
+  const [apiBreakdown, setApiBreakdown] = useState<Record<number, number> | null>(null);
+
+  // Modal de dépôt d'avis
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewFeedback, setReviewFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  useEffect(() => {
+    import('../services/api').then(({ default: api }) => {
+      api.get(`/products/${product.id}/reviews`)
+        .then(res => {
+          if (res.data && res.data.reviews) {
+            setLiveReviews(res.data.reviews);
+            setApiAverage(res.data.average_rating);
+            setApiCount(res.data.total_reviews);
+            if (res.data.breakdown) {
+              setApiBreakdown(res.data.breakdown);
+            }
+          }
+        })
+        .catch(err => {
+          console.warn('Erreur chargement avis API:', err);
+        });
+    });
+  }, [product.id]);
+
+  const productReviews = useMemo(() => {
+    if (liveReviews.length > 0) {
+      return liveReviews.map(r => ({
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment,
+        customerName: r.author,
+        verified_purchase: r.verified_purchase,
+        date: r.date,
+        created_at: r.date
+      }));
+    }
+    return reviews.filter(review => review.product_id === product.id);
+  }, [liveReviews, product.id]);
+
   const relatedProducts = products.filter(p =>
     p.category_id === product.category_id && p.id !== product.id
   ).slice(0, 4);
@@ -72,12 +120,47 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
   };
 
   const ratingDistribution = useMemo(() => {
+    if (apiBreakdown) return apiBreakdown;
     const distribution: Record<number, number> = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
     productReviews.forEach(review => {
       distribution[review.rating] = (distribution[review.rating] || 0) + 1;
     });
     return distribution;
-  }, [productReviews]);
+  }, [apiBreakdown, productReviews]);
+
+  const finalAverage = apiAverage !== null ? apiAverage : (product.rating || 5);
+  const finalReviewCount = apiCount !== null ? apiCount : productReviews.length;
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    try {
+      setSubmittingReview(true);
+      setReviewFeedback(null);
+      const { default: api } = await import('../services/api');
+      const res = await api.post('/reviews', {
+        product_id: product.id,
+        rating: newRating,
+        comment: newComment.trim()
+      });
+      setReviewFeedback({
+        type: 'success',
+        message: res.data.message || 'Merci ! Votre avis a été soumis avec succès.'
+      });
+      setTimeout(() => {
+        setIsReviewModalOpen(false);
+        setReviewFeedback(null);
+        setNewComment('');
+        setNewRating(5);
+      }, 2500);
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Une erreur est survenue. Veuillez vérifier votre connexion ou vous identifier.';
+      setReviewFeedback({ type: 'error', message: msg });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   const filteredAndSortedReviews = useMemo(() => {
     return productReviews
@@ -96,6 +179,13 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-stone-900 pb-20">
+      <SEO
+        title={product.name}
+        description={product.description || `Découvrez ${product.name} de la Maison Stell's Hope.`}
+        image={currentImageSrc}
+        type="product"
+      />
+
       {/* ─── Breadcrumb / Navigation supérieure ────────────────────── */}
       <div className="border-b border-stone-200/60 bg-white/70 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
@@ -401,7 +491,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                     {tab === 'description' && 'Description'}
                     {tab === 'composition' && 'Matières'}
                     {tab === 'entretien' && 'Entretien'}
-                    {tab === 'avis' && `Avis (${product.reviewCount || productReviews.length})`}
+                    {tab === 'avis' && `Avis (${finalReviewCount})`}
                   </button>
                 );
               })}
@@ -457,12 +547,21 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                     <div className="flex items-center gap-2 mt-2">
                       <div className="flex text-amber-400">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-amber-400" />
+                          <Star key={i} className={`w-4 h-4 ${i < Math.round(finalAverage) ? 'fill-amber-400 text-amber-400' : 'text-stone-300'}`} />
                         ))}
                       </div>
-                      <span className="font-bold text-lg text-stone-950">{product.rating || 5} / 5</span>
+                      <span className="font-bold text-lg text-stone-950">{finalAverage} / 5</span>
                     </div>
-                    <p className="text-xs text-stone-400 mt-1">Sur la base de {productReviews.length} avis certifiés</p>
+                    <p className="text-xs text-stone-400 mt-1">Sur la base de {finalReviewCount} avis certifiés</p>
+                    <div className="mt-4">
+                      <button
+                        onClick={() => setIsReviewModalOpen(true)}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-950 hover:bg-black text-white text-xs font-semibold uppercase tracking-wider rounded-full shadow-sm hover:scale-[1.02] transition-all"
+                      >
+                        <MessageSquarePlus className="w-3.5 h-3.5" />
+                        <span>Partager mon avis</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div className="w-full md:w-64 space-y-1.5">
@@ -472,7 +571,7 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                         <div className="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-amber-400 rounded-full"
-                            style={{ width: `${(count / (productReviews.length || 1)) * 100}%` }}
+                            style={{ width: `${(count / (finalReviewCount || 1)) * 100}%` }}
                           />
                         </div>
                         <span className="w-6 text-right font-medium">{count}</span>
@@ -491,7 +590,12 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                             {(review.customerName || 'U').charAt(0)}
                           </div>
                           <div>
-                            <span className="font-semibold text-xs text-stone-950">{review.customerName || 'Client vérifié'}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-xs text-stone-950">{review.customerName || 'Client vérifié'}</span>
+                              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-medium">
+                                <ShieldCheck className="w-3 h-3" /> Achat vérifié
+                              </span>
+                            </div>
                             <div className="flex text-amber-400 mt-0.5">
                               {Array.from({ length: 5 }).map((_, i) => (
                                 <Star
@@ -539,6 +643,96 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
                   }}
                 />
               ))}
+            </div>
+          </div>
+        )}
+        {/* ─── Modal de Dépôt d'Avis ─────────────────────────────────── */}
+        {isReviewModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-stone-200/80 relative">
+              <button
+                onClick={() => {
+                  setIsReviewModalOpen(false);
+                  setReviewFeedback(null);
+                }}
+                className="absolute top-6 right-6 p-2 text-stone-400 hover:text-stone-950 hover:bg-stone-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="text-center mb-6">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-400">Votre Expérience</span>
+                <h3 className="font-serif text-2xl text-stone-950 font-normal mt-1">Évaluer cette création</h3>
+                <p className="text-xs text-stone-500 mt-1">{product.name}</p>
+              </div>
+
+              {reviewFeedback ? (
+                <div className={`p-4 rounded-2xl text-xs font-medium text-center ${reviewFeedback.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`}>
+                  {reviewFeedback.message}
+                </div>
+              ) : !isAuthenticated ? (
+                <div className="text-center py-6 space-y-4">
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    Pour garantir l'authenticité de nos avis, vous devez être connecté(e) à votre compte client Stell's Hope pour déposer un témoignage.
+                  </p>
+                  <a
+                    href="/login"
+                    className="inline-block px-6 py-2.5 bg-stone-950 text-white text-xs font-semibold uppercase tracking-wider rounded-full shadow-sm hover:bg-black transition-all"
+                  >
+                    Me connecter
+                  </a>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitReview} className="space-y-5">
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2 text-center">
+                      Note globale ({newRating} / 5)
+                    </label>
+                    <div className="flex justify-center gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          type="button"
+                          key={star}
+                          onClick={() => setNewRating(star)}
+                          className="p-1 transition-transform hover:scale-110"
+                        >
+                          <Star
+                            className={`w-7 h-7 ${star <= newRating ? 'fill-amber-400 text-amber-400' : 'text-stone-300'}`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
+                      Votre commentaire
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Matières, tombé du vêtement, finitions, confort..."
+                      required
+                      maxLength={1000}
+                      className="w-full text-xs p-3.5 bg-stone-50 border border-stone-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-stone-900 focus:bg-white transition-all resize-none"
+                    />
+                    <div className="text-right text-[10px] text-stone-400 mt-1">
+                      {newComment.length} / 1000 caractères
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={submittingReview}
+                      className="w-full py-3.5 bg-stone-950 hover:bg-black disabled:bg-stone-300 text-white text-xs uppercase tracking-widest font-semibold rounded-full shadow-lg transition-all"
+                    >
+                      {submittingReview ? 'Publication en cours...' : 'Publier mon avis'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         )}

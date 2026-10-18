@@ -44,7 +44,10 @@ class AdminReviewController extends Controller
             'status' => 'required|in:pending,approved,rejected'
         ]);
 
-        $review->update(['status' => $request->status]);
+        $review->update([
+            'status' => $request->status,
+            'is_approved' => ($request->status === 'approved')
+        ]);
 
         return response()->json(['message' => 'Statut mis à jour']);
     }

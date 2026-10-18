@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Truck, CreditCard, CheckCircle, ShieldCheck, Lock, ArrowLeft, ArrowRight, Sparkles, MapPin } from 'lucide-react';
 import { useCartContext } from '../contexts/CartContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Order } from '../types/order';
 import { CheckoutState } from '../types/checkout';
@@ -11,6 +11,7 @@ import { paymentService } from '../services/paymentService';
 import { orderService } from '../services/orderService';
 import { commerce, formatPrice } from '../utils';
 import { BUSINESS_CONSTANTS } from '../constants';
+import SEO from '../components/SEO';
 
 interface CheckoutPageProps {
   onClose: () => void;
@@ -22,6 +23,7 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
   const { products } = useProducts();
   const { isAuthenticated, user: authUser, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     step: 'shipping',
@@ -47,6 +49,22 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [idempotencyKey] = useState(() => crypto.randomUUID());
+
+  useEffect(() => {
+    const passedCode = (location.state as any)?.promoCode;
+    if (passedCode && !appliedPromo) {
+      setPromoCode(passedCode);
+      import('../services/api').then(m => m.default.post('/promotions/validate', {
+        code: passedCode.trim().toUpperCase(),
+        subtotal: cartTotal,
+      })).then(res => {
+        const promo = res.data;
+        setAppliedPromo({ code: promo.code, type: promo.type, value: Number(promo.value) });
+      }).catch(() => {
+        // Ignorer silencieusement si expiré
+      });
+    }
+  }, [location.state, cartTotal]);
 
   const hydratedCart = useMemo(() => cart.map((item: any) => {
     const product = products.find(p => p.id === item.productId);
@@ -229,6 +247,8 @@ export default function CheckoutPage({ onClose, onOrderComplete }: CheckoutPageP
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-stone-900 pb-24">
+      <SEO title="Finalisation de commande" description="Paiement sécurisé et confirmation de vos créations Stell's Hope." />
+
       {/* ─── Barre Supérieure & Stepper de Commande ─────────────────── */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-stone-200/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">

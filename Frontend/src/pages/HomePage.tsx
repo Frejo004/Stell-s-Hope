@@ -5,6 +5,7 @@ import { getImageUrl } from '../utils/imageUtils';
 import { productService } from '../services/productService';
 import { formatPrice } from '../utils';
 import { ArrowRight, ShieldCheck, Truck, RotateCcw, Headphones, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import SEO from '../components/SEO';
 
 interface HomePageProps {
   products?: Product[];
@@ -138,6 +139,11 @@ export default function HomePage({ products, onProductClick, onCategoryChange }:
 
   return (
     <div className="bg-[#FAF9F6] text-stone-900 selection:bg-rose-200 selection:text-stone-950">
+      <SEO
+        title="Maison de Haute Couture & Créations d'Exception"
+        description="Plongez dans l'univers Stell's Hope : pièces haute couture d'exception, coupes modernes et matières nobles sélectionnées avec rigueur."
+      />
+
       {/* ─── Hero Slider Section ────────────────────────────────────────── */}
       <section className="relative min-h-[580px] sm:min-h-[680px] lg:h-[calc(100vh-6rem)] max-h-[900px] overflow-hidden border-b border-stone-200/50">
         {heroSlides.map((slide, index) => {

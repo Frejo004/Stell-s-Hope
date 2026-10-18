@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Package, MapPin, CreditCard, Sparkles, Printer, Truck, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, CreditCard, Sparkles, Printer, Truck, ShieldCheck, FileText } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import { Order, OrderItem } from '../types/order';
 import { formatPrice } from '../utils';
 import { getImageUrl } from '../utils/imageUtils';
 import Logo from '../components/Logo';
+import InvoiceModal from '../components/InvoiceModal';
 import { useNavigate } from 'react-router-dom';
 
 interface OrderDetailsPageProps {
@@ -15,6 +16,7 @@ interface OrderDetailsPageProps {
 export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageProps) {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showInvoice, setShowInvoice] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -104,11 +106,11 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
         <Logo className="h-6" />
 
         <button
-          onClick={() => window.print()}
-          className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-stone-600 hover:text-stone-950"
+          onClick={() => setShowInvoice(true)}
+          className="inline-flex items-center gap-1.5 px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-900 rounded-full text-xs font-semibold uppercase tracking-wider transition-colors"
         >
-          <Printer className="w-4 h-4" />
-          <span>Imprimer</span>
+          <FileText className="w-3.5 h-3.5" />
+          <span>Facture / Reçu</span>
         </button>
       </header>
 
@@ -270,6 +272,12 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
           </div>
         </div>
       </div>
+
+      <InvoiceModal
+        isOpen={showInvoice}
+        onClose={() => setShowInvoice(false)}
+        order={order}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import InfiniteProductList from '../components/InfiniteProductList';
 import { useProductFilters } from '../hooks/useProductFilters';
 import { ProductListingProvider, useProductListing } from '../contexts/ProductListingContext';
 import { categoryService } from '../services/categoryService';
+import SEO from '../components/SEO';
 
 const CATEGORY_EDITORIAL_META: Record<string, { subtitle: string; image: string }> = {
   femme: {
@@ -89,6 +90,12 @@ const CategoryContent = ({ isFiltersOpen, setIsFiltersOpen, categoryName, catego
 
   return (
     <div className="bg-[#FAF9F6] min-h-screen text-stone-900 selection:bg-stone-900 selection:text-white pb-20">
+      <SEO
+        title={categoryName ? `Collection ${categoryName}` : 'Boutique Haute Couture'}
+        description={editorial.subtitle}
+        image={editorial.image}
+      />
+
       {/* ── Editorial Category Hero Banner ── */}
       <section className="relative overflow-hidden bg-stone-950 text-white min-h-[260px] sm:min-h-[320px] flex items-center">
         <img

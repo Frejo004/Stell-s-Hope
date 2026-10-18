@@ -1,8 +1,10 @@
-import { CheckCircle, Package, Truck, Mail, Phone, Download, ArrowRight, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { CheckCircle, Package, Truck, Mail, Phone, Download, ArrowRight, Sparkles, FileText } from 'lucide-react';
 import { Order } from '../types/order';
 import { getImageUrl } from '../utils/imageUtils';
 import { useAuth } from '../hooks/useAuth';
 import { formatPrice } from '../utils';
+import InvoiceModal from '../components/InvoiceModal';
 
 interface OrderConfirmationPageProps {
   order: Order;
@@ -11,6 +13,7 @@ interface OrderConfirmationPageProps {
 
 export default function OrderConfirmationPage({ order, onContinueShopping }: OrderConfirmationPageProps) {
   const { user } = useAuth();
+  const [showInvoice, setShowInvoice] = useState(false);
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 3);
 
@@ -193,20 +196,37 @@ export default function OrderConfirmationPage({ order, onContinueShopping }: Ord
           </div>
         </div>
 
-        {/* ─── Actions & Bouton Continuer ─── */}
+        {/* ─── Actions & Boutons ─── */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-stone-200/60">
           <div className="text-xs text-stone-500 font-light">
             Une confirmation a été envoyée à <strong>{user?.email || order.shipping_address?.email || 'votre adresse'}</strong>.
           </div>
 
-          <button
-            onClick={onContinueShopping}
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-stone-950 hover:bg-black text-white text-xs uppercase tracking-widest font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]"
-          >
-            <span>Poursuivre mes achats</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => setShowInvoice(true)}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs uppercase tracking-widest font-semibold rounded-full border border-stone-200 transition-all flex-1 sm:flex-none"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Facture / Reçu</span>
+            </button>
+
+            <button
+              onClick={onContinueShopping}
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-stone-950 hover:bg-black text-white text-xs uppercase tracking-widest font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01] flex-1 sm:flex-none"
+            >
+              <span>Poursuivre mes achats</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
+
+        {/* Modal de facture haute couture */}
+        <InvoiceModal
+          isOpen={showInvoice}
+          onClose={() => setShowInvoice(false)}
+          order={order}
+        />
       </div>
     </div>
   );
