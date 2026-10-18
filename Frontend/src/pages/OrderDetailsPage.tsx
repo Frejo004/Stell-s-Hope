@@ -251,8 +251,8 @@ export default function OrderDetailsPage({ orderId, onClose }: OrderDetailsPageP
                 <p>
                   {order.shipping_address?.country || order.user?.country || 'Côte d\'Ivoire'}
                 </p>
-                {order.user?.phone && (
-                  <p className="mt-2 text-stone-500">Tél : {order.user.phone}</p>
+                {(order.shipping_address?.phone || order.user?.phone) && (
+                  <p className="mt-2 text-stone-500">Tél : {order.shipping_address?.phone || order.user?.phone}</p>
                 )}
               </div>
             </div>
